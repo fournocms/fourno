@@ -39,13 +39,13 @@ export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mc
     )
   }
 
-  // Emit the same `data-instatic-loop` / `data-instatic-loop-page` attributes the
+  // Emit the same `data-fourno-loop` / `data-fourno-loop-page` attributes the
   // publisher writes in `renderLoop()`. Without these the canvas DOM
   // diverges from the published DOM and user CSS targeting
-  // `[data-instatic-loop] > article` (a common grid-of-cards pattern) doesn't
+  // `[data-fourno-loop] > article` (a common grid-of-cards pattern) doesn't
   // match in the editor preview.
   // Author attributes are spread first, mirroring the published order. The
-  // shared sanitiser reserves `data-instatic-*` / `data-canvas-*`, so the
+  // shared sanitiser reserves `data-fourno-*` / `data-canvas-*`, so the
   // wrapper's own attributes below cannot be overwritten either way.
   const Tag = resolveHtmlTag(props.tag, props.customTag)
   return React.createElement(
@@ -54,8 +54,8 @@ export const LoopEditor: React.FC<ModuleComponentProps> = ({ props, children, mc
       ...nodeWrapperProps,
       ...htmlAttributesForReact(props.htmlAttributes),
       className: mcClassName,
-      'data-instatic-loop': nodeId,
-      'data-instatic-loop-page': '1',
+      'data-fourno-loop': nodeId,
+      'data-fourno-loop-page': '1',
     },
     children,
   )

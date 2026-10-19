@@ -6,7 +6,7 @@
  * is declared up front in the plugin's manifest under `frontend.assets[]`
  * (see `FrontendAsset` in `@core/plugin-sdk/types`). The host does NOT ship
  * any tag content of its own — no built-in tracker, no shared runtime, no
- * special-cased scripts. If a plugin wants `window.__instatic_analytics`, that
+ * special-cased scripts. If a plugin wants `window.__fourno_analytics`, that
  * plugin ships the IIFE that installs it. The host's job is to:
  *
  *   1. Walk enabled plugins, gather their declared assets.
@@ -409,7 +409,7 @@ function relaxCspForPlan(html: string, plan: FrontendInjections, hasTags: boolea
     // Runs regardless of whether any frontend plugin tag was injected — a site
     // can use an external storage backend without any frontend.assets plugin
     // being active. Extending `'self'` keeps the host-relative defaults
-    // (`/uploads/*`, `/_instatic/*`) working.
+    // (`/uploads/*`, `/_fourno/*`) working.
     for (const { directive, origin } of plan.mediaCspOrigins) {
       addCspSources(csp, directive, ["'self'", `https://${origin}`])
     }

@@ -29,7 +29,7 @@ function useAdminFontFaces(fontsCss: string) {
   useEffect(() => {
     if (!fontsCss) return
     const styleEl = document.createElement('style')
-    styleEl.setAttribute('data-source', 'instatic-admin-font-family-control')
+    styleEl.setAttribute('data-source', 'fourno-admin-font-family-control')
     styleEl.textContent = fontsCss
     document.head.appendChild(styleEl)
     return () => {

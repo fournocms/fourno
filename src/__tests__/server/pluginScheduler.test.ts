@@ -120,7 +120,7 @@ async function insertTestPlugin(db: DbClient, id: string, enabled = true): Promi
 }
 
 async function setupDb(): Promise<{ db: DbClient; cleanup: () => Promise<void> }> {
-  const dir = await mkdtemp(join(tmpdir(), 'instatic-scheduler-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fourno-scheduler-'))
   const dbPath = join(dir, 'test.db')
   const db = createSqliteClient(dbPath)
   await runMigrations(db, sqliteMigrations)

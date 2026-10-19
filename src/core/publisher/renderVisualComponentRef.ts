@@ -74,14 +74,14 @@ export function renderVisualComponentRef(
   const componentId =
     typeof node.props.componentId === 'string' ? node.props.componentId.trim() : ''
   if (!componentId) {
-    return '<!-- instatic: visual-component-ref missing componentId -->'
+    return '<!-- fourno: visual-component-ref missing componentId -->'
   }
 
   const propOverrides = safePropOverrides(node.props)
 
   const vc = selectVisualComponentById(config.site, componentId)
   if (!vc) {
-    return `<!-- instatic: unknown component "${escapeHtml(componentId)}" -->`
+    return `<!-- fourno: unknown component "${escapeHtml(componentId)}" -->`
   }
 
   // Build slotInstancesByName from this VC ref node's base.slot-instance children

@@ -1,6 +1,6 @@
 # Benchmark suite
 
-A reusable performance suite for the instatic. Spans both ends of the stack: bundle composition, publisher render speed, the full publish pipeline + public serving, the editor store under class/tree stress, HTTP latency + throughput, SQLite performance, plugin sandbox cost, repo footprint, and code-health snapshot.
+A reusable performance suite for the fourno. Spans both ends of the stack: bundle composition, publisher render speed, the full publish pipeline + public serving, the editor store under class/tree stress, HTTP latency + throughput, SQLite performance, plugin sandbox cost, repo footprint, and code-health snapshot.
 
 Everything writes to `.tmp/benchmarks/` (gitignored). One run produces a single `REPORT.md` plus per-bench logs.
 
@@ -133,7 +133,7 @@ Aggregates external static-analysis tools:
 Each tool runs in its own subprocess with a generous timeout. If a tool is missing, the row notes "unavailable" rather than crashing the suite.
 
 ### browser (opt-in)
-Boots the production server, spawns Chromium via Playwright (uses Playwright's pinned chromium-headless-shell — install once with `pnpm bench:browser:install`), then runs a battery of cold-load and interactive scenarios. Authenticated admin scenarios run only when `INSTATIC_BENCH_ADMIN_EMAIL` and `INSTATIC_BENCH_ADMIN_PASSWORD` are set; without them the bench records the login-screen load and unauthenticated idle frame stability.
+Boots the production server, spawns Chromium via Playwright (uses Playwright's pinned chromium-headless-shell — install once with `pnpm bench:browser:install`), then runs a battery of cold-load and interactive scenarios. Authenticated admin scenarios run only when `FOURNO_BENCH_ADMIN_EMAIL` and `FOURNO_BENCH_ADMIN_PASSWORD` are set; without them the bench records the login-screen load and unauthenticated idle frame stability.
 
 **Cold-load metrics** for the three key entry points:
 - `/admin` (login screen, unauthenticated)
@@ -244,7 +244,7 @@ export const myBench: BenchModule = {
 `.tmp/benchmarks/REPORT.md` looks like:
 
 ```markdown
-# Instatic — Benchmark Report
+# Fourno — Benchmark Report
 
 Run at: 2026-05-20T18:55:32.123Z
 Host: darwin arm64 Apple M2 Pro

@@ -25,7 +25,7 @@ const postsTarget = { kind: 'postTypes' as const, tableSlugs: ['posts'] }
 
 function runtimeAssets(name: string) {
   return {
-    scripts: [{ publicPath: `/_instatic/assets/${name}/classic/001-${name}.js`, placement: 'body-end' as const }],
+    scripts: [{ publicPath: `/_fourno/assets/${name}/classic/001-${name}.js`, placement: 'body-end' as const }],
   }
 }
 

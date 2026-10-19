@@ -1,5 +1,5 @@
 /**
- * Meta endpoint — lean binding catalog for the instatic picker.
+ * Meta endpoint — lean binding catalog for the fourno picker.
  *
  *   GET /admin/api/cms/data/_meta
  *

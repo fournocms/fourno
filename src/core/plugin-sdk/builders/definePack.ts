@@ -1,7 +1,7 @@
 /**
  * `definePack` — type-checked Visual Component / template / class pack.
  *
- *   import { definePack } from '@instatic/plugin-sdk'
+ *   import { definePack } from '@fourno/plugin-sdk'
  *   import hero from './pack/hero'
  *   import featureRow from './pack/featureRow'
  *

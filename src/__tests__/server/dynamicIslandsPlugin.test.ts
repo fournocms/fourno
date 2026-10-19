@@ -289,7 +289,7 @@ describe('hole endpoint — shared (requestDependent) hole', () => {
     const db = makeFakeDb(snap)
     const v = getPublishVersion()
     const u = encodeURIComponent('/search?q=shoes')
-    const url = new URL(`http://localhost/_instatic/hole/hole-loop?v=${v}&u=${u}`)
+    const url = new URL(`http://localhost/_fourno/hole/hole-loop?v=${v}&u=${u}`)
     const res = await handleHoleRequest(makeReq('sid=secret'), url, { db })
 
     expect(res.status).toBe(200)
@@ -305,7 +305,7 @@ describe('hole endpoint — shared (requestDependent) hole', () => {
     const v = getPublishVersion()
 
     const hit = async (q: string) => {
-      const url = new URL(`http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/search?q=${q}`)}`)
+      const url = new URL(`http://localhost/_fourno/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/search?q=${q}`)}`)
       return (await handleHoleRequest(makeReq(), url, { db })).text()
     }
 
@@ -329,7 +329,7 @@ describe('hole endpoint — per-visitor hole', () => {
     const snap = makeSnapshotWithLoop('hole-loop', VISITOR_SOURCE_ID)
     const db = makeFakeDb(snap)
     const v = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent('/')}`)
+    const url = new URL(`http://localhost/_fourno/hole/hole-loop?v=${v}&u=${encodeURIComponent('/')}`)
 
     const res1 = await handleHoleRequest(makeReq('sid=alice'), url, { db })
     expect(res1.headers.get('cache-control')).toBe('no-store')
@@ -359,7 +359,7 @@ describe('hole endpoint — versioned snapshot cache', () => {
     const v = getPublishVersion()
 
     for (const q of ['a', 'b', 'c']) {
-      const url = new URL(`http://localhost/_instatic/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/s?q=${q}`)}`)
+      const url = new URL(`http://localhost/_fourno/hole/hole-loop?v=${v}&u=${encodeURIComponent(`/s?q=${q}`)}`)
       await handleHoleRequest(makeReq(), url, { db })
     }
     // Three distinct requests, one snapshot DB read.

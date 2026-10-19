@@ -30,8 +30,8 @@ export type PluginEditorPanelAccent =
  *   • `component` is a real React component. The host renders it inside
  *     the panel body — chrome (header + close button) is host-provided.
  *
- * The plugin's bundle externalizes `react` / `@instatic/host-ui` /
- * `@instatic/host-hooks`, so the component runs against the host's
+ * The plugin's bundle externalizes `react` / `@fourno/host-ui` /
+ * `@fourno/host-hooks`, so the component runs against the host's
  * React instance. See `definePluginPanel` in `builders/panel.ts`.
  */
 export interface PluginEditorPanel {

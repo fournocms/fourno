@@ -377,7 +377,7 @@ describe('CMS media handlers', () => {
   it('uploads image files to disk and stores metadata for authenticated admins', async () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     const body = new FormData()
     body.set('file', pngFile('Hero Image.png'))
@@ -416,7 +416,7 @@ describe('CMS media handlers', () => {
   it('stores the alt text sent with the upload on the new asset row (#411)', async () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     const body = new FormData()
     body.set('file', pngFile('hero.png'))
@@ -449,7 +449,7 @@ describe('CMS media handlers', () => {
   it('rejects an HTML payload that lies about its Content-Type as image/png (F-0002)', async () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     const body = new FormData()
     // Attacker plants `<script>` HTML but sets the multipart Content-Type
@@ -488,7 +488,7 @@ describe('CMS media handlers', () => {
   it('strips the user-supplied filename extension and uses a server-chosen one (F-0002)', async () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     const body = new FormData()
     // Real PNG bytes, but the filename claims `.html`. Server must rename
@@ -523,7 +523,7 @@ describe('CMS media handlers', () => {
     // upload succeeds, but the stored bytes have the <script> stripped.
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     const body = new FormData()
     const originalConsoleError = console.error
@@ -572,7 +572,7 @@ describe('CMS media handlers', () => {
   it('accepts a JPEG when bytes match the JPEG signature', async () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     const body = new FormData()
     body.set('file', new File([JPEG_BYTES], 'photo.jpg', { type: 'image/jpeg' }))
@@ -658,7 +658,7 @@ describe('CMS media handlers', () => {
   it('soft-deletes uploaded media assets and keeps their file on disk', async () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     await createMediaAsset(db, {
       id: 'asset_1',
@@ -698,7 +698,7 @@ describe('CMS media handlers', () => {
   it('purges soft-deleted media assets and removes their stored file', async () => {
     const db = makeFakeDb()
     const cookie = await createCookie(db)
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     await createMediaAsset(db, {
       id: 'asset_1',

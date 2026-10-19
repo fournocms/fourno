@@ -22,7 +22,7 @@
  * abstraction with config objects. New route groups just need a new
  * file in this directory and one entry in `routeGroups` below.
  *
- * Loop traffic (`/_instatic/loop/...`) lives next door in `./loop.ts` and is
+ * Loop traffic (`/_fourno/loop/...`) lives next door in `./loop.ts` and is
  * dispatched directly by the top-level router, not through this entry
  * point — its prefix is outside `/admin/api/cms/`.
  */
@@ -101,7 +101,7 @@ export async function handleCmsRequest(
     ?? (await handleAuditRoutes(req, db))
   if (accountResponse) return accountResponse
 
-  // Branch scope — resolved ONCE per request from the `X-Instatic-Branch`
+  // Branch scope — resolved ONCE per request from the `X-Fourno-Branch`
   // header and handed to every content-shaped route group. Groups that only
   // ever address the live site (dashboard, publish, plugins) pin MAIN_SCOPE
   // themselves; the media groups have no branched data at all.

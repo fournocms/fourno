@@ -49,14 +49,14 @@
   font-weight: 400;
 }
 
-@keyframes instaticAdminSpin {
+@keyframes fournoAdminSpin {
   to {
     transform: rotate(360deg);
   }
 }
 
 .spinIcon {
-  animation: instaticAdminSpin 0.8s linear infinite;
+  animation: fournoAdminSpin 0.8s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

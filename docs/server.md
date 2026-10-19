@@ -1,6 +1,6 @@
 # Server
 
-Deep dive on the server-side of Instatic — the Node process, the router, the handlers, the auth model, the DB adapter, and how a request becomes a response.
+Deep dive on the server-side of Fourno — the Node process, the router, the handlers, the auth model, the DB adapter, and how a request becomes a response.
 
 The server is a single Node process (`srvx` for HTTP, `ws` for WebSockets, behind the adapter in `server/runtime/httpServer.ts`) that boots the DB, runs migrations, activates installed plugins, then accepts HTTP requests and dispatches them through an ordered route table. There are no separate service processes or message queues. The runtime entrypoint is `server/index.ts`; CPU-heavy image variants and plugin server code run in `worker_threads` workers owned by this process.
 
@@ -74,7 +74,7 @@ It walks an ordered `routes` array of `RouteHandler` functions. Each handler ret
 - Dropping the body is the HTTP adapter's job. A `HEAD` response ships the headers a `GET` would have produced, `content-length` included, with no content — handlers stay body-agnostic.
 - A method a route genuinely doesn't support still gets its `405`; only `HEAD` is folded into `GET`.
 
-Before this normalisation existed, `HEAD` matched no `GET`-gated route and fell through to the terminal JSON `404`, so uptime monitors and link checkers — which probe with `HEAD` by convention — reported healthy published pages as missing ([#306](https://github.com/CoreBunch/Instatic/issues/306)).
+Before this normalisation existed, `HEAD` matched no `GET`-gated route and fell through to the terminal JSON `404`, so uptime monitors and link checkers — which probe with `HEAD` by convention — reported healthy published pages as missing ([#306](https://github.com/fourno/fourno/issues/306)).
 
 ### The route table
 
@@ -83,18 +83,18 @@ const routes: readonly RouteHandler[] = [
   tryServeHealth,                  // /health
   tryServeAi,                      // /admin/api/ai/*         → server/ai/handlers/
   tryServeCmsApi,                  // /admin/api/cms/*        → handlers/cms/index.ts
-  tryServeBranchPreviewLink,       // /_instatic/preview/<token> | /exit → publish/publicRoutes.ts
+  tryServeBranchPreviewLink,       // /_fourno/preview/<token> | /exit → publish/publicRoutes.ts
                                    //   sets / clears the branch preview cookie
-  tryServeLoopRuntimeAsset,        // /_instatic/loop-runtime.js (fixed CMS asset)
-  tryServeLoop,                    // /_instatic/loop/*       → handlers/cms/loop.ts
-  tryServeHoleRuntimeAsset,        // /_instatic/hole-runtime.js (fixed CMS asset)
-  tryServeHole,                    // /_instatic/hole/*       → handlers/cms/hole.ts
-  tryServeModuleJsAsset,           // /_instatic/module-js/*  → handlers/cms/moduleJs.ts
-  tryServePublicForm,              // /_instatic/form/*       → forms/handler.ts
-  tryServeRuntimeAsset,            // /_instatic/assets/*     → published runtime assets
-  tryServeRuntimePackageNamespace, // /_instatic/runtime/cache/<hash>/<...> → npm install workspace
-  tryServeSiteCssNamespace,        // /_instatic/css/*        → hashed CSS bundles
-  tryServeMediaRedirect,           // /_instatic/media/<adapterId>/<path> → 302 to signed read URL
+  tryServeLoopRuntimeAsset,        // /_fourno/loop-runtime.js (fixed CMS asset)
+  tryServeLoop,                    // /_fourno/loop/*       → handlers/cms/loop.ts
+  tryServeHoleRuntimeAsset,        // /_fourno/hole-runtime.js (fixed CMS asset)
+  tryServeHole,                    // /_fourno/hole/*       → handlers/cms/hole.ts
+  tryServeModuleJsAsset,           // /_fourno/module-js/*  → handlers/cms/moduleJs.ts
+  tryServePublicForm,              // /_fourno/form/*       → forms/handler.ts
+  tryServeRuntimeAsset,            // /_fourno/assets/*     → published runtime assets
+  tryServeRuntimePackageNamespace, // /_fourno/runtime/cache/<hash>/<...> → npm install workspace
+  tryServeSiteCssNamespace,        // /_fourno/css/*        → hashed CSS bundles
+  tryServeMediaRedirect,           // /_fourno/media/<adapterId>/<path> → 302 to signed read URL
   tryServeStaticAsset,             // /assets/* → dist/ (admin app)
   tryServeUpload,                  // /uploads/* → uploadsDir (with nosniff hardening)
   tryServeAdminApp,                // /admin/* → dist/index.html (SPA fallback)
@@ -122,9 +122,9 @@ Adding a new endpoint is a one-line edit to `routes` plus a focused `tryServeX` 
 
 Several handlers own an entire prefix and 404 internally rather than falling through:
 
-- `/_instatic/runtime/cache/*` — never falls through to the public-slug renderer
-- `/_instatic/css/*` — never falls through
-- `/_instatic/media/*` — never falls through
+- `/_fourno/runtime/cache/*` — never falls through to the public-slug renderer
+- `/_fourno/css/*` — never falls through
+- `/_fourno/media/*` — never falls through
 
 This prevents an unknown path under a known namespace from accidentally matching a later handler.
 
@@ -146,7 +146,7 @@ The fetch handler in `server/index.ts` wraps every request with:
 
 1. **CSRF defense in depth.** State-changing methods (`POST/PUT/PATCH/DELETE`) must come from an `Origin` matching a configured public origin (`PUBLIC_ORIGIN`, auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN`), or a dev allowlist entry. With nothing configured the check falls back to the inbound `Host` header. Forwarded headers (`X-Forwarded-Host` / `X-Forwarded-Proto`) are never consulted, so `TRUSTED_PROXY_CIDRS` has no bearing on CSRF. `SameSite=Lax` already covers most CSRF; this catches the same-site-different-subdomain edge.
 
-2. **Branch scope.** `resolveBranchScope(req, db)` (`server/branches/scope.ts`) turns the `X-Instatic-Branch` header into a `BranchScope` — `MAIN_SCOPE` when absent, `400` for a malformed id, `404 { code: 'branch_not_found' }` for an unknown one. Content handlers receive it and pass it to every repository call; see [`features/branches.md`](features/branches.md).
+2. **Branch scope.** `resolveBranchScope(req, db)` (`server/branches/scope.ts`) turns the `X-Fourno-Branch` header into a `BranchScope` — `MAIN_SCOPE` when absent, `400` for a malformed id, `404 { code: 'branch_not_found' }` for an unknown one. Content handlers receive it and pass it to every repository call; see [`features/branches.md`](features/branches.md).
 
 3. **Group dispatch.** The handler walks an ordered chain of route-group handlers, each owning a resource:
 
@@ -316,7 +316,7 @@ Use `binaryResponse` whenever a route handler returns binary content (runtime as
 ### The session flow
 
 ```text
-Cookie: instatic_admin_session=<token>
+Cookie: fourno_admin_session=<token>
     │
     ▼
 hashSessionToken(token)
@@ -495,9 +495,9 @@ The lock is **released between ticks**, so a crashed leader hands off naturally 
 
 Three-layer model: **static-by-default, dynamic-by-auto-detection**.
 
-- **Layer A — static-to-disk.** **Every** page is baked at publish time. A fully-static page (no dynamic modules, no request-dependent bindings/loop sources, no VC refs to dynamic VCs) bakes a complete document; a page with dynamic nodes bakes its static **shell** with `<instatic-hole>` placeholders (the dynamic nodes are Layer C holes). HTML is written to `uploads/published/current/<route>.html`, and the CSS bundles (`/_instatic/css/…`) and runtime JS (`/_instatic/assets/…`) are baked into the same slot. The visitor router reads all of these directly off disk (`readArtefact` / `readStaticAsset`) — **a published page never touches the DB for HTML, CSS, or JS.** TTFB ≤ 1.5 ms.
+- **Layer A — static-to-disk.** **Every** page is baked at publish time. A fully-static page (no dynamic modules, no request-dependent bindings/loop sources, no VC refs to dynamic VCs) bakes a complete document; a page with dynamic nodes bakes its static **shell** with `<fourno-hole>` placeholders (the dynamic nodes are Layer C holes). HTML is written to `uploads/published/current/<route>.html`, and the CSS bundles (`/_fourno/css/…`) and runtime JS (`/_fourno/assets/…`) are baked into the same slot. The visitor router reads all of these directly off disk (`readArtefact` / `readStaticAsset`) — **a published page never touches the DB for HTML, CSS, or JS.** TTFB ≤ 1.5 ms.
 - **Layer B — in-memory LRU.** Requests with real loop-pagination query params (`loop_<nodeId>_page`) bypass the disk fast-path and render live, memoised by `(urlPath, canonicalQuery)`. Junk params collapse to the empty canonical query and still hit Layer A. Single-flight. Every publish bumps `publishVersion` so the entire cache evicts lazily. The version is captured at render start — if a publish lands before the factory resolves, the result is returned to the caller but not stored; the next request re-renders against the fresh snapshot.
-- **Layer C — server islands ("holes").** When `findDynamicNodeIds(...)` classifies a node as dynamic (module flagged `dynamic: true`, or its bindings/loop source declare `requestDependent: true` / `perVisitor: true`, or it's a VC ref to a dynamic VC), the publisher emits a `<instatic-hole>` placeholder with an optional `staticPlaceholder(props)` skeleton. A ~1.1 KB `IntersectionObserver` runtime fetches `/_instatic/hole/<nodeId>?v=<publishVersion>&u=<page-url>` lazily as the placeholder enters the viewport, forwarding the originating page path/query into the fragment render. **The hole fragment is the only request that reads the DB for an otherwise-static page.** Shared hole responses are cached via Layer B's LRU; per-visitor holes bypass it with `Cache-Control: no-store`.
+- **Layer C — server islands ("holes").** When `findDynamicNodeIds(...)` classifies a node as dynamic (module flagged `dynamic: true`, or its bindings/loop source declare `requestDependent: true` / `perVisitor: true`, or it's a VC ref to a dynamic VC), the publisher emits a `<fourno-hole>` placeholder with an optional `staticPlaceholder(props)` skeleton. A ~1.1 KB `IntersectionObserver` runtime fetches `/_fourno/hole/<nodeId>?v=<publishVersion>&u=<page-url>` lazily as the placeholder enters the viewport, forwarding the originating page path/query into the fragment render. **The hole fragment is the only request that reads the DB for an otherwise-static page.** Shared hole responses are cached via Layer B's LRU; per-visitor holes bypass it with `Cache-Control: no-store`.
 
 Authors don't toggle anything. `src/core/publisher/dynamicDetection.ts:findDynamicNodeIds` is backed by the single walker that powers Layer A's shell-vs-complete bake and Layer C's placeholder emission. The rules live in exactly one file.
 
@@ -508,7 +508,7 @@ Authors don't toggle anything. `src/core/publisher/dynamicDetection.ts:findDynam
                                 │
               ├── write SiteDocument once → site_snapshots
               │     (page versions reference it via site_snapshot_id)
-              ├── for each page (complete doc, or static shell with <instatic-hole>):
+              ├── for each page (complete doc, or static shell with <fourno-hole>):
               │     publishPage + applyPublishedHtmlPipeline
               │     writeArtefact(inactiveSlot, urlPath, html)
               ├── bake every published data-row route into the same slot
@@ -526,7 +526,7 @@ Authors don't toggle anything. `src/core/publisher/dynamicDetection.ts:findDynam
        ┌────────────────────────┼────────────────────────────┐
        ▼                        ▼                            ▼
   Layer A disk           resolvePublicRoute             (page contains holes)
-  readArtefact            page / row / redirect          /_instatic/hole/<id>?v=<ver>&u=<url>
+  readArtefact            page / row / redirect          /_fourno/hole/<id>?v=<ver>&u=<url>
   (only if no ?           / not-found                    handled by
   query string)                  │                       server/handlers/cms/hole.ts
        │                  ┌──────┴───────┐                     │
@@ -543,7 +543,7 @@ Server-side publishing helpers live in `server/publish/`:
 | `publicRouter.ts`                 | Visitor URL → resolution → Response. Composes Layer A disk-read + Layer B cache. Single entry for every visitor HTML request. |
 | `staticArtefact.ts`               | Layer A. Two-slot symlink swap (`current → slot-{a,b}`), atomic per-file `tmp + rename`, slot-aware read/write/purge. |
 | `renderCache.ts`                  | Layer B. Bounded LRU keyed by `(urlPath, canonicalQuery)`, entries versioned. Single-flight on cache miss. `bumpPublishVersion()` invalidates lazily; version captured at render start so mid-flight publishes discard without caching stale HTML. |
-| `holeRuntime.ts`                  | Layer C client-side runtime (~1.1 KB). Exports `runInstaticHoleRuntime` (TS source) and `HOLE_RUNTIME_JS` (IIFE-serialized for browser delivery). |
+| `holeRuntime.ts`                  | Layer C client-side runtime (~1.1 KB). Exports `runFournoHoleRuntime` (TS source) and `HOLE_RUNTIME_JS` (IIFE-serialized for browser delivery). |
 | `publishSite.ts`                  | Full-site publish orchestrator (`publishDraftSite`): phase-1 builds, the short `persistSitePublish` transaction, Layer A bake + slot swap, Layer B bump. |
 | `publishRow.ts`                   | Per-row publish orchestrator (`publishDataRow`) + `removeDataRowArtefact`: persist via the data repository, in-place artefact update, Layer B bump. |
 | `publicRenderer.ts`               | `renderPublishedSnapshot`, `renderPublishedDataRowTemplate` — snapshot-aware wrappers around `publishPage`. |
@@ -554,11 +554,11 @@ Server-side publishing helpers live in `server/publish/`:
 | `frontendInjections.ts`           | Plugin-contributed frontend scripts injected into published HTML.   |
 | `mediaPresentation.ts`            | `<picture>` / `<img srcset>` materialization at publish time.       |
 | `mediaPrefetch.ts`, `loopPrefetch.ts` | Pre-warm caches needed by published pages.                      |
-| `runtime/packageServer.ts`        | Serve per-site `npm install` workspace under `/_instatic/runtime/cache/`. |
+| `runtime/packageServer.ts`        | Serve per-site `npm install` workspace under `/_fourno/runtime/cache/`. |
 
-Plus the hole endpoint at `server/handlers/cms/hole.ts` — registered in the router BEFORE `tryServePublicRoute` so `/_instatic/hole/*` requests never fall through to slug resolution.
+Plus the hole endpoint at `server/handlers/cms/hole.ts` — registered in the router BEFORE `tryServePublicRoute` so `/_fourno/hole/*` requests never fall through to slug resolution.
 
-Published pages are HTML plus up to four hashed CSS bundles (`reset`, `framework`, `style`, `userStyles`). The ONLY first-party client script for ordinary static pages is the Layer C hole runtime, and it's injected ONLY on pages that contain at least one `<instatic-hole>`. Fully-static pages ship zero first-party JS from us. Plugins and modules can inject explicit frontend assets through the documented runtime channels.
+Published pages are HTML plus up to four hashed CSS bundles (`reset`, `framework`, `style`, `userStyles`). The ONLY first-party client script for ordinary static pages is the Layer C hole runtime, and it's injected ONLY on pages that contain at least one `<fourno-hole>`. Fully-static pages ship zero first-party JS from us. Plugins and modules can inject explicit frontend assets through the documented runtime channels.
 
 For the full design including invariants, atomic-publish protocol, and the auto-detection rules, see [docs/features/publisher.md](features/publisher.md).
 
@@ -600,7 +600,7 @@ Three static handlers, in order:
 - **Plugin bundles** (`/uploads/plugins/*`) get `Access-Control-Allow-Origin: *` because the editor preview iframe loads them from an opaque origin (`sandbox="allow-scripts"` without `allow-same-origin`).
 - **Admin shell path-specific serving** (`serveAdminApp`): the two visitor paths inject different content into the shell HTML to minimize perceived load time:
   - **Unauthenticated** (no session cookie): injects a styled login skeleton into `<div id="root">` and a `BOOT_API_KICKOFF` inline script that fires `setupStatus`, `/me`, and `publicSite` fetches at HTML-parse time. FCP shifts from ~400 ms (React mount) to ~DCL (~50 ms), and `useAdminBoot` finds pre-resolved promises instead of waiting for `useEffect`.
-  - **Authenticated**: keeps the existing spinner shell, but injects `BOOT_API_KICKOFF`, an `__instaticAuthed = 1` flag (lets `main.tsx` skip the post-Suspense concurrent re-render delay), and `<link rel="modulepreload">` hints for the authenticated shell chunk (`AuthenticatedAdmin-*.js`). Only the shell chunk is preloaded here; workspace-page pre-warming is handled in `AuthenticatedAdmin` via `requestIdleCallback` after first paint.
+  - **Authenticated**: keeps the existing spinner shell, but injects `BOOT_API_KICKOFF`, an `__fournoAuthed = 1` flag (lets `main.tsx` skip the post-Suspense concurrent re-render delay), and `<link rel="modulepreload">` hints for the authenticated shell chunk (`AuthenticatedAdmin-*.js`). Only the shell chunk is preloaded here; workspace-page pre-warming is handled in `AuthenticatedAdmin` via `requestIdleCallback` after first paint.
 
 ---
 
@@ -608,7 +608,7 @@ Three static handlers, in order:
 
 1. **Pick the right layer.**
    - CMS resource (e.g. `/admin/api/cms/feature`) → new handler file such as `server/handlers/cms/<feature>.ts`, register in `server/handlers/cms/index.ts`.
-   - Top-level (e.g. `/_instatic/something`) → new `tryServeX` in `server/router.ts`, add to the `routes` array in the right order.
+   - Top-level (e.g. `/_fourno/something`) → new `tryServeX` in `server/router.ts`, add to the `routes` array in the right order.
 
 2. **Write the handler.** Require capability → validate body → call repository → return `jsonResponse`. One function per route. Add a `Route` entry to the group's `ROUTES` table; path matching and 404/405 discrimination are handled by `runRouteTable` — do not hand-roll `if (url.pathname !== ...)` or `return methodNotAllowed()` in the handler itself. Parameterised paths use a `RegExp` with named capture groups; the dispatcher decodes each captured value once.
 

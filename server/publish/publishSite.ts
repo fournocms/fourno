@@ -148,7 +148,7 @@ async function publishDraftSiteLocked(
       site: publishedSite,
       page,
       target: 'publish',
-      assetBasePath: `/_instatic/assets/${versionId}/`,
+      assetBasePath: `/_fourno/assets/${versionId}/`,
       dependencyCache,
     })
     const runtimeErrors = runtimeBuild.diagnostics.filter((d) => d.severity === 'error')
@@ -197,7 +197,7 @@ async function publishDraftSiteLocked(
   //
   // Complete static publishing: alongside each page's HTML we bake the CSS
   // bundles and runtime JS into the same slot under their public paths
-  // (`/_instatic/css/...`, `/_instatic/assets/...`). The visitor router serves these off
+  // (`/_fourno/css/...`, `/_fourno/assets/...`). The visitor router serves these off
   // disk, so a published page never hits the server to (re)generate its CSS
   // or JS — the slot is a self-contained static export. The one thing it
   // references from outside is plugin frontend assets
@@ -205,12 +205,12 @@ async function publishDraftSiteLocked(
   // sweep below runs only after a publish has rewritten those links.
   //
   // EVERY page is baked: fully-static pages bake to a complete document; pages
-  // with dynamic nodes bake their static SHELL with `<instatic-hole>` placeholders
-  // (the hole runtime lazy-fetches each fragment from `/_instatic/hole/`). Either way
+  // with dynamic nodes bake their static SHELL with `<fourno-hole>` placeholders
+  // (the hole runtime lazy-fetches each fragment from `/_fourno/hole/`). Either way
   // the HTML + CSS + JS are served from disk — only the hole fragment touches
   // the server. The shells are stamped with `nextPublishVersion` (the version
   // that becomes current the instant `bumpPublishVersion()` runs after the
-  // swap) so their `<instatic-hole data-instatic-version>` matches what the hole endpoint
+  // swap) so their `<fourno-hole data-fourno-version>` matches what the hole endpoint
   // expects; otherwise every baked hole would be rejected as stale.
   const nextPublishVersion = getPublishVersion() + 1
   if (uploadsDir) {
@@ -227,7 +227,7 @@ async function publishDraftSiteLocked(
       const collectCssFiles = (cssBundle: SiteCssBundle): void => {
         for (const file of [cssBundle.reset, cssBundle.framework, cssBundle.style, cssBundle.userStyles]) {
           if (file.content.length === 0) continue
-          const publicPath = `/_instatic/css/${file.filename}`
+          const publicPath = `/_fourno/css/${file.filename}`
           if (!assetsByPath.has(publicPath)) assetsByPath.set(publicPath, encoder.encode(file.content))
         }
       }

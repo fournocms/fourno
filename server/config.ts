@@ -5,7 +5,7 @@ interface ServerConfig {
   /** Bind address. Defaults to 0.0.0.0; set 127.0.0.1 to keep a local instance off the LAN. */
   host: string
   /**
-   * When set, enables the token-gated `POST /_instatic/shutdown` endpoint so
+   * When set, enables the token-gated `POST /_fourno/shutdown` endpoint so
    * a supervising process can stop the server gracefully on platforms
    * without POSIX signals (Windows). Null disables the endpoint.
    */
@@ -103,7 +103,7 @@ export function readServerConfig(
   return {
     port: Number(env.PORT ?? 3001),
     host: env.HOST ?? '0.0.0.0',
-    shutdownToken: env.INSTATIC_SHUTDOWN_TOKEN ?? null,
+    shutdownToken: env.FOURNO_SHUTDOWN_TOKEN ?? null,
     databaseUrl: env.DATABASE_URL ?? 'sqlite:./.tmp/dev.db',
     uploadsDir: env.UPLOADS_DIR ?? './uploads',
     staticDir: env.STATIC_DIR ?? './dist',

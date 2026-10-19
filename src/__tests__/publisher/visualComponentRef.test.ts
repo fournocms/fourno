@@ -494,7 +494,7 @@ describe('VC inlining — unknown componentId', () => {
       { page, site, registry, breakpointId: undefined },
       makeAccumulators(),
     )
-    expect(html).toContain('<!-- instatic: unknown component')
+    expect(html).toContain('<!-- fourno: unknown component')
     expect(html).toContain('nonexistent-vc')
     expect(html).not.toContain('<div>')
   })
@@ -512,7 +512,7 @@ describe('VC inlining — unknown componentId', () => {
       { page, site, registry, breakpointId: undefined },
       makeAccumulators(),
     )
-    expect(html).toContain('<!-- instatic: visual-component-ref missing componentId -->')
+    expect(html).toContain('<!-- fourno: visual-component-ref missing componentId -->')
   })
 
   it('HTML-escapes the componentId in the error comment to prevent XSS', () => {
@@ -589,9 +589,9 @@ describe('VC inlining — richtext prop sanitization', () => {
     const site = makeSite({ visualComponents: [vcContent], pages: [page] })
     const { html } = publishPage(page, site, registry)
     // The <main> wrapper from base.outlet must be intact (the
-    // `data-instatic-content-region` attribute is the marker the content
+    // `data-fourno-content-region` attribute is the marker the content
     // editor's Live mode uses to mount its inline Tiptap instance).
-    expect(html).toContain('<main data-instatic-content-region>')
+    expect(html).toContain('<main data-fourno-content-region>')
     expect(html).not.toContain('<script>')
   })
 })

@@ -91,7 +91,7 @@ export const LoopModule: ModuleDefinition<LoopProps> = {
    * called. This implementation is intentionally unreachable under
    * normal operation.
    */
-  render: () => ({ html: '<!-- instatic: loop render fell through to default -->' }),
+  render: () => ({ html: '<!-- fourno: loop render fell through to default -->' }),
 }
 
 registry.registerOrReplace(LoopModule)

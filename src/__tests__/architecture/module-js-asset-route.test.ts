@@ -2,7 +2,7 @@
  * Architecture gate: `tryServeModuleJsAsset` must be registered in
  * `server/router.ts` BEFORE `tryServePublicRoute`, mirroring
  * `hole-runtime-asset-route.test.ts`. If the handler is missing or appears
- * after the public resolver, `/_instatic/module-js/...` requests would be
+ * after the public resolver, `/_fourno/module-js/...` requests would be
  * swallowed by the public-slug lookup and 404 as a page miss instead of
  * being answered by the module-JS asset handler.
  */

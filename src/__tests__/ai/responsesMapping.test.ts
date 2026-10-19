@@ -228,7 +228,7 @@ describe('runToolLoop via openaiDriver (Responses)', () => {
     for await (const ev of openaiDriver.stream(req)) events.push(ev)
 
     expect(requestBodies).toHaveLength(2)
-    expect(requestBodies[0]!.prompt_cache_key).toMatch(/^instatic:site:/)
+    expect(requestBodies[0]!.prompt_cache_key).toMatch(/^fourno:site:/)
     expect(requestBodies[0]!).not.toHaveProperty('prompt_cache_retention')
     expect(serverCalls).toEqual([{ v: 7 }])
 

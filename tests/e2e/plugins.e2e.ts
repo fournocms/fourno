@@ -548,7 +548,7 @@ function pluginPackageFiles(
     `,
     'admin/dashboard.js': `
       import { createElement } from 'react'
-      import { definePluginAdminApp } from '@instatic/plugin-sdk'
+      import { definePluginAdminApp } from '@fourno/plugin-sdk'
 
       export default definePluginAdminApp(function Dashboard({ page }) {
         return createElement(

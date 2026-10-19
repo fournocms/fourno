@@ -18,8 +18,8 @@
 
 import { variantsToCss2Axis } from './variants'
 
-const PREVIEW_LINK_PREFIX = 'instatic-font-preview-'
-const PREVIEW_VARIANTS_LINK_PREFIX = 'instatic-font-preview-variants-'
+const PREVIEW_LINK_PREFIX = 'fourno-font-preview-'
+const PREVIEW_VARIANTS_LINK_PREFIX = 'fourno-font-preview-variants-'
 
 /** Render a CSS-safe ID for a family name. */
 function previewLinkId(family: string, prefix: string): string {
@@ -44,7 +44,7 @@ export function loadFontPreview(family: string): void {
   link.id = id
   link.rel = 'stylesheet'
   link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@400&display=swap`
-  link.setAttribute('data-source', 'instatic-font-preview')
+  link.setAttribute('data-source', 'fourno-font-preview')
   document.head.appendChild(link)
 }
 
@@ -68,7 +68,7 @@ export function loadFontPreviewWithVariants(family: string, variants: readonly s
   link.id = id
   link.rel = 'stylesheet'
   link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:${axis}&display=swap`
-  link.setAttribute('data-source', 'instatic-font-preview-variants')
+  link.setAttribute('data-source', 'fourno-font-preview-variants')
   document.head.appendChild(link)
 }
 

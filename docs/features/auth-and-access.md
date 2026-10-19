@@ -8,10 +8,10 @@ Every state-changing CMS request goes through one auth funnel: parse the session
 
 ## TL;DR
 
-- **Sessions** are token-cookie based. Cookie name: `SESSION_COOKIE_NAME` (`instatic_admin_session`). Tokens are hashed before storage; the cookie carries the raw token.
+- **Sessions** are token-cookie based. Cookie name: `SESSION_COOKIE_NAME` (`fourno_admin_session`). Tokens are hashed before storage; the cookie carries the raw token.
 - **Capabilities** are the access model. 38 `CoreCapability` strings defined in `src/core/capabilities.ts` (`@core/capabilities`). Roles are sets of capabilities. Handlers gate on capability, not role.
 - **`requireCapability(req, db, 'site.read')`** is the canonical handler entrypoint. Returns the `AuthUser` or a 401/403 `Response`.
-- **MFA (TOTP)** is per-user opt-in. TOTP seeds are encrypted at rest with `INSTATIC_SECRET_KEY`; recovery codes are one-way hashes. Sessions for MFA-enrolled users are `pending_mfa` until verified, then become `active`. Failed MFA codes go through `mfaRateLimit` AND increment the per-account lockout counter — the same counter the password step uses. A locked account is rejected at the MFA step before any code is checked.
+- **MFA (TOTP)** is per-user opt-in. TOTP seeds are encrypted at rest with `FOURNO_SECRET_KEY`; recovery codes are one-way hashes. Sessions for MFA-enrolled users are `pending_mfa` until verified, then become `active`. Failed MFA codes go through `mfaRateLimit` AND increment the per-account lockout counter — the same counter the password step uses. A locked account is rejected at the MFA step before any code is checked.
 - **Step-up auth** gates sensitive actions (delete user, revoke another device, sign out all) unless the user disables it on Account -> Security. The default window is 15 minutes; users can configure 5, 15, 30, or 60 minutes.
 - **Lockout** kicks in after 5 failed logins. Exponential backoff capped at 24 hours.
 - **CSRF defense in depth.** State-changing methods must come from a matching `Origin`. `SameSite=Lax` covers the rest.
@@ -62,7 +62,7 @@ createSession(user, deviceLabel, ip)
     │            pending_mfa = userHasMfaEnabled, step_up_expires_at = null
     │
     ▼
-Set-Cookie: instatic_admin_session=<rawToken>; HttpOnly; Secure; SameSite=Lax; Path=/admin
+Set-Cookie: fourno_admin_session=<rawToken>; HttpOnly; Secure; SameSite=Lax; Path=/admin
     │
     ▼
 (user enters MFA code if enrolled)
@@ -88,7 +88,7 @@ session is now ACTIVE; subsequent /admin/api/cms/* requests succeed
 ### On every request
 
 ```text
-cookie instatic_admin_session=<token>
+cookie fourno_admin_session=<token>
     │
     ▼
 hashSessionToken(token)
@@ -107,7 +107,7 @@ Sessions rotate (the raw token changes, the row stays) on a cadence to limit bla
 
 ### Logout
 
-`POST /admin/api/cms/auth/logout` -> `revokeSessionByHash(db, hash)` -> `Set-Cookie: instatic_admin_session=; Max-Age=0`.
+`POST /admin/api/cms/auth/logout` -> `revokeSessionByHash(db, hash)` -> `Set-Cookie: fourno_admin_session=; Max-Age=0`.
 
 ### Multi-device
 

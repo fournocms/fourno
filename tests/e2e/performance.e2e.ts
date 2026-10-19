@@ -42,7 +42,7 @@ test.describe('performance and reliability', () => {
     await expectEditorReady(page)
     await expect(page.getByTestId('toolbar')).toBeVisible()
     await expect(page.getByTestId('account-menu-trigger')).toBeVisible()
-    await expect(page.getByRole('status', { name: 'Loading Instatic' })).toHaveCount(0)
+    await expect(page.getByRole('status', { name: 'Loading Fourno' })).toHaveCount(0)
 
     const usableMs = Date.now() - startedAt
     test.info().annotations.push({

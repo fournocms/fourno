@@ -177,7 +177,7 @@ async function buildPreviewRuntime(site: SiteDocument, page: Page) {
 
 function previewBanner(branchName: string): string {
   return (
-    `<div id="instatic-branch-preview" role="status" ` +
+    `<div id="fourno-branch-preview" role="status" ` +
     `style="position:fixed;left:0;right:0;bottom:0;z-index:2147483647;display:flex;align-items:center;` +
     `justify-content:center;gap:12px;padding:10px 16px;background:#111;color:#fff;` +
     `font:600 13px/1.4 system-ui,sans-serif">` +

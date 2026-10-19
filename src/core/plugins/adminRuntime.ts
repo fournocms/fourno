@@ -10,7 +10,7 @@
  * Plugin admin apps used to receive a curated `api` and `ui` namespace
  * via render-function arguments. That layer is gone — plugins now write
  * real React components and pull editor / settings / route helpers from
- * `@instatic/host-hooks` (which the host populates per-mount via
+ * `@fourno/host-hooks` (which the host populates per-mount via
  * `PluginContext`).
  */
 import type { TSchema, Static } from '@sinclair/typebox'

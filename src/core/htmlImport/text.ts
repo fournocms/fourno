@@ -3,7 +3,7 @@
  *
  * Source HTML is pretty-printed: an `<a>` or `<p>` often spans several lines
  * with leading indentation, so its `textContent` carries newlines and runs of
- * spaces (`"\n      instatic"`, `"The Club\n  is how…"`). The browser collapses
+ * spaces (`"\n      fourno"`, `"The Club\n  is how…"`). The browser collapses
  * that whitespace when rendering, so storing it verbatim would surface stray
  * leading spaces / line breaks in the editor's text fields.
  *

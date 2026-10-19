@@ -65,7 +65,7 @@ let cacheRoot: string
 let savedEnv: string | undefined
 
 beforeAll(async () => {
-  cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-cache-layout-'))
+  cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-cache-layout-'))
   savedEnv = process.env.RUNTIME_CACHE_DIR
   // Point the env-based readers (packageServer) at the same root the writer uses.
   process.env.RUNTIME_CACHE_DIR = cacheRoot
@@ -114,7 +114,7 @@ describe('runtime cache layout — reader/writer agreement', () => {
     expect(result).not.toBeNull()
     expect(result?.lockHash).toBe(hash)
     expect(result?.importmap.imports.three).toBe(
-      `/_instatic/runtime/cache/${hash}/three/build/three.module.js`,
+      `/_fourno/runtime/cache/${hash}/three/build/three.module.js`,
     )
   })
 
@@ -125,14 +125,14 @@ describe('runtime cache layout — reader/writer agreement', () => {
     // (Body bytes aren't asserted: the test preload swaps in happy-dom's
     // `Response`, which can't read a BunFile body. Status 200 means the path
     // resolved to a file the writer actually installed.)
-    const url = `/_instatic/runtime/cache/${hash}/three/build/three.module.js`
+    const url = `/_fourno/runtime/cache/${hash}/three/build/three.module.js`
     const res = await tryServeRuntimePackage(new Request(`http://localhost${url}`), url)
     expect(res?.status).toBe(200)
     expect(res?.headers.get('content-type')).toBe('text/javascript; charset=utf-8')
 
     // Negative control: a path the writer never installed must 404, confirming
     // the server resolves inside the writer's node_modules and nowhere else.
-    const missingUrl = `/_instatic/runtime/cache/${hash}/three/build/does-not-exist.js`
+    const missingUrl = `/_fourno/runtime/cache/${hash}/three/build/does-not-exist.js`
     const missing = await tryServeRuntimePackage(new Request(`http://localhost${missingUrl}`), missingUrl)
     expect(missing?.status).toBe(404)
   })
@@ -142,7 +142,7 @@ describe('runtime cache layout — reader/writer agreement', () => {
     await ensureRuntimeDependencyCache(LOCK, { runInstall: fakeInstall })
     const { db, wasQueried } = createThrowingDb()
 
-    const url = `/_instatic/runtime/cache/${hash}/three/build/three.module.js`
+    const url = `/_fourno/runtime/cache/${hash}/three/build/three.module.js`
     const res = await handleServerRequest(new Request(`http://localhost${url}`), { db })
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('text/javascript; charset=utf-8')
@@ -154,7 +154,7 @@ describe('runtime cache layout — reader/writer agreement', () => {
     const { db, wasQueried } = createThrowingDb()
 
     const res = await handleServerRequest(
-      new Request('http://localhost/_instatic/runtime/cache/not-a-24-hex/three/build/three.module.js'),
+      new Request('http://localhost/_fourno/runtime/cache/not-a-24-hex/three/build/three.module.js'),
       { db },
     )
     expect(res.status).toBe(404)
@@ -163,10 +163,10 @@ describe('runtime cache layout — reader/writer agreement', () => {
 
   it('packageServer rejects malformed hashes and traversal-shaped package paths', async () => {
     const malformedUrls = [
-      '/_instatic/runtime/cache/not-a-24-hex/three/build/three.module.js',
-      '/_instatic/runtime/cache/aaaaaaaaaaaaaaaaaaaaaaaa/../secret.js',
-      '/_instatic/runtime/cache/aaaaaaaaaaaaaaaaaaaaaaaa/three/../package.json',
-      '/_instatic/runtime/cache/aaaaaaaaaaaaaaaaaaaaaaaa/',
+      '/_fourno/runtime/cache/not-a-24-hex/three/build/three.module.js',
+      '/_fourno/runtime/cache/aaaaaaaaaaaaaaaaaaaaaaaa/../secret.js',
+      '/_fourno/runtime/cache/aaaaaaaaaaaaaaaaaaaaaaaa/three/../package.json',
+      '/_fourno/runtime/cache/aaaaaaaaaaaaaaaaaaaaaaaa/',
     ]
 
     for (const url of malformedUrls) {

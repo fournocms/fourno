@@ -1,8 +1,8 @@
 /**
- * `@instatic/host-hooks` — React hooks plugin code can use to reach into
+ * `@fourno/host-hooks` — React hooks plugin code can use to reach into
  * host editor state, settings, and command runtime.
  *
- *   import { useEditorStore, usePluginSettings } from '@instatic/host-hooks'
+ *   import { useEditorStore, usePluginSettings } from '@fourno/host-hooks'
  *
  *   function MyPanel() {
  *     const selected = useEditorStore((s) => s.selectedNodeId)
@@ -10,7 +10,7 @@
  *     return <p>Selected: {selected ?? 'none'}, sample: {settings.sampleRate}</p>
  *   }
  *
- * Like `@instatic/host-ui`, this is an externalized package — plugin
+ * Like `@fourno/host-ui`, this is an externalized package — plugin
  * bundles compile against the named exports but resolve the runtime at
  * mount time through the host's import map.
  *
@@ -78,7 +78,7 @@ export function useEditorStore<T>(selector?: (state: EditorStore) => T): T | Edi
 
 /**
  * Read the current plugin's persisted settings as a typed snapshot.
- * Updates flow through `setPluginSettings(...)` from `@instatic/host-hooks`
+ * Updates flow through `setPluginSettings(...)` from `@fourno/host-hooks`
  * (round-trips through the host's settings PUT endpoint).
  *
  * Settings declared `secret: true` always read as the mask (`'***'`) here —

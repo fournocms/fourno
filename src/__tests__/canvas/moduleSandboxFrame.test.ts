@@ -3,14 +3,14 @@ import { createSandboxSrcDoc } from '@site/canvas/moduleSandboxSrcDoc'
 
 describe('ModuleSandboxFrame srcDoc', () => {
   it('builds an isolated iframe document with import map, encoded module source, and host bridge', () => {
-    const threeUrl = '/_instatic/runtime/cache/abc123/three/build/three.module.js'
+    const threeUrl = '/_fourno/runtime/cache/abc123/three/build/three.module.js'
     const srcDoc = createSandboxSrcDoc({
       title: 'Runtime preview',
       source: `import * as THREE from 'three'\nexport function mount() {}`,
       importMap: {
         imports: {
           three: threeUrl,
-          'three/': '/_instatic/runtime/cache/abc123/three/',
+          'three/': '/_fourno/runtime/cache/abc123/three/',
         },
       },
       context: {
@@ -28,8 +28,8 @@ describe('ModuleSandboxFrame srcDoc', () => {
     expect(srcDoc).toContain(`"three":"${threeUrl}"`)
     expect(srcDoc).toContain('data:text/javascript;base64,')
     expect(srcDoc).not.toContain(`import * as THREE from 'three'`)
-    expect(srcDoc).toContain('instatic-module-sandbox')
-    expect(srcDoc).toContain('instatic-module-host')
+    expect(srcDoc).toContain('fourno-module-sandbox')
+    expect(srcDoc).toContain('fourno-module-host')
     expect(srcDoc).toContain("message.type !== 'update'")
     expect(srcDoc).toContain('.class-1')
   })

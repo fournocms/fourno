@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto'
 import { hash as argon2Hash, verify as argon2Verify } from '@node-rs/argon2'
 
-export const SESSION_COOKIE_NAME = 'instatic_admin_session'
+export const SESSION_COOKIE_NAME = 'fourno_admin_session'
 const SESSION_ABSOLUTE_TIMEOUT_MS = 1000 * 60 * 60 * 24 * 90
 
 /**

@@ -89,7 +89,7 @@ describe('fieldIdError', () => {
     }
   })
 
-  it("accepts Instatic's own built-in post-type field ids", () => {
+  it("accepts Fourno's own built-in post-type field ids", () => {
     // The regression in #434: the dialog rejected ids that the product itself
     // ships, so one table could end up holding two naming conventions.
     for (const id of [

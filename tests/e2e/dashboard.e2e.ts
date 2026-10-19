@@ -91,7 +91,7 @@ test.describe('dashboard', () => {
       await expectLoaded(plugins)
 
       const domain = await expectWidget(page, 'domain', 'Domain')
-      await expect(domain).toContainText('instatic.com')
+      await expect(domain).toContainText('example.com')
       await expect(domain).toContainText('HTTPS')
     })
 

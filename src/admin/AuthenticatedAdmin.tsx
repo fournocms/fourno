@@ -7,7 +7,7 @@
  *   - StepUpProvider (auth re-verification for sensitive actions)
  *   - ConfirmDeleteProvider (the one confirm dialog every admin route asks through)
  *   - The 10 workspace page components (DashboardPage, SitePage, …)
- *   - installPluginRuntime() (populates globalThis.__instatic for plugins)
+ *   - installPluginRuntime() (populates globalThis.__fourno for plugins)
  *
  * Splitting this out from `AdminEntry` keeps the cold-load JS execution
  * gap small for the unauthenticated login flow: the entry chunk no longer
@@ -118,7 +118,7 @@ const SiteExportModal = lazy(() =>
   import('./modals/SiteExport').then((m) => ({ default: m.SiteExportModal })),
 )
 
-// Plugin runtime (globalThis.__instatic) is now installed LAZILY by
+// Plugin runtime (globalThis.__fourno) is now installed LAZILY by
 // `ensurePluginRuntime()` in `pluginRuntimeBootstrap.ts`. The two callers
 // that need it (useInstalledEditorPlugins, PluginPageRenderer) await it
 // before triggering their plugin dynamic-imports. Eagerly installing

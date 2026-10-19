@@ -2,13 +2,13 @@
 // Loaded at runtime by plugin bundles via the import map in index.html.
 // Fallow cannot see this static-asset path; the file is live in production.
 /**
- * Plugin-runtime shim for `@instatic/host-hooks`.
+ * Plugin-runtime shim for `@fourno/host-hooks`.
  *
  * Plugins import editor + plugin-runtime hooks from this package:
  *   useEditorStore, usePluginSettings, usePluginContext,
  *   usePluginRoutes, useEditorCommand
  *
- * The host's main bundle populates `globalThis.__instatic.hostHooks`
+ * The host's main bundle populates `globalThis.__fourno.hostHooks`
  * with the live hook implementations and the React context they
  * subscribe to.
  *
@@ -18,10 +18,10 @@
  * mutations go through `api.editor.store.transaction`
  * (`editor.store.write`) in the plugin's editor entrypoint.
  */
-const G = globalThis.__instatic?.hostHooks
+const G = globalThis.__fourno?.hostHooks
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host hooks not initialized. Did the host bundle finish loading before the plugin import?",
+    "[@fourno/runtime] Host hooks not initialized. Did the host bundle finish loading before the plugin import?",
   )
 }
 

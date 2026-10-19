@@ -4,11 +4,11 @@
  *
  *   1. An editor issues a link: a random token, stored hashed on
  *      `site_branch_previews`, one active link per branch.
- *   2. Opening `/_instatic/preview/<token>` validates it and sets an
+ *   2. Opening `/_fourno/preview/<token>` validates it and sets an
  *      HttpOnly cookie carrying the token, then redirects to the site root.
  *   3. Every public GET with that cookie renders the branch's draft instead
  *      of the published site (see server/publish/branchPreview.ts), with a
- *      banner offering `/_instatic/preview/exit`, which clears the cookie.
+ *      banner offering `/_fourno/preview/exit`, which clears the cookie.
  *
  * Revoking (or deleting the branch) invalidates the cookie on the next
  * request — the cookie is only ever the token, never a grant of its own.
@@ -23,8 +23,8 @@ import {
 } from '../repositories/branchPreviews'
 import { branchExists } from '../repositories/branches'
 
-export const BRANCH_PREVIEW_COOKIE = 'instatic_branch_preview'
-export const BRANCH_PREVIEW_PATH_PREFIX = '/_instatic/preview/'
+export const BRANCH_PREVIEW_COOKIE = 'fourno_branch_preview'
+export const BRANCH_PREVIEW_PATH_PREFIX = '/_fourno/preview/'
 export const BRANCH_PREVIEW_EXIT_PATH = `${BRANCH_PREVIEW_PATH_PREFIX}exit`
 /** A preview cookie outlives a typical review round; revocation is the real bound. */
 const PREVIEW_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 30
@@ -34,7 +34,7 @@ export function hashPreviewToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
 }
 
-/** `/_instatic/preview/<token>` — the path a shared link points at. */
+/** `/_fourno/preview/<token>` — the path a shared link points at. */
 export function previewEntryPath(token: string): string {
   return `${BRANCH_PREVIEW_PATH_PREFIX}${token}`
 }

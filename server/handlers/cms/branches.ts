@@ -1,6 +1,6 @@
 /**
  * Site branches endpoints — the branch REGISTRY. Branch content is addressed
- * through the `X-Instatic-Branch` header on the ordinary content routes
+ * through the `X-Fourno-Branch` header on the ordinary content routes
  * (see server/branches/scope.ts); nothing here reads or writes rows except
  * through the fork and delete operations.
  *

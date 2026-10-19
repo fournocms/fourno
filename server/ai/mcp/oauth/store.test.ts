@@ -15,7 +15,7 @@ import {
   rotateRefreshToken,
 } from './store'
 
-const RESOURCE = 'https://cms.example.com/_instatic/mcp'
+const RESOURCE = 'https://cms.example.com/_fourno/mcp'
 const REDIRECT_URI = 'https://claude.ai/api/mcp/auth_callback'
 const VERIFIER = 'a'.repeat(64)
 

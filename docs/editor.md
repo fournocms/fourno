@@ -67,7 +67,7 @@ Why the split:
 - **`AdminEntry`** is eager-imported but small (~10 KB gz). Owns the boot probe and gate.
 - **`AuthenticatedAdmin`** is `React.lazy` so the login screen doesn't pay for SpotlightRoot, the editor store, or any workspace page chunk.
 - **Workspace pages** are wrapped in `prewarmedLazy(...)` — the active page pre-warms at module evaluation (alone, so no 8 sibling imports stealing CPU); after first paint a `requestIdleCallback` pre-warms the remaining pages. `/admin/site` delays sibling preloads slightly so `AdminCanvasEditorBody` claims the first post-paint slot. The result: subsequent workspace navigation renders synchronously with no Suspense fallback.
-- **Plugin runtime** (`globalThis.__instatic`) is installed lazily by `ensurePluginRuntime()` in `pluginRuntimeBootstrap.ts`. It's triggered on first admin-layout mount via `useInstalledEditorPlugins`, so plugin code never runs before login and the runtime download stays off the dashboard critical path.
+- **Plugin runtime** (`globalThis.__fourno`) is installed lazily by `ensurePluginRuntime()` in `pluginRuntimeBootstrap.ts`. It's triggered on first admin-layout mount via `useInstalledEditorPlugins`, so plugin code never runs before login and the runtime download stays off the dashboard critical path.
 
 ---
 
@@ -108,7 +108,7 @@ import { useInitialQueryParams, useUrlQuerySync } from '@admin/lib/urlState'
 
 ### Why a separate module
 
-Workspace selections still need bookmarkable query strings without replaying route navigation. `urlState` solves this by operating on `window.history.replaceState` directly — no `instatic:locationchange` event, no route re-match, just a query-string update that keeps the pathname stable.
+Workspace selections still need bookmarkable query strings without replaying route navigation. `urlState` solves this by operating on `window.history.replaceState` directly — no `fourno:locationchange` event, no route re-match, just a query-string update that keeps the pathname stable.
 
 ### `useInitialQueryParams()`
 
@@ -204,7 +204,7 @@ src/admin/
 ├── access.ts                   ← workspace gating
 ├── workspace.ts                ← AdminWorkspace union
 ├── session.tsx, sessionContext.ts ← AdminSession context
-├── pluginRuntimeBootstrap.ts   ← installs globalThis.__instatic (lazy)
+├── pluginRuntimeBootstrap.ts   ← installs globalThis.__fourno (lazy)
 │
 ├── layouts/
 │   ├── AdminCanvasLayout/      ← Site shell + lazy editor body
@@ -425,7 +425,7 @@ Each iframe `<head>` receives five `<style>` elements (three from `ClassStyleInj
 
 | Element | Injector | Cascade layer | Contents |
 |---|---|---|---|
-| `<style id="instatic-editor-chrome">` | `EditorChromeInjector` | **unlayered** | Editor-only chrome: placeholder, slot-instance, list placeholder, unknown-module fallback |
+| `<style id="fourno-editor-chrome">` | `EditorChromeInjector` | **unlayered** | Editor-only chrome: placeholder, slot-instance, list placeholder, unknown-module fallback |
 | `<style id="mc-classes">` | `ClassStyleInjector` | `@layer user-authored` | Publisher reset + framework CSS + class registry CSS |
 | `<style id="mc-classes-preview">` | `ClassStyleInjector` | `@layer user-authored` | Higher-specificity preview rule while a property control is hovered; empty for state-pseudo rules |
 | `<style id="mc-classes-force-state">` | `ClassStyleInjector` | `@layer user-authored` | Forced state preview: paints the active state-pseudo rule onto the selected node via a doubled `[data-node-id]` selector |
@@ -433,7 +433,7 @@ Each iframe `<head>` receives five `<style>` elements (three from `ClassStyleInj
 
 The **unlayered-vs-layered** split is the cascade isolation mechanism: CSS rules outside any `@layer` always beat rules inside `@layer`-d blocks, regardless of specificity. Author CSS (both the class registry and user stylesheets) goes into `@layer user-authored`, so it can never override the editor chrome even with a high-specificity selector.
 
-`EditorChromeInjector` targets chrome elements via **stable data-attribute selectors** (`data-canvas-module-placeholder`, `data-instatic-slot-instance`, `data-instatic-unknown-module`, etc.) rather than hashed CSS-Module class names, which only exist in the parent document. At mount, it copies the admin design tokens the chrome reads from the parent document's `:root` onto the iframe's `:root`, every one renamed into the reserved `--chrome-*` namespace: `--radius` becomes `--chrome-radius`, `--text-subtle` becomes `--chrome-text-subtle`, `--font-sans` becomes `--chrome-font-sans`, and so on. The chrome rules read only `var(--chrome-*)`, and the forwarded set is derived from those references, so it cannot drift from what the rules use.
+`EditorChromeInjector` targets chrome elements via **stable data-attribute selectors** (`data-canvas-module-placeholder`, `data-fourno-slot-instance`, `data-fourno-unknown-module`, etc.) rather than hashed CSS-Module class names, which only exist in the parent document. At mount, it copies the admin design tokens the chrome reads from the parent document's `:root` onto the iframe's `:root`, every one renamed into the reserved `--chrome-*` namespace: `--radius` becomes `--chrome-radius`, `--text-subtle` becomes `--chrome-text-subtle`, `--font-sans` becomes `--chrome-font-sans`, and so on. The chrome rules read only `var(--chrome-*)`, and the forwarded set is derived from those references, so it cannot drift from what the rules use.
 
 No admin token is ever declared on the iframe `:root` under its own name. The chrome stylesheet is unlayered, so a declaration of `--radius`, `--text`, or `--space-s` there would beat the site's own custom property of the same name in `@layer user-authored`, and the canvas would render the site with the editor's values while the published page used the site's. `editorChromeInjector.test.tsx` fails if the chrome sheet declares or reads any custom property outside `--chrome-*`.
 
@@ -641,7 +641,7 @@ Data sources:
 - **Modules:** `registry.list()` filtered by the same editor insertion rules as the compact picker (`base.body`, `base.visual-component-ref`, and `base.slot-instance` hidden; `base.slot-outlet` only in Visual Component mode).
 - **Layouts:** a single source — user-saved layouts from `site.layouts` (see "Saved layouts" below), which persist as `data_rows` (table_id `layouts`). There are no code-defined presets; any built-ins we ship later are seeded rows in that same table, indistinguishable from a user save.
 - **Components:** `site.visualComponents`.
-- **Recent:** per-browser local state in `instatic-module-inserter-v1`, validated with TypeBox before use.
+- **Recent:** per-browser local state in `fourno-module-inserter-v1`, validated with TypeBox before use.
 - **Favorites:** per-user server state in `user_preferences` key `module-inserter`, validated with TypeBox by `src/core/persistence/userPreferences.ts` and used by `CanvasNotch`.
 
 The modal uses the tile-card pattern from `docs/design.md`: `--bg-surface` parent, 1px grid gap, `--bg-surface-2` tiles, `--card-radius`, categorical accents via `data-accent`, and an achromatic `--focus-ring` selection state. Wireframe image regions reuse `--canvas-placeholder-bg`.
@@ -676,7 +676,7 @@ The palette is wired so that **plugin-registered commands work the same as built
 
 Two folders carry the plugin frontend:
 
-- **`src/admin/plugin-host-hooks/`** — React hooks exposed to plugins via `globalThis.__instatic` (set up by `installPluginRuntime()` in `AuthenticatedAdmin`).
+- **`src/admin/plugin-host-hooks/`** — React hooks exposed to plugins via `globalThis.__fourno` (set up by `installPluginRuntime()` in `AuthenticatedAdmin`).
 - **`src/admin/plugin-host-ui/`** — UI primitives plugins call to render dashboard / panel / page surfaces.
 
 Plugin canvas modules render inside the canvas iframe like any other module. Plugin admin pages mount at `/admin/plugins/:pluginId/:pageId` via the `pluginPage` workspace.

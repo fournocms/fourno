@@ -2,7 +2,7 @@
  * Tree builder — composes Visual Component trees as nested JS calls instead
  * of hand-rolled flat-map JSON.
  *
- *   import { h, vc } from '@instatic/plugin-sdk'
+ *   import { h, vc } from '@fourno/plugin-sdk'
  *
  *   export const hero = vc('hero', 'Hero (Centered)', () =>
  *     h.container({ tag: 'section', classIds: [ns.classRef('hero')] }, [

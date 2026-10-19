@@ -72,7 +72,7 @@ export function createEditorBridgeStream(
   scope: EditorBridgeScope,
   signal: AbortSignal,
   options: {
-    /** The branch the workspace has open (its `X-Instatic-Branch`); main when absent. */
+    /** The branch the workspace has open (its `X-Fourno-Branch`); main when absent. */
     branchId?: string
     /** Test seam: the idle lease shrinks to milliseconds in unit tests. */
     idleLeaseMs?: number

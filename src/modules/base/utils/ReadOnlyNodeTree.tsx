@@ -44,7 +44,7 @@ import { useLoopPreviewItems } from '@site/canvas/useLoopPreviewItems'
 /**
  * Identifies the editable source a read-only region was composed from, so the
  * canvas can label it ("part of X") and open it on double-click. Stamped as
- * `data-instatic-readonly-*` markers on every element of the region.
+ * `data-fourno-readonly-*` markers on every element of the region.
  */
 export interface ReadOnlyRegion {
   /** Human label, e.g. "Global Layout template" or "Hero component". */
@@ -80,7 +80,7 @@ interface ReadOnlyNodeTreeProps {
   outletSlot?: ReactNode
   /**
    * When set, every element rendered by this tree is stamped with
-   * `data-instatic-readonly-*` markers identifying its editable source, so the
+   * `data-fourno-readonly-*` markers identifying its editable source, so the
    * canvas can show a hover hint and open the source on double-click.
    */
   readonly?: ReadOnlyRegion
@@ -91,13 +91,13 @@ interface ReadOnlyNodeTreeProps {
   templateContext?: TemplateRenderDataContext
 }
 
-/** Build the `data-instatic-readonly-*` marker bag spread onto read-only nodes. */
+/** Build the `data-fourno-readonly-*` marker bag spread onto read-only nodes. */
 function readonlyMarkers(region: ReadOnlyRegion | undefined): NodeWrapperPropsType | undefined {
   if (!region) return undefined
   return {
-    'data-instatic-readonly-label': region.label,
-    'data-instatic-readonly-kind': region.kind,
-    'data-instatic-readonly-id': region.targetId,
+    'data-fourno-readonly-label': region.label,
+    'data-fourno-readonly-kind': region.kind,
+    'data-fourno-readonly-id': region.targetId,
   }
 }
 

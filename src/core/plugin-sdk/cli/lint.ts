@@ -1,5 +1,5 @@
 /**
- * `instatic-plugin lint` — pre-publish health check for a plugin source tree.
+ * `fourno-plugin lint` — pre-publish health check for a plugin source tree.
  *
  * Validates the manifest, the declared entrypoints' source files, and (when
  * a `dist/` directory exists) the bundled output. Returns a list of human-
@@ -7,14 +7,14 @@
  * finding has severity `error`.
  *
  * Checks performed:
- *   • `instatic-plugin.config.ts` exists, evaluates, default-exports a plugin definition
+ *   • `fourno-plugin.config.ts` exists, evaluates, default-exports a plugin definition
  *   • Manifest validates against the host's TypeBox schema
  *   • Every entrypoint declared in the manifest has a source file on disk
  *     (or a built artifact in `dist/`)
  *   • Plugin source files in `server/` and `modules/` do not import Node/Bun
  *     primitives (`'node:*'`, `'bun:*'`, `require(`, `process.binding`, …)
  *   • Bundled outputs in `dist/server/index.js` and `dist/modules/index.js`
- *     pass the same scan (catches authors that bypass `instatic-plugin build`)
+ *     pass the same scan (catches authors that bypass `fourno-plugin build`)
  *   • If `network.outbound` is requested, `networkAllowedHosts` is non-empty
  *   • Every requested `cms.content.*` permission is consumed by a
  *     `contentAccess` entry declaring the matching mode (the missing-
@@ -54,7 +54,7 @@ const SANDBOXED_ENTRYPOINTS: ReadonlyArray<'server' | 'modules'> = ['server', 'm
 
 /**
  * Run all lint checks for a plugin source directory. Throws on a corrupt
- * `instatic-plugin.config.ts`; everything else is reported as a finding so the
+ * `fourno-plugin.config.ts`; everything else is reported as a finding so the
  * CLI can list multiple problems in one pass.
  */
 export async function lintPlugin(sourceDir: string): Promise<LintResult> {
@@ -69,7 +69,7 @@ export async function lintPlugin(sourceDir: string): Promise<LintResult> {
         severity: 'error',
         scope: 'config',
         message: err instanceof Error ? err.message : String(err),
-        file: 'instatic-plugin.config.ts',
+        file: 'fourno-plugin.config.ts',
       }],
     }
   }
@@ -238,7 +238,7 @@ export async function lintPlugin(sourceDir: string): Promise<LintResult> {
   }
   if (await findEntrypointSource(absoluteSource, 'editor')) {
     entrypointSources.push({ kind: 'editor', path: 'editor/' })
-    // `instatic-plugin build` auto-adds `entrypoints.editor` when an
+    // `fourno-plugin build` auto-adds `entrypoints.editor` when an
     // `editor/` source exists — but the config manifest validated above
     // doesn't carry that auto-added entrypoint, so the host-side
     // `editor.code` coherence check can't fire here. Re-check explicitly
@@ -309,7 +309,7 @@ export async function lintPlugin(sourceDir: string): Promise<LintResult> {
         findings.push({
           severity: 'error',
           scope: `bundle:${kind}`,
-          message: `bundled output references forbidden sandbox literal \`${offender.literal}\`. Re-run \`instatic-plugin build\` and check imports.`,
+          message: `bundled output references forbidden sandbox literal \`${offender.literal}\`. Re-run \`fourno-plugin build\` and check imports.`,
           file: `dist/${kind}/index.js`,
         })
       }

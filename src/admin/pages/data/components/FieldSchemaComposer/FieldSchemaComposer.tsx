@@ -1,6 +1,6 @@
 /**
  * THESIS: A collection schema should read like a small, editable blueprint.
- * OWN-WORLD: Instatic's compact surfaces, quiet borders, pixel icons, and
+ * OWN-WORLD: Fourno's compact surfaces, quiet borders, pixel icons, and
  * deliberate state color remain the visual vocabulary.
  * STORY: Understand the schema, add or refine a field, then reorder the final
  * record shape without leaving the current task.

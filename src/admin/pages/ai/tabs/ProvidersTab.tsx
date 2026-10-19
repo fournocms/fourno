@@ -492,7 +492,7 @@ function ProviderSetupPanel({
         <div className={styles.detailSectionHeader}>
           <div>
             <h3>Connection details</h3>
-            <p>Instatic validates and encrypts the credential before storing it.</p>
+            <p>Fourno validates and encrypts the credential before storing it.</p>
           </div>
         </div>
         <AddCredentialForm provider={provider} onCreated={onCreated} />

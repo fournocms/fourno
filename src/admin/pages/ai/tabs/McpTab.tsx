@@ -240,7 +240,7 @@ function OAuthSetupPanel({
         <div className={styles.settingsDetailIdentity}>
           <span className={styles.detailEyebrow}>Hosted OAuth</span>
           <h2 id="mcp-oauth-title">Connect a remote client</h2>
-          <p>Claude, ChatGPT, and remote agents authorize through Instatic.</p>
+          <p>Claude, ChatGPT, and remote agents authorize through Fourno.</p>
         </div>
       </header>
 
@@ -262,7 +262,7 @@ function OAuthSetupPanel({
             <ReadinessNotice
               tone="warning"
               title="Available on this device only"
-              message="Hosted clients connect from the cloud. Publish Instatic at a public HTTPS URL before adding this connector."
+              message="Hosted clients connect from the cloud. Publish Fourno at a public HTTPS URL before adding this connector."
             />
           ) : (
             <ReadinessNotice
@@ -284,7 +284,7 @@ function OAuthSetupPanel({
         <ol className={mcpStyles.steps}>
           <li>Open the client&apos;s connector settings and choose a custom MCP connector.</li>
           <li>Paste the URL above. Leave OAuth Client ID and Secret empty.</li>
-          <li>Choose Connect, then approve the requested capabilities in Instatic.</li>
+          <li>Choose Connect, then approve the requested capabilities in Fourno.</li>
         </ol>
       </section>
     </article>
@@ -419,7 +419,7 @@ function ConnectionDetail({
               : connection.authMode === 'oauth' ? 'Disconnect client' : 'Revoke token'}
           </span>
         </Button>
-        <p>This immediately prevents the client from calling Instatic tools.</p>
+        <p>This immediately prevents the client from calling Fourno tools.</p>
       </div>
     </article>
   )
@@ -554,7 +554,7 @@ function AccessTokenResultDialog({
   onClose: () => void
 }) {
   const accessToken = result.accessToken
-  const claudeCommand = `claude mcp add instatic --transport http ${endpoint} --header "Authorization: Bearer ${accessToken}"`
+  const claudeCommand = `claude mcp add fourno --transport http ${endpoint} --header "Authorization: Bearer ${accessToken}"`
   const bridgeArgs = [
     '-y',
     'mcp-remote@latest',
@@ -563,14 +563,14 @@ function AccessTokenResultDialog({
     '--transport',
     'http-only',
     '--header',
-    'Authorization:${INSTATIC_MCP_AUTH}',
+    'Authorization:${FOURNO_MCP_AUTH}',
   ]
   const desktopConfig = JSON.stringify({
     mcpServers: {
-      instatic: {
+      fourno: {
         command: 'npx',
         args: bridgeArgs,
-        env: { INSTATIC_MCP_AUTH: `Bearer ${accessToken}` },
+        env: { FOURNO_MCP_AUTH: `Bearer ${accessToken}` },
       },
     },
   }, null, 2)
@@ -589,7 +589,7 @@ function AccessTokenResultDialog({
     >
       <div className={mcpStyles.tokenBody}>
         <p role="status" className={mcpStyles.tokenNotice}>
-          Copy this token now. Instatic stores only its hash and cannot show it again.
+          Copy this token now. Fourno stores only its hash and cannot show it again.
         </p>
         <CopyField label="Personal access token" value={accessToken} copyLabel="Copy token" />
         <div className={mcpStyles.setupResult}>
@@ -598,7 +598,7 @@ function AccessTokenResultDialog({
           <CopyField label="Command" value={claudeCommand} copyLabel="Copy command" />
         </div>
         <div className={mcpStyles.setupResult}>
-          <h3>Claude Desktop with local Instatic</h3>
+          <h3>Claude Desktop with local Fourno</h3>
           <p>
             Merge this entry into <code>claude_desktop_config.json</code>, then completely restart
             Claude Desktop. The bridge requires Node 18 or newer.

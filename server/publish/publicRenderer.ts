@@ -19,13 +19,13 @@ import type { PublishedPageSnapshot } from '../repositories/publish'
 
 /**
  * URL prefix where the Node server exposes the per-site CSS bundle. Mirrors
- * `/_instatic/assets/` for runtime scripts. The matching route is registered in
+ * `/_fourno/assets/` for runtime scripts. The matching route is registered in
  * `server/router.ts` and serves files with `Cache-Control: immutable`.
  */
-const CSS_ASSET_BASE_URL = '/_instatic/css/'
+const CSS_ASSET_BASE_URL = '/_fourno/css/'
 
 /** URL prefix for the loop data endpoint serving infinite-load fragments. */
-const LOOP_ENDPOINT_BASE_URL = '/_instatic/loop/'
+const LOOP_ENDPOINT_BASE_URL = '/_fourno/loop/'
 
 /**
  * Renderer output — raw HTML body without plugin asset injection or the
@@ -69,7 +69,7 @@ interface RenderPublishedSnapshotContext {
   /** Optional request URL — when present, drives per-loop pagination. */
   url?: URL
   /**
-   * Publish version to stamp into `<instatic-hole data-instatic-version>` placeholders.
+   * Publish version to stamp into `<fourno-hole data-fourno-version>` placeholders.
    * Defaults to the live `getPublishVersion()`. The full/incremental publish
    * bakes shells BEFORE bumping the version, so it passes the next version
    * (`getPublishVersion() + 1`) here — otherwise every baked hole would carry

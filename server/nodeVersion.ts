@@ -24,7 +24,7 @@ export function unsupportedNodeWarning(version: string): string | null {
   if (semverSatisfies(version, SUPPORTED_NODE_RANGE, { includePrerelease: true })) return null
   return (
     `[server] Node ${version} is outside the supported range ${SUPPORTED_NODE_RANGE}. ` +
-    'Instatic starts anyway, but releases are built and tested inside that range; ' +
+    'Fourno starts anyway, but releases are built and tested inside that range; ' +
     'install a current Node LTS.'
   )
 }

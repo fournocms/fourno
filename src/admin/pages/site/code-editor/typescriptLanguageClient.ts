@@ -30,7 +30,7 @@ type TypeScriptAsyncRequest =
 
 function defaultWorkerFactory(): TypeScriptWorkerTransport {
   return new Worker(new URL('./typescriptWorker.ts', import.meta.url), {
-    name: 'instatic-typescript',
+    name: 'fourno-typescript',
     type: 'module',
   })
 }

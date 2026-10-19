@@ -29,7 +29,7 @@ import {
   type SelectPreferenceId,
 } from './catalog'
 
-export const EDITOR_PREFS_KEY = 'instatic-editor-prefs'
+export const EDITOR_PREFS_KEY = 'fourno-editor-prefs'
 
 interface EditorAppearancePreferences {
   density: string

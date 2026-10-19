@@ -48,7 +48,7 @@ export function scriptTagsForRuntimeAssets(
         ? ` integrity="${escapeAttribute(asset.integrity)}" crossorigin="anonymous"`
         : ''
       const type = asset.format === 'classic' ? '' : ' type="module"'
-      return `  <script${type} src="${escapeAttribute(asset.src.trim())}" data-instatic-runtime-script="${escapeAttribute(asset.fileId)}"${integrity}></script>`
+      return `  <script${type} src="${escapeAttribute(asset.src.trim())}" data-fourno-runtime-script="${escapeAttribute(asset.fileId)}"${integrity}></script>`
     })
     .join('\n')
 }

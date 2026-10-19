@@ -56,7 +56,7 @@ export function FontsSection() {
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false)
   const [editToken, setEditToken] = useState<FontToken | null>(null)
 
-  useInstalledFontFaces(fonts, 'instatic-admin-installed-fonts')
+  useInstalledFontFaces(fonts, 'fourno-admin-installed-fonts')
 
   const installedFamiliesLower = new Set(fonts.map((f) => f.family.toLowerCase()))
 

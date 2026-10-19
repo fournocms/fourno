@@ -153,7 +153,7 @@ function ImportHtmlModalLoading() {
       open={true}
       onClose={closeModal}
       title="Import HTML"
-      eyebrow="Instatic"
+      eyebrow="Fourno"
       size="lg"
       className={styles.importHtmlLoadingDialog}
       bodyClassName={styles.importHtmlLoadingBody}

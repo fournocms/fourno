@@ -7,7 +7,7 @@
  * fails at activation time with a low-level loader error.
  *
  * This scan runs at two points:
- *  - Build time, inside `instatic-plugin build` — catches author mistakes early
+ *  - Build time, inside `fourno-plugin build` — catches author mistakes early
  *    with an actionable error message.
  *  - Install time, inside `readPluginPackage` — defense-in-depth against
  *    bundles produced outside our CLI (raw zip uploads, packages signed

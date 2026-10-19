@@ -344,7 +344,7 @@ const LOGIN_SKELETON_HTML = `<div class="login-skeleton" data-initial-login-skel
 //     any module script downloads or evaluates. The fetches start at
 //     ~5 ms instead of ~350 ms.
 //
-// The fetches' result promises live on `window.__instaticBootPromises` so
+// The fetches' result promises live on `window.__fournoBootPromises` so
 // `useAdminBoot` can consume them inside its `useEffect` and skip the
 // network entirely (the response is already in hand).
 //
@@ -361,7 +361,7 @@ const BOOT_API_KICKOFF = `
               return r.json();
             });
         };
-        window.__instaticBootPromises = {
+        window.__fournoBootPromises = {
           setupStatus: json('/admin/api/cms/setup/status'),
           // /me is allowed to fail (401 when unauthenticated) — swallow
           // here so the await in useAdminBoot doesn't see a rejected
@@ -429,14 +429,14 @@ function buildAuthenticatedShellPreloadHints(staticDir: string): string {
 // the spinner until React mounts, but:
 //   - The boot fetches fire at HTML-parse time (BOOT_API_KICKOFF), so
 //     useAdminBoot's `useEffect` consumes already-resolved promises.
-//   - `window.__instaticAuthed = 1` flag tells the client this is the
+//   - `window.__fournoAuthed = 1` flag tells the client this is the
 //     authenticated path. The session cookie is `HttpOnly` so
 //     `document.cookie` can't see it; this flag lets `main.tsx` decide
 //     whether to `await import('./AuthenticatedAdmin')` BEFORE the first
 //     React mount (eliminates the post-Suspense concurrent re-render
 //     delay — see main.tsx for the full sequence).
 const AUTHED_FLAG_SCRIPT = `
-    <script>window.__instaticAuthed = 1;</script>`
+    <script>window.__fournoAuthed = 1;</script>`
 function injectAuthenticatedHints(html: string, staticDir: string): string {
   const preloadHints = buildAuthenticatedShellPreloadHints(staticDir)
   // Use `</head>` as the anchor — it's guaranteed to be in the document

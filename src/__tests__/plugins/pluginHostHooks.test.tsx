@@ -1,5 +1,5 @@
 /**
- * Permission gating for `@instatic/host-hooks`.
+ * Permission gating for `@fourno/host-hooks`.
  *
  * Plugin React surfaces (editor panels, admin app pages, canvas overlays)
  * mount under a `PluginContext` carrying the operator-granted permission

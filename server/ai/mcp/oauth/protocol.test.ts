@@ -25,9 +25,9 @@ afterEach(() => {
 describe('mcpIssuer', () => {
   it('uses the configured public origin regardless of the inbound Host', () => {
     configurePublicOrigins(['https://cms.example.com'])
-    const req = requestAt('https://attacker.example/_instatic/mcp', 'attacker.example')
+    const req = requestAt('https://attacker.example/_fourno/mcp', 'attacker.example')
     expect(mcpIssuer(req)).toBe('https://cms.example.com')
-    expect(mcpResource(req)).toBe('https://cms.example.com/_instatic/mcp')
+    expect(mcpResource(req)).toBe('https://cms.example.com/_fourno/mcp')
     expect(mcpProtectedResourceMetadataUrl(req)).toBe(
       'https://cms.example.com/.well-known/oauth-protected-resource',
     )
@@ -39,18 +39,18 @@ describe('mcpIssuer', () => {
   })
 
   it.each([
-    ['http://localhost:3001/_instatic/mcp', 'http://localhost:3001'],
-    ['http://127.0.0.1:3001/_instatic/mcp', 'http://127.0.0.1:3001'],
-    ['http://[::1]:3001/_instatic/mcp', 'http://[::1]:3001'],
+    ['http://localhost:3001/_fourno/mcp', 'http://localhost:3001'],
+    ['http://127.0.0.1:3001/_fourno/mcp', 'http://127.0.0.1:3001'],
+    ['http://[::1]:3001/_fourno/mcp', 'http://[::1]:3001'],
   ])('falls back to the loopback request origin without a configured origin (%s)', (url, origin) => {
     const req = requestAt(url)
     expect(mcpIssuer(req)).toBe(origin)
-    expect(mcpResource(req)).toBe(`${origin}/_instatic/mcp`)
-    expect(mcpOAuthEndpoints(req)?.tokenEndpoint).toBe(`${origin}/_instatic/oauth/token`)
+    expect(mcpResource(req)).toBe(`${origin}/_fourno/mcp`)
+    expect(mcpOAuthEndpoints(req)?.tokenEndpoint).toBe(`${origin}/_fourno/oauth/token`)
   })
 
   it('has no issuer for a non-loopback request without a configured origin', () => {
-    const req = requestAt('http://attacker.example:18020/_instatic/mcp', 'attacker.example:18020')
+    const req = requestAt('http://attacker.example:18020/_fourno/mcp', 'attacker.example:18020')
     expect(mcpIssuer(req)).toBeNull()
     expect(mcpResource(req)).toBeNull()
     expect(mcpProtectedResourceMetadataUrl(req)).toBeNull()
@@ -58,7 +58,7 @@ describe('mcpIssuer', () => {
   })
 
   it('does not treat a loopback-looking Host on a non-loopback request URL as local', () => {
-    const req = requestAt('http://attacker.example/_instatic/mcp', 'localhost:3001')
+    const req = requestAt('http://attacker.example/_fourno/mcp', 'localhost:3001')
     expect(mcpIssuer(req)).toBeNull()
   })
 })

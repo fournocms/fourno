@@ -243,7 +243,7 @@ function PluginAppPage({
     // `ensurePluginRuntime` MUST resolve before the plugin module is
     // dynamically imported — the plugin's bundle does `import * as React
     // from 'react'`, which the import-map shims at `/runtime/*.js`
-    // resolve via `globalThis.__instatic`. Without the runtime
+    // resolve via `globalThis.__fourno`. Without the runtime
     // installed, the shims throw at module-evaluation time.
     void ensurePluginRuntime()
       .then(() => loadPluginAdminAppComponent(page, importModule, cacheKey))

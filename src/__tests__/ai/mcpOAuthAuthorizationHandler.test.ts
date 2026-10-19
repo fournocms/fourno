@@ -49,7 +49,7 @@ describe('MCP OAuth authorization consent handler', () => {
       codeChallenge: await pkceChallengeForVerifier(VERIFIER),
       codeChallengeMethod: 'S256',
       scope: 'mcp offline_access',
-      resource: 'http://localhost/_instatic/mcp',
+      resource: 'http://localhost/_fourno/mcp',
       state: 'client-state',
     }
   })

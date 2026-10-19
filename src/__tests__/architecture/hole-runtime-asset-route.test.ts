@@ -3,9 +3,9 @@
  * registered in `server/router.ts` BEFORE `tryServePublicRoute`.
  *
  * If either handler is missing or appears after `tryServePublicRoute`, a
- * `/_instatic/hole/...` request would be silently consumed by the public-slug
+ * `/_fourno/hole/...` request would be silently consumed by the public-slug
  * resolver (which would attempt to look up the URL as a page slug and return
- * a 404 rather than the hole fragment). Likewise, the `/_instatic/hole-runtime.js`
+ * a 404 rather than the hole fragment). Likewise, the `/_fourno/hole-runtime.js`
  * asset would fall through to an unrelated handler.
  *
  * This test reads the router source file and asserts on the position of each
@@ -64,8 +64,8 @@ describe('hole runtime + fragment route ordering', () => {
     const runtimeIdx = table.indexOf('tryServeHoleRuntimeAsset')
     const holeIdx = table.indexOf('tryServeHole')
 
-    // The exact-match handler (/_instatic/hole-runtime.js) must come before the
-    // prefix handler (/_instatic/hole/<nodeId>) so the runtime asset is served
+    // The exact-match handler (/_fourno/hole-runtime.js) must come before the
+    // prefix handler (/_fourno/hole/<nodeId>) so the runtime asset is served
     // before the hole fragment dispatcher can swallow it.
     //
     // NOTE: holeIdx may equal runtimeIdx if the substring matches (e.g.,

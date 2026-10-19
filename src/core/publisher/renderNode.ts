@@ -171,7 +171,7 @@ function renderStandardNode(
   }
 
   // JS dedup — one entry per moduleId, mirroring CSS. No escaping needed:
-  // module JS is served as an external file (`/_instatic/module-js/<id>.js`),
+  // module JS is served as an external file (`/_fourno/module-js/<id>.js`),
   // never inlined into the document.
   if (output.js && !acc.jsMap.has(node.moduleId)) {
     acc.jsMap.set(node.moduleId, output.js)
@@ -199,7 +199,7 @@ function renderStandardNode(
 }
 
 /**
- * Emit a `<instatic-hole>` placeholder for a dynamic node.
+ * Emit a `<fourno-hole>` placeholder for a dynamic node.
  *
  * The subtree is NOT rendered — the hole runtime fetches it at request time
  * when the element approaches the viewport. The optional `staticPlaceholder`
@@ -228,9 +228,9 @@ function renderHolePlaceholder(
   const version = config.publishVersion ?? 0
 
   return (
-    `<instatic-hole id="hole-${safeId}" data-instatic-hole="${safeId}" data-instatic-version="${version}" style="display:contents">` +
+    `<fourno-hole id="hole-${safeId}" data-fourno-hole="${safeId}" data-fourno-version="${version}" style="display:contents">` +
     sanitized +
-    `</instatic-hole>`
+    `</fourno-hole>`
   )
 }
 
@@ -306,12 +306,12 @@ export function renderNode(
   const def = config.registry.get(node.moduleId)
   if (!def) {
     // Unknown module — emit a comment so the page doesn't silently lose content
-    return `<!-- instatic: unknown module "${escapeHtml(node.moduleId)}" -->`
+    return `<!-- fourno: unknown module "${escapeHtml(node.moduleId)}" -->`
   }
 
-  // Layer C: when this node id is in the dynamic set, emit a <instatic-hole>
+  // Layer C: when this node id is in the dynamic set, emit a <fourno-hole>
   // placeholder and do NOT recurse into the subtree. The hole runtime will
-  // fetch the full rendered fragment at request time via /_instatic/hole/<nodeId>.
+  // fetch the full rendered fragment at request time via /_fourno/hole/<nodeId>.
   if (config.dynamicNodeIds?.has(nodeId)) {
     return renderHolePlaceholder(node, def, config, acc)
   }

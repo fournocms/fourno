@@ -12,10 +12,10 @@
 import { MAIN_BRANCH_ID, isValidBranchId } from '@core/branches'
 import { registerRequestHeaderProvider } from '@core/http'
 
-export const ACTIVE_BRANCH_STORAGE_KEY = 'instatic-active-branch'
+export const ACTIVE_BRANCH_STORAGE_KEY = 'fourno-active-branch'
 export const BRANCH_QUERY_PARAM = 'branch'
 /** The request header carrying the branch; the server reads it case-insensitively. */
-export const BRANCH_HEADER = 'X-Instatic-Branch'
+export const BRANCH_HEADER = 'X-Fourno-Branch'
 
 function readStoredBranch(): string {
   if (typeof window === 'undefined') return MAIN_BRANCH_ID

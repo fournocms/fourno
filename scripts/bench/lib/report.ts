@@ -2,7 +2,7 @@
  * Renders an array of BenchResult into a single markdown report.
  *
  * Layout:
- *   # Instatic — Benchmark Report
+ *   # Fourno — Benchmark Report
  *   ## Headline numbers (one-line summary of every bench)
  *   ## <bench title>            (one section per bench)
  *      <highlights bullets>
@@ -19,7 +19,7 @@ export function renderReport(
   meta: { runAt: Date; durationMs: number; host: string; runtime: string },
 ): string {
   const lines: string[] = []
-  lines.push('# Instatic — Benchmark Report')
+  lines.push('# Fourno — Benchmark Report')
   lines.push('')
   lines.push(`Run at: ${meta.runAt.toISOString()}`)
   lines.push(`Host: ${meta.host}`)

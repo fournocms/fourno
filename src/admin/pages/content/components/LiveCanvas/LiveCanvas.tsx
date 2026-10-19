@@ -10,11 +10,11 @@
  *      public route, so what shows up in the iframe matches what visitors
  *      would see on the published page.
  *   2. Inject the HTML via `iframe.srcdoc`. The iframe inherits the
- *      parent's origin for relative-URL resolution, so `/_instatic/css/…`,
- *      `/_instatic/assets/…`, `/uploads/…` all resolve and get proxied as
+ *      parent's origin for relative-URL resolution, so `/_fourno/css/…`,
+ *      `/_fourno/assets/…`, `/uploads/…` all resolve and get proxied as
  *      usual in dev.
  *   3. After the iframe loads, find the body region marker
- *      (`[data-instatic-content-region]` emitted by `base.outlet`) inside
+ *      (`[data-fourno-content-region]` emitted by `base.outlet`) inside
  *      `iframe.contentDocument` and instantiate a fresh Tiptap editor
  *      against that element. ProseMirror handles cross-document mounts
  *      naturally as long as the host element belongs to the target
@@ -86,10 +86,10 @@ const FETCH_DEBOUNCE_MS = 350
  *      writing…" — discoverability parity with Write mode.
  */
 const IFRAME_EDITOR_STYLE = `
-  [data-instatic-content-region]:focus,
-  [data-instatic-content-region]:focus-visible,
-  [data-instatic-content-region] *:focus,
-  [data-instatic-content-region] *:focus-visible {
+  [data-fourno-content-region]:focus,
+  [data-fourno-content-region]:focus-visible,
+  [data-fourno-content-region] *:focus,
+  [data-fourno-content-region] *:focus-visible {
     outline: none !important;
     box-shadow: none !important;
   }
@@ -100,7 +100,7 @@ const IFRAME_EDITOR_STYLE = `
    * those coords, and a hidden sentinel returns {0,0,0,0} which
    * puts the button in the page top-left corner. We just neutralise
    * its layout impact instead. */
-  [data-instatic-content-region] .ProseMirror-trailingBreak {
+  [data-fourno-content-region] .ProseMirror-trailingBreak {
     user-select: none;
   }
 
@@ -111,15 +111,15 @@ const IFRAME_EDITOR_STYLE = `
    * a clickable space the cursor can land in. The values are derived
    * from each tag's typical line-height; tweaking them in absolute em
    * keeps us font-size agnostic. */
-  [data-instatic-content-region] .ProseMirror p,
-  [data-instatic-content-region] .ProseMirror h1,
-  [data-instatic-content-region] .ProseMirror h2,
-  [data-instatic-content-region] .ProseMirror h3,
-  [data-instatic-content-region] .ProseMirror h4,
-  [data-instatic-content-region] .ProseMirror h5,
-  [data-instatic-content-region] .ProseMirror h6,
-  [data-instatic-content-region] .ProseMirror blockquote,
-  [data-instatic-content-region] .ProseMirror li {
+  [data-fourno-content-region] .ProseMirror p,
+  [data-fourno-content-region] .ProseMirror h1,
+  [data-fourno-content-region] .ProseMirror h2,
+  [data-fourno-content-region] .ProseMirror h3,
+  [data-fourno-content-region] .ProseMirror h4,
+  [data-fourno-content-region] .ProseMirror h5,
+  [data-fourno-content-region] .ProseMirror h6,
+  [data-fourno-content-region] .ProseMirror blockquote,
+  [data-fourno-content-region] .ProseMirror li {
     min-height: 1em;
   }
 
@@ -128,7 +128,7 @@ const IFRAME_EDITOR_STYLE = `
    * with the is-empty class and data-placeholder attribute; we
    * render the attribute via ::before so the user sees a hint
    * (e.g., Heading, Start writing) inside the empty block. */
-  [data-instatic-content-region] .ProseMirror .is-empty::before {
+  [data-fourno-content-region] .ProseMirror .is-empty::before {
     content: attr(data-placeholder);
     pointer-events: none;
     float: left;
@@ -359,7 +359,7 @@ export function LiveCanvas({
       return null
     })
 
-    const target = iframe.contentDocument.querySelector<HTMLElement>('[data-instatic-content-region]')
+    const target = iframe.contentDocument.querySelector<HTMLElement>('[data-fourno-content-region]')
     if (!target) {
       // The template doesn't include a `base.outlet` module — fall
       // back to read-only preview without an inline editor.
@@ -372,7 +372,7 @@ export function LiveCanvas({
     // is replaced when `srcdoc` changes, so a previous injection is
     // already gone).
     const styleEl = iframe.contentDocument.createElement('style')
-    styleEl.setAttribute('data-instatic-live-editor', 'true')
+    styleEl.setAttribute('data-fourno-live-editor', 'true')
     styleEl.textContent = IFRAME_EDITOR_STYLE
     iframe.contentDocument.head.appendChild(styleEl)
 
@@ -416,7 +416,7 @@ export function LiveCanvas({
       // Replace the URL with a sentinel so the visual styling stays
       // intact (some templates rely on `:hover` selectors that need
       // a real href to apply) but a default click is a no-op.
-      node.setAttribute('data-instatic-href-original', node.getAttribute('href') ?? '')
+      node.setAttribute('data-fourno-href-original', node.getAttribute('href') ?? '')
       node.setAttribute('href', 'javascript:void(0)')
     })
     iframe.contentDocument.querySelectorAll('form').forEach((form) => {

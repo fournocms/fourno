@@ -25,19 +25,19 @@ RUN pnpm install --frozen-lockfile --prod
 FROM node:${NODE_VERSION}-bookworm-slim AS runtime
 WORKDIR /app
 
-ARG INSTATIC_VERSION=dev
-ARG INSTATIC_REVISION=unknown
-ARG INSTATIC_CREATED=unknown
+ARG FOURNO_VERSION=dev
+ARG FOURNO_REVISION=unknown
+ARG FOURNO_CREATED=unknown
 
-LABEL org.opencontainers.image.title="Instatic"
+LABEL org.opencontainers.image.title="Fourno"
 LABEL org.opencontainers.image.description="Self-hosted CMS with an integrated visual editor."
-LABEL org.opencontainers.image.source="https://github.com/corebunch/instatic"
-LABEL org.opencontainers.image.url="https://github.com/corebunch/instatic"
-LABEL org.opencontainers.image.documentation="https://github.com/corebunch/instatic/tree/main/docs/deployment"
+LABEL org.opencontainers.image.source="https://github.com/fourno/fourno"
+LABEL org.opencontainers.image.url="https://github.com/fourno/fourno"
+LABEL org.opencontainers.image.documentation="https://github.com/fourno/fourno/tree/main/docs/deployment"
 LABEL org.opencontainers.image.licenses="MIT"
-LABEL org.opencontainers.image.version="${INSTATIC_VERSION}"
-LABEL org.opencontainers.image.revision="${INSTATIC_REVISION}"
-LABEL org.opencontainers.image.created="${INSTATIC_CREATED}"
+LABEL org.opencontainers.image.version="${FOURNO_VERSION}"
+LABEL org.opencontainers.image.revision="${FOURNO_REVISION}"
+LABEL org.opencontainers.image.created="${FOURNO_CREATED}"
 
 ENV NODE_ENV=production
 ENV PORT=3001

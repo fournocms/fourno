@@ -8,7 +8,7 @@
  *
  * Source priority:
  *
- *   1. `INSTATIC_SECRET_KEY` environment variable (base64).
+ *   1. `FOURNO_SECRET_KEY` environment variable (base64).
  *      Production deployments MUST set this. If unset in production
  *      (`NODE_ENV=production`), boot fails loudly with instructions.
  *
@@ -27,7 +27,7 @@ import { dirname } from 'node:path'
 
 const REQUIRED_KEY_BYTES = 32
 const DEV_KEY_PATH = '.tmp/secret.key'
-const ENV_VAR_NAME = 'INSTATIC_SECRET_KEY'
+const ENV_VAR_NAME = 'FOURNO_SECRET_KEY'
 
 let cachedKey: CryptoKey | null = null
 let cachedFingerprint: string | null = null

@@ -6,14 +6,14 @@ async function importChallengeWithEnv(env: {
   formSecret?: string
   secretKey?: string
 }): Promise<ChallengeModule> {
-  const originalFormSecret = process.env.INSTATIC_FORM_SECRET
-  const originalSecretKey = process.env.INSTATIC_SECRET_KEY
+  const originalFormSecret = process.env.FOURNO_FORM_SECRET
+  const originalSecretKey = process.env.FOURNO_SECRET_KEY
 
-  if (env.formSecret === undefined) delete process.env.INSTATIC_FORM_SECRET
-  else process.env.INSTATIC_FORM_SECRET = env.formSecret
+  if (env.formSecret === undefined) delete process.env.FOURNO_FORM_SECRET
+  else process.env.FOURNO_FORM_SECRET = env.formSecret
 
-  if (env.secretKey === undefined) delete process.env.INSTATIC_SECRET_KEY
-  else process.env.INSTATIC_SECRET_KEY = env.secretKey
+  if (env.secretKey === undefined) delete process.env.FOURNO_SECRET_KEY
+  else process.env.FOURNO_SECRET_KEY = env.secretKey
 
   try {
     // The secret is read when the module graph evaluates, so each call needs
@@ -21,16 +21,16 @@ async function importChallengeWithEnv(env: {
     vi.resetModules()
     return await import('../../../server/forms/challenge')
   } finally {
-    if (originalFormSecret === undefined) delete process.env.INSTATIC_FORM_SECRET
-    else process.env.INSTATIC_FORM_SECRET = originalFormSecret
+    if (originalFormSecret === undefined) delete process.env.FOURNO_FORM_SECRET
+    else process.env.FOURNO_FORM_SECRET = originalFormSecret
 
-    if (originalSecretKey === undefined) delete process.env.INSTATIC_SECRET_KEY
-    else process.env.INSTATIC_SECRET_KEY = originalSecretKey
+    if (originalSecretKey === undefined) delete process.env.FOURNO_SECRET_KEY
+    else process.env.FOURNO_SECRET_KEY = originalSecretKey
   }
 }
 
 describe('public form challenge signing secret configuration', () => {
-  it('uses INSTATIC_FORM_SECRET ahead of INSTATIC_SECRET_KEY', async () => {
+  it('uses FOURNO_FORM_SECRET ahead of FOURNO_SECRET_KEY', async () => {
     const issuer = await importChallengeWithEnv({
       formSecret: 'form-secret',
       secretKey: 'old-master-key',
@@ -61,7 +61,7 @@ describe('public form challenge signing secret configuration', () => {
     })).toBe(false)
   })
 
-  it('falls back to INSTATIC_SECRET_KEY when no dedicated form secret is configured', async () => {
+  it('falls back to FOURNO_SECRET_KEY when no dedicated form secret is configured', async () => {
     const issuer = await importChallengeWithEnv({ secretKey: 'shared-master-key' })
     const verifier = await importChallengeWithEnv({ secretKey: 'shared-master-key' })
     const rotatedMasterKey = await importChallengeWithEnv({ secretKey: 'rotated-master-key' })

@@ -202,7 +202,7 @@ async function verifyPublishedRuntimeDependency({
   const visitor = await context.newPage()
   const runtimeCacheResponses: Response[] = []
   visitor.on('response', (response) => {
-    if (new URL(response.url()).pathname.startsWith('/_instatic/runtime/cache/')) {
+    if (new URL(response.url()).pathname.startsWith('/_fourno/runtime/cache/')) {
       runtimeCacheResponses.push(response)
     }
   })
@@ -220,7 +220,7 @@ async function verifyPublishedRuntimeDependency({
     const packageUrl = importmap.imports?.['canvas-confetti']
     expect(packageUrl).toBeTruthy()
     if (!packageUrl) throw new Error('Published importmap did not include canvas-confetti')
-    expect(packageUrl).toMatch(/^\/_instatic\/runtime\/cache\/[0-9a-f]{24}\/canvas-confetti\//)
+    expect(packageUrl).toMatch(/^\/_fourno\/runtime\/cache\/[0-9a-f]{24}\/canvas-confetti\//)
 
     await visitor.evaluate((src) => new Promise<void>((resolve, reject) => {
       const script = document.createElement('script')

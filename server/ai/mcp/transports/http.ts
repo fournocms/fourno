@@ -9,7 +9,7 @@
  * Stateless-per-request: every request authenticates before protocol dispatch.
  * The official handler serves stable MCP 2026-07-28 and its default stateless
  * fallback keeps 2025-era initialize clients working on the same endpoint.
- * Modern exchanges use JSON responses because Instatic's current tools do not
+ * Modern exchanges use JSON responses because Fourno's current tools do not
  * emit mid-call notifications. Returns `null` when the path isn't ours,
  * honouring the router's fall-through contract.
  */
@@ -58,7 +58,7 @@ export async function handleMcpHttp(
   if (url.pathname !== MCP_ENDPOINT_PATH) return null
 
   // Streamable HTTP requires Origin validation to prevent DNS rebinding. Use
-  // Instatic's configured public-origin policy (which also knows the Vite dev
+  // Fourno's configured public-origin policy (which also knows the Vite dev
   // origins), then let the SDK shape the standard JSON-RPC rejection.
   if (!originAllowed(req)) {
     return originValidationResponse(req, []) ?? new Response(null, { status: 403 })

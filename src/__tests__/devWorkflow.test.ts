@@ -117,7 +117,7 @@ describe('development workflow', () => {
   it('Vite forwards published runtime assets to the CMS server in local dev', () => {
     const viteConfig = readSiteFile('vite.config.ts')
 
-    expect(viteConfig).toContain("pathname.startsWith('/_instatic/assets/')")
+    expect(viteConfig).toContain("pathname.startsWith('/_fourno/assets/')")
   })
 
   it('Docker Postgres uses a non-default host port for local dev', () => {

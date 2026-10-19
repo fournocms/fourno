@@ -8,7 +8,7 @@ describe('AppLoadingScreen', () => {
   it('renders one accessible centered loader without visible raw loading text or skeleton chrome', () => {
     render(<AppLoadingScreen />)
 
-    const status = screen.getByRole('status', { name: /loading instatic/i })
+    const status = screen.getByRole('status', { name: /loading fourno/i })
     expect(status.getAttribute('aria-busy')).toBe('true')
     expect(status.querySelector('[data-loader-spinner="true"]')).not.toBeNull()
     expect(status.querySelector('[data-editor-skeleton="true"]')).toBeNull()

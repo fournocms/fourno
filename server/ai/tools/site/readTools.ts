@@ -202,7 +202,7 @@ const listLoopSourcesTool: AiTool = {
   execution: 'server',
   requiredCapabilities: ['site.read'],
   description:
-    'List loop source ids and the valid dynamic data tokens for loop children. Use before creating a <instatic-loop>. For posts/custom tables use sourceId "data.rows" and pass the chosen table id as data-table-id; inside the loop use returned tokens like {currentEntry.title}, never {{post.title}}.',
+    'List loop source ids and the valid dynamic data tokens for loop children. Use before creating a <fourno-loop>. For posts/custom tables use sourceId "data.rows" and pass the chosen table id as data-table-id; inside the loop use returned tokens like {currentEntry.title}, never {{post.title}}.',
   inputSchema: ListLoopSourcesInput,
   handler: async (_input, ctx) => {
     const sources = loopSourceRegistry.list().map((source) => ({
@@ -221,7 +221,7 @@ const listLoopSourcesTool: AiTool = {
     const dataRowsFields = dataRowsSource?.fields.map(loopFieldToAgentField) ?? []
     return {
       usage: {
-        loopElement: '<instatic-loop data-source-id="data.rows" data-table-id="<table id>" data-order-by="publishedAt" data-direction="desc" data-limit="3">...</instatic-loop>',
+        loopElement: '<fourno-loop data-source-id="data.rows" data-table-id="<table id>" data-order-by="publishedAt" data-direction="desc" data-limit="3">...</fourno-loop>',
         tokenSyntax: '{currentEntry.field}',
         invalidTokenSyntax: '{{post.field}}',
       },

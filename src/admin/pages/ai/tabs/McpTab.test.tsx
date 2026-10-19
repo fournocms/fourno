@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 vi.mock('../../../ai/api', () => ({
   getMcpConnectionOverview: async () => ({
     connections: [],
-    endpoint: 'http://localhost/_instatic/mcp',
+    endpoint: 'http://localhost/_fourno/mcp',
     remoteAccess: 'local-only',
   }),
   createMcpAccessToken: async () => ({

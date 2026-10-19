@@ -34,8 +34,8 @@
   display: block;
 }
 
-:global(html[data-instatic-canvas-parent-space-pan='1']) .iframe:not(.iframeLive),
-:global(html[data-instatic-canvas-iframe-space-pan='1']) .iframe:not(.iframeLive) {
+:global(html[data-fourno-canvas-parent-space-pan='1']) .iframe:not(.iframeLive),
+:global(html[data-fourno-canvas-iframe-space-pan='1']) .iframe:not(.iframeLive) {
   pointer-events: none;
 }
 

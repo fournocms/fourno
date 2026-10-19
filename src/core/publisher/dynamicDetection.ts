@@ -4,7 +4,7 @@
  *
  * `findDynamicNodeIds(page, site, registry)` classifies every node in a
  * page tree as either static (can be pre-rendered at publish time) or
- * dynamic (must be deferred to request time via a `<instatic-hole>` placeholder).
+ * dynamic (must be deferred to request time via a `<fourno-hole>` placeholder).
  * It returns the SET of node IDs that are dynamic; an empty set means the
  * page is fully static.
  *
@@ -289,7 +289,7 @@ interface WalkResult {
 
 /**
  * Single pass over `page.nodes` that returns BOTH the set of page-level node
- * ids needing `<instatic-hole>` placeholders AND the human-readable reason
+ * ids needing `<fourno-hole>` placeholders AND the human-readable reason
  * strings. Layer A's shell-vs-complete decision and Layer C's `renderNode`
  * placeholder emission both derive from this one walker — and every per-node
  * decision runs through {@link classifyNode}, so the rules cannot drift between
@@ -344,7 +344,7 @@ function findDynamicNodesWithReasons(
 
 /**
  * Returns the set of PAGE node ids whose subtree must be deferred to a
- * `<instatic-hole>` placeholder. Empty set means the page is fully static.
+ * `<fourno-hole>` placeholder. Empty set means the page is fully static.
  *
  * Public wrapper for callers that only need the ids. The shared walker also
  * keeps reason strings internally so diagnostics can reuse the same rule path.

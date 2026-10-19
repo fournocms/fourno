@@ -715,7 +715,7 @@ describe('CMS plugin handlers', () => {
   })
 
   it('installs zip plugin packages, writes assets, and activates backend routes', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-plugins-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-plugins-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const manifest = {
@@ -801,7 +801,7 @@ describe('CMS plugin handlers', () => {
     // exact bytes via the uploaded-file facade, and serves them back as a
     // binary `__response` body. Any lossy text decode on the way corrupts
     // the PNG signature bytes (0x89, 0x00, 0xff …) and fails the assert.
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-binary-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-binary-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const manifest = {
@@ -843,7 +843,7 @@ describe('CMS plugin handlers', () => {
       // Hand-rolled multipart payload (happy-dom's test-global `Request`
       // strips the cookie header, so the stub-request pattern from
       // `cmsRequest` is extended with raw body bytes + iterable headers).
-      const boundary = 'InstaticTestBoundary42'
+      const boundary = 'FournoTestBoundary42'
       const te = new TextEncoder()
       const head = te.encode(
         `--${boundary}\r\n` +
@@ -895,7 +895,7 @@ describe('CMS plugin handlers', () => {
   })
 
   it('runs packaged server plugin lifecycle hooks on install, disable, enable, and remove', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-lifecycle-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-lifecycle-'))
     // The QuickJS-sandboxed plugin can't touch node:fs. We use the hookBus as
     // the sandbox-safe cross-context channel — the plugin emits lifecycle
     // events as hook events, the host subscribes to record them.
@@ -1095,7 +1095,7 @@ describe('CMS plugin handlers', () => {
   })
 
   it('stores lifecycle errors for admin diagnostics without losing the plugin row', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-lifecycle-error-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-lifecycle-error-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const manifest = {
@@ -1148,7 +1148,7 @@ describe('CMS plugin handlers', () => {
   // including stale version dirs left behind by interrupted upgrades.
 
   it('uninstall hook failure leaves the plugin installed; force-remove tears everything down', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-force-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-force-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const manifest = {
@@ -1226,7 +1226,7 @@ describe('CMS plugin handlers', () => {
   })
 
   it('force-remove works when the server entry file is missing from disk', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-missing-entry-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-missing-entry-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     // Seed the row directly: the manifest points at an entry file that does
@@ -1295,7 +1295,7 @@ describe('CMS plugin handlers', () => {
   // version on activate failure.
 
   it('routes a same-id newer-version upload through the upgrade flow with migrate', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-upgrade-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-upgrade-'))
     // Plugin runs in a QuickJS sandbox — no node:fs. Use the hookBus as the
     // sandbox-safe cross-context channel. Re-attach the listener after every
     // CMS request because `activateInstalledServerPlugins` calls
@@ -1408,7 +1408,7 @@ describe('CMS plugin handlers', () => {
   })
 
   it('rolls back to the prior version when the new version\'s activate hook throws', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-rollback-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-rollback-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const baseManifest = (version: string) => ({
@@ -1469,7 +1469,7 @@ describe('CMS plugin handlers', () => {
   })
 
   it('refuses to downgrade to an older version', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-downgrade-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-downgrade-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const baseManifest = (version: string) => ({
@@ -1524,7 +1524,7 @@ describe('CMS plugin handlers', () => {
     // path written for a plugin that is not installed. That skipped the
     // running version's `deactivate`, ran `install` a second time on a live
     // plugin, and had no rollback if it threw.
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-reinstall-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-reinstall-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     const manifest = {
@@ -1641,7 +1641,7 @@ describe('CMS plugin handlers', () => {
   // ─── Manual restart endpoint ──────────────────────────────────────────────
 
   it('POST /restart resets crash counter, drops crash events, and re-activates the plugin', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-restart-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-restart-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     // Sandbox-safe activation tracking via hookBus — re-attach after every
@@ -1727,7 +1727,7 @@ describe('CMS plugin handlers', () => {
   // serving routes — proving that crashes are isolated per pluginId.
 
   it('crash in one plugin\'s worker does not affect a sibling plugin\'s worker', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-crash-iso-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-crash-iso-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
 

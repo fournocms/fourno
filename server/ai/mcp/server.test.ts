@@ -102,14 +102,14 @@ describe('mcp server', () => {
     const { tools } = await client.listTools()
 
     const sitePage = tools.find((t) => t.name === 'site_add_page')
-    expect(sitePage?.description).toContain('Requires the Instatic Site editor to be open')
+    expect(sitePage?.description).toContain('Requires the Fourno Site editor to be open')
 
     const contentTool = tools.find((t) => t.name === 'content_set_document_field')
-    expect(contentTool?.description).toContain('Requires the Instatic Content workspace to be open')
+    expect(contentTool?.description).toContain('Requires the Fourno Content workspace to be open')
 
     // Headless tools must stay free of the hint — they work with no editor open.
     const headless = tools.find((t) => t.name === 'site_read_styles')
-    expect(headless?.description).not.toContain('Requires the Instatic')
+    expect(headless?.description).not.toContain('Requires the Fourno')
 
     await client.close()
   })

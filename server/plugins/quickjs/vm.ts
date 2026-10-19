@@ -340,7 +340,7 @@ export async function createPluginVm(args: {
     //    it, a plugin bundle with a top-level `while (true) {}` would wedge
     //    the worker thread before any other guard could engage.
     withSyncDeadline(ctx, evalTimeoutMs, () => {
-      ctx.unwrapResult(ctx.evalCode(BOOTSTRAP_SOURCE, 'instatic-bootstrap.js')).dispose()
+      ctx.unwrapResult(ctx.evalCode(BOOTSTRAP_SOURCE, 'fourno-bootstrap.js')).dispose()
     })
     // Grab the dispatcher function handles the bootstrap just installed.
     for (const name of DISPATCHER_NAMES) {

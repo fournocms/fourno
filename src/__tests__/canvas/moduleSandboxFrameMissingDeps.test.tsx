@@ -48,8 +48,8 @@ function seed(packageDeps: Record<string, string>, opts: { installed?: boolean }
         lockHash: 'test-hash',
         imports: Object.fromEntries(
           Object.keys(packageDeps).flatMap((name) => [
-            [name, `/_instatic/runtime/cache/test-hash/${name}/index.js`],
-            [`${name}/`, `/_instatic/runtime/cache/test-hash/${name}/`],
+            [name, `/_fourno/runtime/cache/test-hash/${name}/index.js`],
+            [`${name}/`, `/_fourno/runtime/cache/test-hash/${name}/`],
           ]),
         ),
       },

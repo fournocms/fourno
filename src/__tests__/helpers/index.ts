@@ -1,5 +1,5 @@
 /**
- * Shared test helpers for the instatic test suite.
+ * Shared test helpers for the fourno test suite.
  *
  * Exports:
  *   - renderModule()              — safe wrapper around ModuleDefinition.render()

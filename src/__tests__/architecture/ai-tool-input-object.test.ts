@@ -2,7 +2,7 @@
  * Architecture Gate — provider-facing tool inputs are object-rooted schemas.
  *
  * Anthropic requires `input_schema.type === "object"` and rejects top-level
- * `anyOf`/`oneOf`/`allOf`; OpenAI-compatible providers and Instatic's MCP
+ * `anyOf`/`oneOf`/`allOf`; OpenAI-compatible providers and Fourno's MCP
  * adapter use the same canonical TypeBox schema. Keep that provider contract
  * in the shared registry instead of repairing schemas in individual drivers.
  */

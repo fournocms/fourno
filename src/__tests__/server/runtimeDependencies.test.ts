@@ -96,7 +96,7 @@ describe('runtime dependency resolution', () => {
   })
 
   it('creates an isolated npm install workspace with lifecycle scripts disabled', async () => {
-    const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-cache-test-'))
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-runtime-cache-test-'))
     const calls: Array<{ command: string[]; cwd: string; env: Record<string, string> }> = []
     const lock: SiteDependencyLock = {
       version: 1,
@@ -148,7 +148,7 @@ describe('runtime dependency resolution', () => {
       // Sentinel marker proves the install completed; it must be present at
       // the final cache path.
       const sentinel = JSON.parse(
-        await readFile(join(cache.workspaceDir, '.instatic-install-complete'), 'utf8'),
+        await readFile(join(cache.workspaceDir, '.fourno-install-complete'), 'utf8'),
       ) as { hash: string; packageCount: number }
       expect(sentinel.hash).toBe(cache.hash)
       expect(sentinel.packageCount).toBe(1)
@@ -158,7 +158,7 @@ describe('runtime dependency resolution', () => {
   })
 
   it('skips reinstall when a sentinel-marked cache already exists', async () => {
-    const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-cache-test-'))
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-runtime-cache-test-'))
     const lock: SiteDependencyLock = {
       version: 1,
       updatedAt: 100,
@@ -190,7 +190,7 @@ describe('runtime dependency resolution', () => {
   })
 
   it('self-heals when a stale cache is missing the sentinel (partial install)', async () => {
-    const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-cache-test-'))
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-runtime-cache-test-'))
     const lock: SiteDependencyLock = {
       version: 1,
       updatedAt: 100,
@@ -216,7 +216,7 @@ describe('runtime dependency resolution', () => {
         },
       })).hash
       const workspaceDir = join(cacheRoot, 'deps', hash)
-      await rm(join(workspaceDir, '.instatic-install-complete'), { force: true })
+      await rm(join(workspaceDir, '.fourno-install-complete'), { force: true })
       await rm(join(workspaceDir, 'node_modules'), { recursive: true, force: true })
       await mkdir(join(workspaceDir, 'node_modules', 'canvas-confetti'), { recursive: true })
 
@@ -235,7 +235,7 @@ describe('runtime dependency resolution', () => {
       // After self-heal, the sentinel exists and the package files written by
       // the new install are visible at the final path.
       expect(
-        JSON.parse(await readFile(join(workspaceDir, '.instatic-install-complete'), 'utf8')),
+        JSON.parse(await readFile(join(workspaceDir, '.fourno-install-complete'), 'utf8')),
       ).toMatchObject({ hash })
       expect(
         await readFile(join(workspaceDir, 'node_modules', 'canvas-confetti', 'package.json'), 'utf8'),
@@ -246,7 +246,7 @@ describe('runtime dependency resolution', () => {
   })
 
   it('rejects locks that exceed the package-count cap', async () => {
-    const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-cache-test-'))
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-runtime-cache-test-'))
     try {
       const packages: SiteDependencyLock['packages'] = {}
       for (let i = 0; i < 10; i += 1) {
@@ -274,7 +274,7 @@ describe('runtime dependency resolution', () => {
   })
 
   it('aborts the install when the timeout elapses before exit', async () => {
-    const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-cache-test-'))
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-runtime-cache-test-'))
     const lock: SiteDependencyLock = {
       version: 1,
       updatedAt: 1,
@@ -316,7 +316,7 @@ describe('runtime dependency resolution', () => {
   })
 
   it('deduplicates concurrent installs of the same lock hash', async () => {
-    const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-cache-test-'))
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-runtime-cache-test-'))
     const lock: SiteDependencyLock = {
       version: 1,
       updatedAt: 1,

@@ -2,21 +2,21 @@
 // Loaded at runtime by plugin bundles via the import map in index.html.
 // Fallow cannot see this static-asset path; the file is live in production.
 /**
- * Plugin-runtime shim for `@instatic/host-ui`.
+ * Plugin-runtime shim for `@fourno/host-ui`.
  *
  * Plugins import named primitives from this package (`Button`, `Stack`,
  * `Card`, `Input`, etc.) — the host's main bundle has already populated
- * `globalThis.__instatic.hostUi` with React component references that
+ * `globalThis.__fourno.hostUi` with React component references that
  * use the editor's design system (and only the editor's design system).
  *
  * Adding a new export here: import it on the host side
- * (`src/admin/main.tsx` populates `__instatic.hostUi`), then add the
+ * (`src/admin/main.tsx` populates `__fourno.hostUi`), then add the
  * named export below.
  */
-const G = globalThis.__instatic?.hostUi
+const G = globalThis.__fourno?.hostUi
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host UI not initialized. Did the host bundle finish loading before the plugin import?",
+    "[@fourno/runtime] Host UI not initialized. Did the host bundle finish loading before the plugin import?",
   )
 }
 

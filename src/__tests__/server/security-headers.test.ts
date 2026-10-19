@@ -183,7 +183,7 @@ describe('/uploads/* responses via router (integration)', () => {
   })
 
   it("sets CSP default-src 'none' on inert image uploads", async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-sec-test-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-sec-test-'))
     try {
       writeFileSync(join(uploadsDir, 'photo.png'), 'fake-png-bytes')
       const res = await handleServerRequest(
@@ -199,7 +199,7 @@ describe('/uploads/* responses via router (integration)', () => {
   })
 
   it("sets CSP default-src 'none' on potentially dangerous upload MIMEs", async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-sec-test-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-sec-test-'))
     try {
       writeFileSync(join(uploadsDir, 'data.html'), '<script>evil()</script>')
       const res = await handleServerRequest(

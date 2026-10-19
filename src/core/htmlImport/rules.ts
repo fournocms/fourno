@@ -103,12 +103,12 @@ function numberAttr(el: Element, name: string, fallback: number = 0): number {
 }
 
 function formControlFieldId(el: Element): string {
-  return attr(el, 'data-instatic-field-id') || attr(el, 'name') || attr(el, 'id')
+  return attr(el, 'data-fourno-field-id') || attr(el, 'name') || attr(el, 'id')
 }
 
 function formIdentifier(el: Element): string {
   return normalizeIdentifierValue(
-    attr(el, 'data-instatic-form-id') || attr(el, 'id') || attr(el, 'name'),
+    attr(el, 'data-fourno-form-id') || attr(el, 'id') || attr(el, 'name'),
     'form',
   )
 }
@@ -167,11 +167,11 @@ function mapOutletProps(el: Element): Record<string, unknown> {
 
 export const HTML_TO_MODULE_RULES: ImportRule[] = [
   // CMS content outlet → base.outlet (LEAF). The agent (and any hand-authored
-  // template HTML) writes `<instatic-outlet>` to mark where matched content —
+  // template HTML) writes `<fourno-outlet>` to mark where matched content —
   // a page tree or the current entry body — flows in. base.outlet is childless,
   // so we never recurse; any inner markup is ignored (the composer fills it).
   {
-    match: 'instatic-outlet',
+    match: 'fourno-outlet',
     map: (el) => ({ moduleId: 'base.outlet', props: mapOutletProps(el) }),
   },
 
@@ -180,7 +180,7 @@ export const HTML_TO_MODULE_RULES: ImportRule[] = [
   // Children become loop variants; each iteration resolves `{currentEntry.*}`
   // tokens against the selected source item.
   {
-    match: 'instatic-loop',
+    match: 'fourno-loop',
     map: (el) => ({ moduleId: 'base.loop', props: mapLoopProps(el) }),
     recurse: true,
   },
@@ -212,15 +212,15 @@ export const HTML_TO_MODULE_RULES: ImportRule[] = [
   {
     match: 'form',
     map: (el) => {
-      const mode = normalizedAttr(el, 'data-instatic-form-mode') === 'cms' ? 'cms' : 'custom'
-      const redirectUrl = attr(el, 'data-instatic-success-redirect')
-      const successMessage = attr(el, 'data-instatic-success-message')
+      const mode = normalizedAttr(el, 'data-fourno-form-mode') === 'cms' ? 'cms' : 'custom'
+      const redirectUrl = attr(el, 'data-fourno-success-redirect')
+      const successMessage = attr(el, 'data-fourno-success-message')
       return {
         moduleId: 'base.form',
         props: {
           mode,
           formId: formIdentifier(el),
-          targetTableId: mode === 'cms' ? attr(el, 'data-instatic-target-table') : '',
+          targetTableId: mode === 'cms' ? attr(el, 'data-fourno-target-table') : '',
           action: attr(el, 'action'),
           method: normalizeFormMethod(el),
           successBehavior: redirectUrl ? 'redirect' : 'message',

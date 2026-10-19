@@ -156,7 +156,7 @@ describe('renderNotFoundResponse — Layer A baked artefact', () => {
   let uploadsDir: string
 
   beforeEach(async () => {
-    uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-404-'))
+    uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-404-'))
     const slotDir = join(uploadsDir, 'published', 'a')
     await mkdir(slotDir, { recursive: true })
     await writeFile(join(slotDir, '404.html'), '<!DOCTYPE html><h1>baked 404</h1>', 'utf-8')

@@ -109,10 +109,10 @@ const server = await startHttpServer({
     // Supervisor shutdown: on platforms without POSIX signals (Windows, where
     // the process never receives SIGTERM) a supervising process stops the
     // server through this token-gated endpoint instead. Only exists when the
-    // supervisor set INSTATIC_SHUTDOWN_TOKEN at spawn; 404s otherwise so it
+    // supervisor set FOURNO_SHUTDOWN_TOKEN at spawn; 404s otherwise so it
     // is invisible on normal deployments.
-    if (pathname === '/_instatic/shutdown' && req.method === 'POST') {
-      const provided = req.headers.get('x-instatic-shutdown-token')
+    if (pathname === '/_fourno/shutdown' && req.method === 'POST') {
+      const provided = req.headers.get('x-fourno-shutdown-token')
       if (config.shutdownToken && shutdownTokenMatches(provided, config.shutdownToken)) {
         setTimeout(() => void shutdown('shutdown endpoint'), 50)
         return applySecurityHeaders(

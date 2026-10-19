@@ -2,7 +2,7 @@
  * Storage widget — total used + a StackedBar showing the per-category
  * breakdown.
  *
- * There is intentionally **no quota** here. Self-hosted Instatic
+ * There is intentionally **no quota** here. Self-hosted Fourno
  * never imposes an artificial disk cap, so the headline stat is the
  * total currently in use and the breakdown bar stretches to fill its
  * full width — each segment reads as a proportion of *what is used*,

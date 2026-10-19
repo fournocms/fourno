@@ -150,7 +150,7 @@ export interface AgentToolCall {
   id: string
   /** SDK tool_use id (`toolu_…`) — correlates UI badges with stream events. */
   externalId?: string
-  /** Tool name as Claude saw it (e.g. `mcp__instatic__insertHtml`). */
+  /** Tool name as Claude saw it (e.g. `mcp__fourno__insertHtml`). */
   actionType: string
   /** Tool input as Claude produced it. */
   params: Record<string, unknown>

@@ -4,7 +4,7 @@ import Database from 'better-sqlite3'
 import { ANONYMOUS_STATE, OWNER, completeStepUp, login, loginAs } from './helpers'
 
 const E2E_DB_PATH = '.tmp/e2e-agent.db'
-const SESSION_COOKIE_NAME = 'instatic_admin_session'
+const SESSION_COOKIE_NAME = 'fourno_admin_session'
 const EXPIRED_STEP_UP_TIMESTAMP = '2000-01-01T00:00:00.000Z'
 
 /**

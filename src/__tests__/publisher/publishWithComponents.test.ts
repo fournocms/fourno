@@ -360,7 +360,7 @@ describe('VC inline — unknown componentId', () => {
     })
     const site = makeSite({ visualComponents: [], pages: [page] })
     const { html } = publishPage(page, site, registry)
-    expect(html).toContain('<!-- instatic: unknown component')
+    expect(html).toContain('<!-- fourno: unknown component')
     expect(html).toContain('nonexistent-vc-xyz')
     expect(html).not.toContain('<div>')
   })

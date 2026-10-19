@@ -12,7 +12,7 @@
  *     css: '.hero { padding: 96px 24px; text-align: center; }',
  *   }]
  *
- * Compilation runs at PLUGIN BUILD TIME (inside `instatic-plugin build`, which
+ * Compilation runs at PLUGIN BUILD TIME (inside `fourno-plugin build`, which
  * installs a happy-dom polyfill) — the pack's `site.json` carries the
  * compiled `SavedLayout`, so the host install path stays on the one canonical
  * wire format and needs no DOM.
@@ -54,7 +54,7 @@ export function compilePackLayout(pluginId: string, entry: LayoutPackEntry): Sav
   if (typeof DOMParser === 'undefined') {
     throw new Error(
       `[plugin-sdk] Pack layout "${entry.id}" needs a DOM to compile its HTML. ` +
-        `Build the plugin with \`instatic-plugin build\` (which provides one) ` +
+        `Build the plugin with \`fourno-plugin build\` (which provides one) ` +
         `instead of importing the pack config directly.`,
     )
   }

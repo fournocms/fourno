@@ -13,7 +13,7 @@ const fakeDb = createFakeDb(async (sql) => {
 })
 
 function createStaticDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'instatic-static-'))
+  const dir = mkdtempSync(join(tmpdir(), 'fourno-static-'))
   mkdirSync(join(dir, 'assets'))
   writeFileSync(join(dir, 'index.html'), '<div id="root">admin app</div>')
   writeFileSync(join(dir, 'assets', 'app.js'), 'console.log("admin")')
@@ -21,7 +21,7 @@ function createStaticDir(): string {
 }
 
 function createAdminShellFixture(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'instatic-static-'))
+  const dir = mkdtempSync(join(tmpdir(), 'fourno-static-'))
   mkdirSync(join(dir, 'assets'))
   writeFileSync(
     join(dir, 'index.html'),
@@ -92,7 +92,7 @@ describe('self-hosted admin static serving', () => {
 
       expect(res?.status).toBe(200)
       const html = (await res?.text()) ?? ''
-      expect(html).toContain('window.__instaticAuthed = 1')
+      expect(html).toContain('window.__fournoAuthed = 1')
       expect(html).toContain('rel="modulepreload" href="/assets/AuthenticatedAdmin-test.js"')
       expect(html).not.toContain('SitePage-test.js')
       expect(html).not.toContain('ContentPage-test.js')
@@ -123,7 +123,7 @@ describe('self-hosted admin static serving', () => {
   })
 
   it('serves uploaded media files from /uploads', async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     try {
       writeFileSync(join(uploadsDir, 'hero.png'), 'image-bytes')
 
@@ -145,7 +145,7 @@ describe('self-hosted admin static serving', () => {
   })
 
   it('serves AVIF uploads inline with the image/avif content type', async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     try {
       writeFileSync(join(uploadsDir, 'hero.avif'), 'image-bytes')
 
@@ -169,7 +169,7 @@ describe('self-hosted admin static serving', () => {
   // any non-inert MIME prevents top-level navigation from rendering it as
   // HTML on the admin origin.
   it('forces attachment disposition for non-inert MIMEs in /uploads (F-0002)', async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     try {
       writeFileSync(join(uploadsDir, 'pwn.html'), '<script>alert(1)</script>')
 
@@ -190,7 +190,7 @@ describe('self-hosted admin static serving', () => {
   })
 
   it('forces attachment disposition for SVG in /uploads (XSS gadget)', async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-uploads-'))
     try {
       writeFileSync(
         join(uploadsDir, 'evil.svg'),

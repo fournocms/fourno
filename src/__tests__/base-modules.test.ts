@@ -259,7 +259,7 @@ describe('base.text — unified text module', () => {
         'aria-label': 'Intro',
         class: 'skip',
         'data-aos': 'fade-up',
-        'data-instatic-node': 'skip',
+        'data-fourno-node': 'skip',
         onclick: 'alert(1)',
         role: 'note',
       },
@@ -269,7 +269,7 @@ describe('base.text — unified text module', () => {
     expect(html).toContain(' role="note"')
     expect(html).not.toContain('class="skip"')
     expect(html).not.toContain('onclick')
-    expect(html).not.toContain('data-instatic-node')
+    expect(html).not.toContain('data-fourno-node')
   })
 
   it('escapes text content through the publisher pipeline', async () => {
@@ -492,7 +492,7 @@ describe('base.body — render() specifics', () => {
     expect(editorDocument.body.className).toBe('ist-body')
     expect(editorDocument.body.style.backgroundColor).toBe('rgb(9, 10, 11)')
     expect(editorDocument.body.style.backgroundImage).toBe('linear-gradient(red, blue)')
-    expect(container.querySelector('[data-instatic-body-probe]')).toBeNull()
+    expect(container.querySelector('[data-fourno-body-probe]')).toBeNull()
     expect(container.querySelector('p')?.textContent).toBe('Body child')
     expect(container.children).toHaveLength(1)
     expect(container.firstElementChild?.tagName).toBe('P')

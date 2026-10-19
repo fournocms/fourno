@@ -34,7 +34,7 @@
         var(--bg-surface-3) 100%
     );
     background-size: 200% 100%;
-    animation: instaticSkeletonShimmer 1.4s ease-in-out infinite;
+    animation: fournoSkeletonShimmer 1.4s ease-in-out infinite;
 }
 
 /* --- SkeletonBlock --- */
@@ -110,7 +110,7 @@
     height: 14px;
 }
 
-@keyframes instaticSkeletonShimmer {
+@keyframes fournoSkeletonShimmer {
     0% {
         background-position: 200% 0;
     }

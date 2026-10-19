@@ -188,7 +188,7 @@ function isAgentRenderFrameReady(frame: HTMLElement, requestId?: string): boolea
   // the load marker identifies the final srcDoc document for visible and
   // transient frames alike. Without this gate, a snapshot requested while a
   // frame is mounting can capture the detached initial body.
-  if (iframe?.dataset.instaticCanvasDocumentLoaded !== 'true') return false
+  if (iframe?.dataset.fournoCanvasDocumentLoaded !== 'true') return false
   const body = iframe?.contentDocument?.body
   if (!breakpointId || !body || body.dataset.breakpointId !== breakpointId) return false
   return !requestId || iframe.dataset.agentSnapshotReady === requestId

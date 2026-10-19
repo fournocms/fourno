@@ -1,6 +1,6 @@
 # Design
 
-The visual design system for Instatic — principles, tokens, surfaces, components.
+The visual design system for Fourno — principles, tokens, surfaces, components.
 
 The design is a **two-layer color model**: an achromatic base (surfaces, borders, default text) with a deliberate semantic and categorical color layer on top (numbered accents for identity, state tokens for meaning, canvas neon for selection). Everything is tokenized in `src/styles/globals.css`. Every primitive lives in `src/ui/components/`.
 
@@ -13,7 +13,7 @@ The design is a **two-layer color model**: an achromatic base (surfaces, borders
 - **Bordered transparent inputs.** Inputs have a 1px white-alpha border, transparent background, and a pill 1em radius. Focus adds an inset achromatic glow.
 - **Floating overlay panels.** Spotlight, popovers, and modals use direct globals: `--bg-surface`, `--overlay-10`, `--panel-radius`, `--panel-blur`, and `--shadow-panel`.
 - **Editor controls** (toolbar buttons, chips) use `--radius` (6px) for default and `--radius-sm` (3px) for tight badges.
-- **Admin appearance is token-scoped.** Settings → Preferences stores `theme`, `density`, and `textScale` in `instatic-editor-prefs`; `useEditorAppearancePreferences()` mirrors them to `data-editor-theme`, `data-editor-density`, and `data-editor-text-scale` on the document and layout roots. Light mode and text scaling are token overrides, not per-component restyles.
+- **Admin appearance is token-scoped.** Settings → Preferences stores `theme`, `density`, and `textScale` in `fourno-editor-prefs`; `useEditorAppearancePreferences()` mirrors them to `data-editor-theme`, `data-editor-density`, and `data-editor-text-scale` on the document and layout roots. Light mode and text scaling are token overrides, not per-component restyles.
 - **One source of truth: `src/styles/globals.css`.** No hardcoded hex / rgb / hsl in admin / ui CSS modules — gated by `css-token-policy.test.ts`. Admin font sizes use the fluid `--text-*` scale, and admin spacing uses the fluid `--space-*` scale — gated by `admin-typography-token-policy.test.ts` and `admin-spacing-token-policy.test.ts`.
 - **CSS Modules only.** No Tailwind utility classes — gated by `noTailwindUtilities.test.ts`. No Tailwind ecosystem deps — gated by `no-tailwind-deps.test.ts`.
 - **Every interactive control goes through a UI primitive** from `src/ui/components/`. Bare `<button>` is gated.
@@ -320,7 +320,7 @@ Each tile usually carries:
 - A **value** rendered large with `--text-bright`
 - Optional micro-trend, chart, or list body
 
-This is what reads as the Instatic dashboard aesthetic. Same pattern is used by the storage breakdown, posts widget, activity feed, etc. The "Add block" tile uses `box-shadow: inset 0 0 0 1px ...` to convey emptiness without breaking the borderless rule.
+This is what reads as the Fourno dashboard aesthetic. Same pattern is used by the storage breakdown, posts widget, activity feed, etc. The "Add block" tile uses `box-shadow: inset 0 0 0 1px ...` to convey emptiness without breaking the borderless rule.
 
 ### 2. Floating Overlay Panels
 

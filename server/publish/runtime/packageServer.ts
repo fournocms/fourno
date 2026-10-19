@@ -1,5 +1,5 @@
 /**
- * HTTP handler for `/_instatic/runtime/cache/<hash>/<...path>` — serves files from a
+ * HTTP handler for `/_fourno/runtime/cache/<hash>/<...path>` — serves files from a
  * site's local runtime dependency cache.
  *
  * Why this exists
@@ -7,12 +7,12 @@
  * `ensureRuntimeDependencyCache(lock)` runs `npm install` against the site's
  * locked dependencies in a content-addressed workspace dir
  * (`<cacheRoot>/deps/<hash>/`). Published pages need to *fetch* those installed
- * files at runtime so an importmap entry like `"three" → "/_instatic/runtime/cache/
+ * files at runtime so an importmap entry like `"three" → "/_fourno/runtime/cache/
  * <hash>/three/build/three.module.js"` resolves to a real asset.
  *
  * URL shape
  * ─────────
- *   /_instatic/runtime/cache/<24-char-hex-hash>/<package>/<path>
+ *   /_fourno/runtime/cache/<24-char-hex-hash>/<package>/<path>
  *
  * where `<package>` can be either a bare package name (`three`) or a scoped
  * one (`@scope/name`). Path traversal is blocked: every resolved path must
@@ -20,7 +20,7 @@
  *
  * Cache validity
  * ──────────────
- * Each cache dir has a `.instatic-install-complete` sentinel written after
+ * Each cache dir has a `.fourno-install-complete` sentinel written after
  * `npm install` succeeds. We refuse to serve when the sentinel is missing —
  * a stale or partial install must complete before responses go out.
  *
@@ -36,7 +36,7 @@ import { resolve as resolvePath } from 'node:path'
 import { isPathWithin } from '../../util/pathWithin'
 import { nodeModulesDirForHash, sentinelPathForHash } from './dependencyCache'
 
-const RUNTIME_PACKAGE_PREFIX = '/_instatic/runtime/cache/'
+const RUNTIME_PACKAGE_PREFIX = '/_fourno/runtime/cache/'
 const HASH_PATTERN = /^[0-9a-f]{24}$/
 
 function contentTypeForPath(path: string): string {
@@ -54,7 +54,7 @@ export function isRuntimePackagePath(pathname: string): boolean {
 }
 
 /**
- * Resolve `/_instatic/runtime/cache/<hash>/<...>` to an absolute filesystem path
+ * Resolve `/_fourno/runtime/cache/<hash>/<...>` to an absolute filesystem path
  * inside the cache. Returns `null` for any malformed URL — caller should
  * 404 in that case.
  *

@@ -186,9 +186,9 @@ async function waitForPostgresReady(timeoutMs = 60_000): Promise<void> {
         'postgres',
         'pg_isready',
         '-U',
-        'instatic',
+        'fourno',
         '-d',
-        'instatic',
+        'fourno',
       ],
     )
     if (exitCode === 0) {

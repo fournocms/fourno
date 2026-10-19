@@ -16,7 +16,7 @@ export type PanelMode = 'docked' | 'floating'
  * — each `FloatingPanelId` is unique to a single workspace, so there is no
  * cross-workspace collision to namespace around.
  */
-export const EDITOR_LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
+export const EDITOR_LAYOUT_STORAGE_KEY = 'fourno-editor-layout-v2'
 
 /**
  * 2D position of a draggable / floating panel relative to the viewport.

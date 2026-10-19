@@ -28,7 +28,7 @@
  *
  * One allowlisted directory, for the same reason:
  *
- *   - `src/core/plugin-sdk/cli/` — the `instatic-plugin` CLI. An executable
+ *   - `src/core/plugin-sdk/cli/` — the `fourno-plugin` CLI. An executable
  *     entry point that always runs under Node, never reaches a browser bundle,
  *     and is deliberately kept out of the SDK barrel. Its pack-compile
  *     environment side-effect-imports `@modules/base` to populate the module

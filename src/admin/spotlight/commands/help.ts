@@ -4,7 +4,7 @@
  * - Show keyboard shortcuts
  * - Open documentation
  * - Report an issue
- * - About Instatic
+ * - About Fourno
  * - Copy environment info (for bug reports)
  */
 
@@ -30,14 +30,14 @@ export function getHelpCommands(): Command[] {
     {
       id: 'help.documentation',
       title: 'Open documentation',
-      subtitle: 'View the Instatic docs',
+      subtitle: 'View the Fourno docs',
       group: 'help',
       iconName: 'book-open-solid',
       keywords: ['docs', 'documentation', 'help', 'guide', 'reference'],
       workspaces: ['any'],
       run: (ctx) => {
         ctx.closeSpotlight()
-        window.open('https://github.com/corebunch/instatic/blob/main/docs/', '_blank', 'noopener,noreferrer')
+        window.open('https://github.com/fourno/fourno/blob/main/docs/', '_blank', 'noopener,noreferrer')
       },
     },
 
@@ -51,13 +51,13 @@ export function getHelpCommands(): Command[] {
       workspaces: ['any'],
       run: (ctx) => {
         ctx.closeSpotlight()
-        window.open('https://github.com/corebunch/instatic/issues/new', '_blank', 'noopener,noreferrer')
+        window.open('https://github.com/fourno/fourno/issues/new', '_blank', 'noopener,noreferrer')
       },
     },
 
     {
       id: 'help.about',
-      title: 'About Instatic',
+      title: 'About Fourno',
       subtitle: 'Version information and license',
       group: 'help',
       iconName: 'book-open-solid',
@@ -66,7 +66,7 @@ export function getHelpCommands(): Command[] {
       run: (ctx) => {
         ctx.closeSpotlight()
         // Navigate to About section in settings when available, else open docs
-        window.open('https://github.com/corebunch/instatic', '_blank', 'noopener,noreferrer')
+        window.open('https://github.com/fourno/fourno', '_blank', 'noopener,noreferrer')
       },
     },
 
@@ -81,7 +81,7 @@ export function getHelpCommands(): Command[] {
       run: (ctx) => {
         ctx.closeSpotlight()
         const info = [
-          `Instatic`,
+          `Fourno`,
           `Browser: ${navigator.userAgent}`,
           `Platform: ${navigator.platform}`,
           `URL: ${window.location.href}`,

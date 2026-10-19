@@ -8,7 +8,7 @@
  * wiring required (the change is local to the widget that owns the state).
  *
  * Lives under `src/ui/components/` so plugins can import it via
- * `@instatic/host-ui` and reuse the exact look of host widgets in
+ * `@fourno/host-ui` and reuse the exact look of host widgets in
  * their own dashboard widgets.
  */
 import { Button } from '@ui/components/Button'

@@ -143,13 +143,13 @@ describe('agent breakpoint snapshot capture', () => {
     expect(frame).not.toBeNull()
     const iframe = frame!.querySelector('iframe')
     expect(iframe?.style.width).toBe('375px')
-    expect(iframe?.dataset.instaticCanvasDocumentLoaded).toBe('true')
+    expect(iframe?.dataset.fournoCanvasDocumentLoaded).toBe('true')
     expect(iframe?.dataset.agentSnapshotReady).toBe('manual-mobile-capture')
     expect(iframe?.contentDocument?.documentElement.hasAttribute(
-      'data-instatic-canvas-document',
+      'data-fourno-canvas-document',
     )).toBe(false)
-    expect(iframe?.contentDocument?.querySelector('[data-instatic-canvas-runtime-script]')).toBeNull()
-    expect(iframe?.contentDocument?.body.querySelector('[data-instatic-body-probe]')).toBeNull()
+    expect(iframe?.contentDocument?.querySelector('[data-fourno-canvas-runtime-script]')).toBeNull()
+    expect(iframe?.contentDocument?.body.querySelector('[data-fourno-body-probe]')).toBeNull()
     expect(iframe?.contentDocument?.body.hasAttribute('data-agent-snapshot-ready')).toBe(false)
     expect(iframe?.contentDocument?.body.children).toHaveLength(1)
     expect(iframe?.contentDocument?.body.firstElementChild?.getAttribute('data-node-id')).toBe('headline')
@@ -193,7 +193,7 @@ describe('agent breakpoint snapshot capture', () => {
     // The srcDoc load replaces the initial document. Its React portal has not
     // committed yet, so the iframe load marker alone is still insufficient.
     currentDocument = loadedDocument
-    iframe.dataset.instaticCanvasDocumentLoaded = 'true'
+    iframe.dataset.fournoCanvasDocumentLoaded = 'true'
     expect(findAgentRenderFrame(query)).toBeNull()
 
     iframe.dataset.agentSnapshotReady = requestId

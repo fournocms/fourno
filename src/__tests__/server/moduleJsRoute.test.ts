@@ -1,5 +1,5 @@
 /**
- * Tests for the `/_instatic/module-js/<moduleId>.js` asset endpoint.
+ * Tests for the `/_fourno/module-js/<moduleId>.js` asset endpoint.
  * Fake DbClient intercepts the published-snapshot query — same pattern as
  * holeRouteHandler.test.ts.
  */
@@ -114,16 +114,16 @@ beforeEach(() => {
 
 describe('isModuleJsAssetPath', () => {
   it('matches the namespace prefix only', () => {
-    expect(isModuleJsAssetPath('/_instatic/module-js/test.jsy.js')).toBe(true)
-    expect(isModuleJsAssetPath('/_instatic/module-js/')).toBe(true)
-    expect(isModuleJsAssetPath('/_instatic/module-js')).toBe(false)
-    expect(isModuleJsAssetPath('/_instatic/hole-runtime.js')).toBe(false)
+    expect(isModuleJsAssetPath('/_fourno/module-js/test.jsy.js')).toBe(true)
+    expect(isModuleJsAssetPath('/_fourno/module-js/')).toBe(true)
+    expect(isModuleJsAssetPath('/_fourno/module-js')).toBe(false)
+    expect(isModuleJsAssetPath('/_fourno/hole-runtime.js')).toBe(false)
   })
 })
 
 describe('handleModuleJsAssetRequest', () => {
   it('serves a known module with text/javascript and a 1h public cache', async () => {
-    const [req, url] = moduleJsRequest('/_instatic/module-js/test.jsy.js?v=0')
+    const [req, url] = moduleJsRequest('/_fourno/module-js/test.jsy.js?v=0')
     const res = await handleModuleJsAssetRequest(req, url, { db: makeFakeDb(makeSnapshot()) })
     expect(res.status).toBe(200)
     expect(res.headers.get('content-type')).toBe('text/javascript; charset=utf-8')
@@ -132,18 +132,18 @@ describe('handleModuleJsAssetRequest', () => {
   })
 
   it('404s for a moduleId with no published js', async () => {
-    const [req, url] = moduleJsRequest('/_instatic/module-js/test.body.js')
+    const [req, url] = moduleJsRequest('/_fourno/module-js/test.body.js')
     const res = await handleModuleJsAssetRequest(req, url, { db: makeFakeDb(makeSnapshot()) })
     expect(res.status).toBe(404)
   })
 
   it('404s for malformed / traversal-shaped ids without touching the map', async () => {
     for (const path of [
-      '/_instatic/module-js/..%2F..%2Fetc%2Fpasswd.js',
-      '/_instatic/module-js/UPPER.Case.js',
-      '/_instatic/module-js/no-namespace.js',
-      '/_instatic/module-js/test.jsy', // missing .js extension
-      '/_instatic/module-js/',
+      '/_fourno/module-js/..%2F..%2Fetc%2Fpasswd.js',
+      '/_fourno/module-js/UPPER.Case.js',
+      '/_fourno/module-js/no-namespace.js',
+      '/_fourno/module-js/test.jsy', // missing .js extension
+      '/_fourno/module-js/',
     ]) {
       const [req, url] = moduleJsRequest(path)
       const res = await handleModuleJsAssetRequest(req, url, { db: makeFakeDb(makeSnapshot()) })
@@ -152,13 +152,13 @@ describe('handleModuleJsAssetRequest', () => {
   })
 
   it('404s when the site has never been published', async () => {
-    const [req, url] = moduleJsRequest('/_instatic/module-js/test.jsy.js')
+    const [req, url] = moduleJsRequest('/_fourno/module-js/test.jsy.js')
     const res = await handleModuleJsAssetRequest(req, url, { db: makeFakeDb(null) })
     expect(res.status).toBe(404)
   })
 
   it('405s non-GET methods', async () => {
-    const [req, url] = moduleJsRequest('/_instatic/module-js/test.jsy.js', 'POST')
+    const [req, url] = moduleJsRequest('/_fourno/module-js/test.jsy.js', 'POST')
     const res = await handleModuleJsAssetRequest(req, url, { db: makeFakeDb(makeSnapshot()) })
     expect(res.status).toBe(405)
   })

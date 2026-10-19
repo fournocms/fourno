@@ -102,7 +102,7 @@ describe('form attributes', () => {
     expect(renderNode(node)).toContain('data-recipe-filters')
   })
 
-  it('does not duplicate the form wiring instatic generates itself', () => {
+  it('does not duplicate the form wiring fourno generates itself', () => {
     const node = firstNodeOf(
       '<form action="/search" method="get" data-keep="yes"><input name="q"></form>',
       'base.form',

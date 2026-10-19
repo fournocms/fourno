@@ -62,7 +62,7 @@ describe('inline <svg> → base.svg', () => {
 
 describe('anchor recursion preserves nested icons', () => {
   it('an <a> wrapping an <svg> + text recurses (base.link with children)', () => {
-    const node = single('<a class="brand" href="/"><svg viewBox="0 0 24 24"><path d="M1 1"/></svg> instatic</a>')
+    const node = single('<a class="brand" href="/"><svg viewBox="0 0 24 24"><path d="M1 1"/></svg> fourno</a>')
     expect(node.moduleId).toBe('base.link')
     expect(node.children.length).toBeGreaterThan(0)
   })

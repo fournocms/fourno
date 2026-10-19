@@ -11,41 +11,41 @@ const PAGE_WITH_CMS_FORM = `<!doctype html>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'none'; worker-src 'none'; style-src 'self'; img-src 'self' data:; connect-src 'self';">
 </head>
 <body>
-<form data-instatic-form-mode="cms" data-instatic-form-id="contact"></form>
+<form data-fourno-form-mode="cms" data-fourno-form-id="contact"></form>
 </body>
 </html>`
 
 describe('stampFormPageTokens', () => {
   it('stamps a page token and page id onto every CMS-native form tag', () => {
     const html = stampFormPageTokens(PAGE_WITH_CMS_FORM, 'page-home')
-    expect(html).toContain('data-instatic-page-token=')
-    expect(html).toContain('data-instatic-page-id="page-home"')
+    expect(html).toContain('data-fourno-page-token=')
+    expect(html).toContain('data-fourno-page-id="page-home"')
   })
 
   it('leaves non-CMS forms untouched', () => {
     const html = stampFormPageTokens(
-      PAGE_WITH_CMS_FORM.replace('data-instatic-form-mode="cms"', 'data-instatic-form-mode="custom"'),
+      PAGE_WITH_CMS_FORM.replace('data-fourno-form-mode="cms"', 'data-fourno-form-mode="custom"'),
       'page-home',
     )
-    expect(html).not.toContain('data-instatic-page-token=')
-    expect(html).not.toContain('data-instatic-page-id=')
+    expect(html).not.toContain('data-fourno-page-token=')
+    expect(html).not.toContain('data-fourno-page-id=')
   })
 
   it('is idempotent', () => {
     const once = stampFormPageTokens(PAGE_WITH_CMS_FORM, 'page-home')
     const twice = stampFormPageTokens(once, 'page-home')
     expect(twice).toBe(once)
-    expect(twice.match(/data-instatic-page-token=/g)?.length).toBe(1)
+    expect(twice.match(/data-fourno-page-token=/g)?.length).toBe(1)
   })
 })
 
 describe('form runtime browser behaviour', () => {
   it('prefetches the submit challenge on attach and submits via document-level delegation', async () => {
     document.body.innerHTML = `
-      <form data-instatic-form-mode="cms" data-instatic-form-id="contact" data-instatic-page-id="page-home" data-instatic-page-token="page-token">
+      <form data-fourno-form-mode="cms" data-fourno-form-id="contact" data-fourno-page-id="page-home" data-fourno-page-token="page-token">
         <input name="email" value="ai@example.com">
         <button type="submit">Send</button>
-        <p data-instatic-form-message="status"></p>
+        <p data-fourno-form-message="status"></p>
       </form>
     `
 
@@ -61,7 +61,7 @@ describe('form runtime browser behaviour', () => {
       const payload = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>
       calls.push({ path, payload })
 
-      if (path === '/_instatic/form/challenge') {
+      if (path === '/_fourno/form/challenge') {
         return new Response(JSON.stringify({
           token: 'prefetched-token',
           challenge: 'prefetched-challenge',
@@ -82,7 +82,7 @@ describe('form runtime browser behaviour', () => {
       await importRuntimeScript(FORM_RUNTIME_JS)
       await flushRuntime()
 
-      expect(calls.map((call) => call.path)).toEqual(['/_instatic/form/challenge'])
+      expect(calls.map((call) => call.path)).toEqual(['/_fourno/form/challenge'])
       expect(calls[0].payload.pageId).toBe('page-home')
 
       const form = document.querySelector('form')
@@ -91,8 +91,8 @@ describe('form runtime browser behaviour', () => {
       form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
       await waitForCalls(calls, 2)
 
-      expect(calls[0].path).toBe('/_instatic/form/challenge')
-      expect(calls[1].path).toBe('/_instatic/form/submit')
+      expect(calls[0].path).toBe('/_fourno/form/challenge')
+      expect(calls[1].path).toBe('/_fourno/form/submit')
       expect(calls[1].payload.pageId).toBe('page-home')
       expect(calls[1].payload.token).toBe('prefetched-token')
       expect(calls[1].payload.challenge).toBe('prefetched-challenge')

@@ -3,7 +3,7 @@
  *
  * Accepts files via drag-and-drop, folder picker, or multi-file picker.
  * Handles directory entry walking for dropped folders. A single .zip file is
- * handed off as a File so the parent can route Instatic archives before static-
+ * handed off as a File so the parent can route Fourno archives before static-
  * site ingestion; everything else is passed as a File array.
  *
  * Validation errors (oversized, zip-bomb, traversal) are shown via the

@@ -444,7 +444,7 @@ export function CanvasRoot({ editable = true }: CanvasRootProps) {
           aria-label="Canvas — infinite editing surface"
           tabIndex={0}
           data-testid="canvas-root"
-          data-instatic-canvas-root="true"
+          data-fourno-canvas-root="true"
           data-canvas-state={canvasPage ? 'canvas-ready' : 'canvas-empty'}
           data-canvas-view={canvasView}
           data-vc-mode={activeDocument?.kind === 'visualComponent' ? 'true' : undefined}

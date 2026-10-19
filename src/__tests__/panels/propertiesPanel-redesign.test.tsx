@@ -303,7 +303,7 @@ describe('ClassPicker — suggestion hover preview', () => {
   })
 
   it('does not preview suggestion hovers when the preference is disabled', () => {
-    localStorage.setItem('instatic-editor-prefs', JSON.stringify({ hoverPreview: false }))
+    localStorage.setItem('fourno-editor-prefs', JSON.stringify({ hoverPreview: false }))
     const { nodeId } = loadSiteWithHeading()
     useEditorStore.getState().createClass('no-preview')
     selectNode(nodeId)

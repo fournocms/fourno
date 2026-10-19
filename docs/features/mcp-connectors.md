@@ -1,8 +1,8 @@
 # MCP connections
 
-MCP connections let external AI clients operate an Instatic instance through the [Model Context Protocol](https://modelcontextprotocol.io). Instatic is the MCP server: clients list its capability-filtered tools, run headless reads, relay editing tools to the connection owner's open workspace, and explicitly publish completed drafts.
+MCP connections let external AI clients operate an Fourno instance through the [Model Context Protocol](https://modelcontextprotocol.io). Fourno is the MCP server: clients list its capability-filtered tools, run headless reads, relay editing tools to the connection owner's open workspace, and explicitly publish completed drafts.
 
-This is the inverse of the **Providers** tab. Providers let Instatic call model APIs; MCP connections let outside clients call Instatic.
+This is the inverse of the **Providers** tab. Providers let Fourno call model APIs; MCP connections let outside clients call Fourno.
 
 The wire server uses the stable split `@modelcontextprotocol/server` v2 package. That dependency remains allowed only under `server/ai/mcp/`; provider drivers continue to use their direct REST implementations.
 
@@ -12,7 +12,7 @@ The UI exposes two credential lifecycles instead of a cosmetic local/remote swit
 
 | Mode | Intended client | Authentication | Lifecycle |
 |---|---|---|---|
-| Hosted OAuth | Claude custom connectors and other remote MCP clients | OAuth authorization code with S256 PKCE | The client discovers the authorization server, dynamically registers, and sends the user to Instatic for consent. Access tokens last up to one hour; refresh tokens rotate; the grant expires after 90 days. |
+| Hosted OAuth | Claude custom connectors and other remote MCP clients | OAuth authorization code with S256 PKCE | The client discovers the authorization server, dynamically registers, and sends the user to Fourno for consent. Access tokens last up to one hour; refresh tokens rotate; the grant expires after 90 days. |
 | Personal access token | Claude Code, Codex, Cursor, local bridges, and clients that accept an explicit header | `Authorization: Bearer imcp_pat_…` | Created after step-up authentication, shown once, scoped to selected capabilities, configurable expiry, independently revocable. |
 
 Both modes resolve to the same persistent connection grant and the same `toolAllowedForCapabilities` gate. OAuth does not create a wider tool path.
@@ -20,10 +20,10 @@ Both modes resolve to the same persistent connection grant and the same `toolAll
 The MCP endpoint is always:
 
 ```text
-https://<your-host>/_instatic/mcp
+https://<your-host>/_fourno/mcp
 ```
 
-Hosted clients run in their provider's infrastructure. They cannot reach `localhost`, a private LAN address, or an HTTP-only deployment. The MCP tab detects this and warns until Instatic's canonical public origin is HTTPS.
+Hosted clients run in their provider's infrastructure. They cannot reach `localhost`, a private LAN address, or an HTTP-only deployment. The MCP tab detects this and warns until Fourno's canonical public origin is HTTPS.
 
 ## Wire protocol
 
@@ -36,24 +36,24 @@ The endpoint uses the official v2 `createMcpHandler` Web-standard entry and serv
 
 The same handler keeps the SDK's `legacy: 'stateless'` fallback enabled. Clients speaking a 2025-era revision may still send an `initialize` request and then make independent authenticated POSTs, but no protocol session is created. This compatibility path can be removed when supported clients have all migrated.
 
-Every request is bearer-authenticated before the SDK dispatches it. Browser-originated requests are also checked against Instatic's configured public-origin policy before authentication or dispatch; requests without `Origin` remain valid for native and server-to-server MCP clients.
+Every request is bearer-authenticated before the SDK dispatches it. Browser-originated requests are also checked against Fourno's configured public-origin policy before authentication or dispatch; requests without `Origin` remain valid for native and server-to-server MCP clients.
 
 See the official [TypeScript SDK v2 migration guide](https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration/support-2026-07-28.md), [stable MCP 2026-07-28 specification](https://modelcontextprotocol.io/specification/2026-07-28), and [release changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog) for the wire revision.
 
 ## Hosted OAuth flow
 
-Instatic implements the MCP authorization-server surface directly:
+Fourno implements the MCP authorization-server surface directly:
 
 | Endpoint | Purpose |
 |---|---|
 | `/.well-known/oauth-protected-resource` | RFC 9728 protected-resource metadata for the MCP resource. |
-| `/.well-known/oauth-protected-resource/_instatic/mcp` | Path-aware protected-resource discovery alias. |
+| `/.well-known/oauth-protected-resource/_fourno/mcp` | Path-aware protected-resource discovery alias. |
 | `/.well-known/oauth-authorization-server` | Authorization-server metadata. |
-| `/_instatic/oauth/register` | Dynamic client registration for public clients. |
+| `/_fourno/oauth/register` | Dynamic client registration for public clients. |
 | `/admin/ai/oauth/authorize` | Signed-in consent screen. |
-| `/_instatic/oauth/token` | Form-encoded authorization-code and refresh-token exchange. |
+| `/_fourno/oauth/token` | Form-encoded authorization-code and refresh-token exchange. |
 
-The issuer, the `resource` value, and every URL in these documents come from the configured public origin (`PUBLIC_ORIGIN`, auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` on Render and Railway), never from the inbound `Host` header. Remote OAuth connectors therefore require `PUBLIC_ORIGIN`. Without it, both discovery endpoints answer `503` with `{ "error": "MCP OAuth needs PUBLIC_ORIGIN to be configured for this deployment." }`, the token endpoint answers `503` with `temporarily_unavailable`, the `401` challenge on `/_instatic/mcp` carries `scope="mcp"` but no `resource_metadata`, and OAuth access tokens do not authenticate. Personal access tokens keep working. Requests addressed to a loopback host (`localhost`, `127.0.0.1`, `::1`) are exempt and use their own origin so local development keeps working; the server warns at boot when no public origin is configured.
+The issuer, the `resource` value, and every URL in these documents come from the configured public origin (`PUBLIC_ORIGIN`, auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` on Render and Railway), never from the inbound `Host` header. Remote OAuth connectors therefore require `PUBLIC_ORIGIN`. Without it, both discovery endpoints answer `503` with `{ "error": "MCP OAuth needs PUBLIC_ORIGIN to be configured for this deployment." }`, the token endpoint answers `503` with `temporarily_unavailable`, the `401` challenge on `/_fourno/mcp` carries `scope="mcp"` but no `resource_metadata`, and OAuth access tokens do not authenticate. Personal access tokens keep working. Requests addressed to a loopback host (`localhost`, `127.0.0.1`, `::1`) are exempt and use their own origin so local development keeps working; the server warns at boot when no public origin is configured.
 
 The authorization sequence is:
 
@@ -63,9 +63,9 @@ Hosted MCP client
   → dynamically registers its exact callback URI
   → opens /admin/ai/oauth/authorize with resource + state + S256 challenge
   → user signs in, reviews the client, selects capabilities, and completes step-up
-  → Instatic redirects a one-time code to the registered callback
+  → Fourno redirects a one-time code to the registered callback
   → client exchanges code + verifier for opaque access and refresh tokens
-  → client calls /_instatic/mcp with the access token
+  → client calls /_fourno/mcp with the access token
 ```
 
 Security properties:
@@ -83,13 +83,13 @@ Security properties:
 
 ### Claude Desktop / Claude custom connector
 
-1. Deploy Instatic at a public HTTPS origin and set `PUBLIC_ORIGIN` to it (auto-detected on Render and Railway). The OAuth issuer is built only from this value.
-2. In Instatic, open **AI → MCP** and copy the **Remote MCP URL**.
+1. Deploy Fourno at a public HTTPS origin and set `PUBLIC_ORIGIN` to it (auto-detected on Render and Railway). The OAuth issuer is built only from this value.
+2. In Fourno, open **AI → MCP** and copy the **Remote MCP URL**.
 3. In Claude, open **Settings → Connectors**, add a custom connector, choose a name, and paste the URL.
 4. Leave **OAuth Client ID** and **OAuth Client Secret** empty. Claude can dynamically register as a public PKCE client.
-5. Choose **Connect**. The browser returns to Instatic, where the user selects capabilities and approves the connection.
+5. Choose **Connect**. The browser returns to Fourno, where the user selects capabilities and approves the connection.
 
-The resulting OAuth connection appears automatically under **Authorized connections**. No Instatic token is copied into Claude.
+The resulting OAuth connection appears automatically under **Authorized connections**. No Fourno token is copied into Claude.
 
 ## Personal access tokens
 
@@ -98,7 +98,7 @@ In **AI → MCP**, choose **Create access token**, name the device/client, choos
 Claude Code example:
 
 ```sh
-claude mcp add instatic --transport http http://localhost:3000/_instatic/mcp \
+claude mcp add fourno --transport http http://localhost:3000/_fourno/mcp \
   --header "Authorization: Bearer imcp_pat_…"
 ```
 
@@ -114,7 +114,7 @@ MCP client
   ▼
 server/router.ts
   ├─ OAuth metadata / registration / token endpoints
-  └─ /_instatic/mcp
+  └─ /_fourno/mcp
        ▼
 server/ai/mcp/auth.ts
   bearer → OAuth access token or personal token → connection capability set

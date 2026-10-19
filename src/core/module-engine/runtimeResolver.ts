@@ -4,7 +4,7 @@
  * The host owns the URLs. When the site has resolved its runtime
  * dependencies (`Dependencies Panel → Resolve runtime`), the server
  * persists a `packageImportmap` on `site.runtime` whose entries point at
- * the host's own `/_instatic/runtime/cache/<lockHash>/<name>/<entry>` route.
+ * the host's own `/_fourno/runtime/cache/<lockHash>/<name>/<entry>` route.
  * This file does NOT invent URLs — it just narrows that site-wide map to
  * the entries each iframe actually needs.
  *

@@ -1,5 +1,5 @@
 {
-  "name": "instatic",
+  "name": "fourno",
   "private": true,
   "version": "0.0.21",
   "engines": {
@@ -7,15 +7,14 @@
   },
   "packageManager": "pnpm@10.33.0",
   "description": "Self-hosted CMS with an integrated visual editor.",
-  "author": "David Babinec",
+  "author": "Fourno contributors",
   "license": "MIT",
-  "homepage": "https://instatic.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/corebunch/instatic.git"
+    "url": "https://github.com/fourno/fourno.git"
   },
   "bugs": {
-    "url": "https://github.com/corebunch/instatic/issues"
+    "url": "https://github.com/fourno/fourno/issues"
   },
   "type": "module",
   "scripts": {
@@ -44,7 +43,7 @@
     "icons:check": "tsx scripts/sync-icons.ts --check",
     "bootstrap:sync": "tsx scripts/sync-plugin-bootstrap.ts",
     "bootstrap:check": "tsx scripts/sync-plugin-bootstrap.ts --check",
-    "instatic-plugin": "tsx src/core/plugin-sdk/cli/index.ts",
+    "fourno-plugin": "tsx src/core/plugin-sdk/cli/index.ts",
     "bench": "tsx scripts/bench/index.ts",
     "bench:bundle": "tsx scripts/bench/index.ts --only=bundle",
     "bench:publisher": "tsx scripts/bench/index.ts --only=publisher",

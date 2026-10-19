@@ -153,7 +153,7 @@ export async function dispatchUpload(
 
   // For `'public-url'` adapters the renderer emits the absolute URL the
   // plugin returned. For `'signed-redirect'` (and the future `'proxy'`) we
-  // own the URL ourselves — the renderer emits `/_instatic/media/<id>/<path>`,
+  // own the URL ourselves — the renderer emits `/_fourno/media/<id>/<path>`,
   // browsers hit our router (`tryServeMediaRedirect`), and we ask the
   // adapter for a freshly-signed URL on every request. Substituting the
   // URL here (not in the plugin) keeps signing latency off the page render
@@ -175,14 +175,14 @@ export async function dispatchUpload(
 /**
  * Build the host-owned redirect URL for an adapter that wants to mint
  * signed URLs at read time (`'signed-redirect'`). The shape mirrors the
- * other `/_instatic/*` namespaces; the router's `tryServeMediaRedirect` does
+ * other `/_fourno/*` namespaces; the router's `tryServeMediaRedirect` does
  * the actual lookup + signing.
  *
  * Both segments are URI-encoded so storage paths containing slashes or
  * special chars round-trip cleanly. The router decodes the SAME way.
  */
 function buildSignedRedirectUrl(adapterId: string, storagePath: string): string {
-  return `/_instatic/media/${encodeURIComponent(adapterId)}/${encodeURIComponent(storagePath)}`
+  return `/_fourno/media/${encodeURIComponent(adapterId)}/${encodeURIComponent(storagePath)}`
 }
 
 /**

@@ -29,7 +29,7 @@
  * rewritten to a marker custom property:
  *
  *   `border-left: 1px solid var(--rule)`
- *     → `--instatic-sub-border-left: 1px solid var(--rule)`
+ *     → `--fourno-sub-border-left: 1px solid var(--rule)`
  *
  * and decoded back to its real property after the engine parse
  * (`decodeSubstitutionProperty`). The output is identical across engines BY
@@ -43,7 +43,7 @@
 import { isEmittableProperty } from '@core/publisher'
 import type { CSSDeclarationPriorityBag } from '@core/page-tree'
 /** Prefix for encoded substitution declarations. */
-export const SUBSTITUTION_PROP_MARKER = '--instatic-sub-'
+export const SUBSTITUTION_PROP_MARKER = '--fourno-sub-'
 
 /** CSS functions whose declarations must survive differing CSSOM implementations. */
 export const SUBSTITUTION_FN_RE = /\b(?:var|env|clamp|min|max)\(/i

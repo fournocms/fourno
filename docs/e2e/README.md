@@ -1,6 +1,6 @@
 # User E2E Testing
 
-This folder defines the agent-run browser testing workflow for Instatic.
+This folder defines the agent-run browser testing workflow for Fourno.
 
 - `protocol.md` explains how an agent should run user-facing E2E audits.
 - `feature-validation.tsv` is the canonical feature, test, and defect
@@ -21,7 +21,7 @@ Use these prompts with Codex:
 - "Retest E2E-20260514-01 from the last run."
 - "Promote PUB-001 into automated smoke coverage."
 
-The project-local `instatic-user-e2e` skill should load for those requests and keep the agent focused on browser-observed user behavior.
+The project-local `fourno-user-e2e` skill should load for those requests and keep the agent focused on browser-observed user behavior.
 
 ## Automated Playwright E2E
 

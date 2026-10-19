@@ -7,7 +7,7 @@
  * misbehaving plugin can't blank the canvas.
  *
  * Plugins position children using `useCanvasNodeRect(nodeId)` from
- * `@instatic/host-hooks`, which returns layer-relative coordinates
+ * `@fourno/host-hooks`, which returns layer-relative coordinates
  * already mapped through any pan/zoom transform on the canvas.
  *
  * Each overlay is mounted under a `PluginContext.Provider` carrying the

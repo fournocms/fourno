@@ -22,7 +22,7 @@ describe('publishPage runtime assets', () => {
 
     expect(html).toContain("script-src 'none'")
     expect(html).toContain("worker-src 'none'")
-    expect(html).not.toContain('data-instatic-runtime-script')
+    expect(html).not.toContain('data-fourno-runtime-script')
   })
 
   it('allows self-hosted scripts and injects head and body-end runtime assets', () => {
@@ -30,14 +30,14 @@ describe('publishPage runtime assets', () => {
       scripts: [
         {
           fileId: 'body-script',
-          src: '/_instatic/assets/runtime/body.123.js',
+          src: '/_fourno/assets/runtime/body.123.js',
           placement: 'body-end',
           timing: 'dom-ready',
           priority: 100,
         },
         {
           fileId: 'head-script',
-          src: '/_instatic/assets/runtime/head.123.js',
+          src: '/_fourno/assets/runtime/head.123.js',
           placement: 'head',
           timing: 'immediate',
           priority: 10,
@@ -51,27 +51,27 @@ describe('publishPage runtime assets', () => {
     expect(html).toContain("worker-src 'self' blob:")
     expect(html).not.toContain("script-src 'none'")
     expect(html).toContain(
-      '<script type="module" src="/_instatic/assets/runtime/head.123.js" data-instatic-runtime-script="head-script"></script>',
+      '<script type="module" src="/_fourno/assets/runtime/head.123.js" data-fourno-runtime-script="head-script"></script>',
     )
     expect(html).toContain(
-      '<script type="module" src="/_instatic/assets/runtime/body.123.js" data-instatic-runtime-script="body-script"></script>',
+      '<script type="module" src="/_fourno/assets/runtime/body.123.js" data-fourno-runtime-script="body-script"></script>',
     )
-    expect(html.indexOf('/_instatic/assets/runtime/head.123.js')).toBeLessThan(html.indexOf('</head>'))
-    expect(html.indexOf('/_instatic/assets/runtime/body.123.js')).toBeLessThan(html.indexOf('</body>'))
-    expect(html.indexOf('/_instatic/assets/runtime/body.123.js')).toBeGreaterThan(html.indexOf('<body>'))
+    expect(html.indexOf('/_fourno/assets/runtime/head.123.js')).toBeLessThan(html.indexOf('</head>'))
+    expect(html.indexOf('/_fourno/assets/runtime/body.123.js')).toBeLessThan(html.indexOf('</body>'))
+    expect(html.indexOf('/_fourno/assets/runtime/body.123.js')).toBeGreaterThan(html.indexOf('<body>'))
   })
 
   it('orders runtime scripts by priority within each placement', () => {
     const runtimeAssets: PublishedPageRuntimeAssets = {
       scripts: [
-        { fileId: 'b', src: '/_instatic/assets/runtime/b.js', placement: 'body-end', timing: 'dom-ready', priority: 20 },
-        { fileId: 'a', src: '/_instatic/assets/runtime/a.js', placement: 'body-end', timing: 'dom-ready', priority: 10 },
+        { fileId: 'b', src: '/_fourno/assets/runtime/b.js', placement: 'body-end', timing: 'dom-ready', priority: 20 },
+        { fileId: 'a', src: '/_fourno/assets/runtime/a.js', placement: 'body-end', timing: 'dom-ready', priority: 10 },
       ],
     }
 
     const { html } = publishPage(page, site, registry, { runtimeAssets })
 
-    expect(html.indexOf('/_instatic/assets/runtime/a.js')).toBeLessThan(html.indexOf('/_instatic/assets/runtime/b.js'))
+    expect(html.indexOf('/_fourno/assets/runtime/a.js')).toBeLessThan(html.indexOf('/_fourno/assets/runtime/b.js'))
   })
 
   it('emits classic runtime scripts without type=module', () => {
@@ -79,7 +79,7 @@ describe('publishPage runtime assets', () => {
       scripts: [
         {
           fileId: 'classic',
-          src: '/_instatic/assets/runtime/jquery.js',
+          src: '/_fourno/assets/runtime/jquery.js',
           format: 'classic',
           placement: 'body-end',
           timing: 'dom-ready',
@@ -91,10 +91,10 @@ describe('publishPage runtime assets', () => {
     const { html } = publishPage(page, site, registry, { runtimeAssets })
 
     expect(html).toContain(
-      '<script src="/_instatic/assets/runtime/jquery.js" data-instatic-runtime-script="classic"></script>',
+      '<script src="/_fourno/assets/runtime/jquery.js" data-fourno-runtime-script="classic"></script>',
     )
     expect(html).not.toContain(
-      '<script type="module" src="/_instatic/assets/runtime/jquery.js"',
+      '<script type="module" src="/_fourno/assets/runtime/jquery.js"',
     )
   })
 

@@ -63,11 +63,11 @@ describe('site module-JS map', () => {
 describe('injectModuleScripts', () => {
   it('appends sorted, versioned, deferred script tags before </body> and relaxes CSP', () => {
     const html = injectModuleScripts(HTML_DOC, ['z.widget', 'a.widget'], 7)
-    const aIdx = html.indexOf('data-instatic-module-js="a.widget"')
-    const zIdx = html.indexOf('data-instatic-module-js="z.widget"')
+    const aIdx = html.indexOf('data-fourno-module-js="a.widget"')
+    const zIdx = html.indexOf('data-fourno-module-js="z.widget"')
     expect(aIdx).toBeGreaterThan(-1)
     expect(zIdx).toBeGreaterThan(aIdx)
-    expect(html).toContain('<script src="/_instatic/module-js/a.widget.js?v=7" defer data-instatic-module-js="a.widget"></script>')
+    expect(html).toContain('<script src="/_fourno/module-js/a.widget.js?v=7" defer data-fourno-module-js="a.widget"></script>')
     expect(zIdx).toBeLessThan(html.indexOf('</body>'))
     expect(html).toContain("script-src 'self';")
     expect(html).not.toContain("script-src 'none';")

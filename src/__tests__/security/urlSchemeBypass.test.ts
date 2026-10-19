@@ -25,7 +25,7 @@ import { escapeHtml, hasDangerousUrlScheme, isSafeUrl, safeUrl } from '@core/htm
 import { sanitizeRenderableHtmlAttribute } from '@core/htmlAttributes'
 import { safeUrl as sdkSafeUrl } from '@core/plugin-sdk'
 
-const PARSE_BASE = 'https://instatic.invalid/'
+const PARSE_BASE = 'https://fourno.invalid/'
 const DANGEROUS_SCHEMES = new Set(['javascript:', 'vbscript:', 'data:'])
 
 function browserScheme(value: string): string | null {

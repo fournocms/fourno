@@ -151,7 +151,7 @@ export function originAllowed(req: Request): boolean {
  * standard one, and any inbound version is stripped in `stampSocketIp`
  * before we set our own value — clients cannot spoof it.
  */
-const SOCKET_IP_HEADER = 'x-instatic-socket-ip'
+const SOCKET_IP_HEADER = 'x-fourno-socket-ip'
 
 interface ParsedIpAddress {
   family: 4 | 6
@@ -334,7 +334,7 @@ export function stampSocketIp(req: Request, address: string | null): void {
  *      `X-Forwarded-For` right-to-left and return the nearest untrusted IP.
  *      That avoids trusting a spoofed leftmost value preserved by the proxy.
  *   2. Otherwise ignore forwarding headers and fall back to the synthetic
- *      `x-instatic-socket-ip` header that `stampSocketIp` writes from
+ *      `x-fourno-socket-ip` header that `stampSocketIp` writes from
  *      the connection peer address. That covers dev (`pnpm dev`) and any
  *      self-hosted deployment without a fronting proxy.
  *   3. If neither is available, return `null` — audit/activity logs render

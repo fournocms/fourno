@@ -68,7 +68,7 @@ async function rpc(method: string, params: unknown): Promise<{ status: number; j
   if (method === 'tools/call' && typeof modernParams.name === 'string') {
     headers['Mcp-Name'] = modernParams.name
   }
-  const req = new Request('http://localhost/_instatic/mcp', {
+  const req = new Request('http://localhost/_fourno/mcp', {
     method: 'POST',
     headers,
     body: JSON.stringify({ jsonrpc: '2.0', id: nextId++, method, params: modernParams }),
@@ -114,7 +114,7 @@ describe('MCP end-to-end (2026-07-28 stateless requests, real handler)', () => {
           'io.modelcontextprotocol/clientCapabilities': {},
         },
       }
-      return new Request('http://localhost/_instatic/mcp', {
+      return new Request('http://localhost/_fourno/mcp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

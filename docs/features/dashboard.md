@@ -253,7 +253,7 @@ Endpoints that don't bin timestamps receive the `?tz=` param but ignore it. The 
 - **`databaseBytes`** — SQLite stats the `.db` file plus its `-wal` / `-shm` sidecars when present; Postgres runs `select pg_database_size(current_database())`.
 - **`dialect`** — `db.dialect`, surfaced verbatim so the widget caption can show "SQLite" / "Postgres".
 
-There is **no quota** — self-hosted Instatic never imposes an artificial disk cap, so the widget shows real usage and stretches its breakdown bar to fill the full width.
+There is **no quota** — self-hosted Fourno never imposes an artificial disk cap, so the widget shows real usage and stretches its breakdown bar to fill the full width.
 
 Each CMS hook fetches on mount through `useAsyncResource` + `apiRequest`, validates the response with TypeBox, sends the viewer's `tz` query, aborts on unmount, and leaves the widget in its skeleton/empty state on failure. There is no shared dashboard aggregate request and the header `RangeTabs` state does not change first-party endpoint queries today; first-party widget scopes are fixed per hook (`this week`, 28 days, this month, etc.).
 

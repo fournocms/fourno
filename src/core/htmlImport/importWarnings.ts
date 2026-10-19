@@ -2,7 +2,7 @@
  * Import-time diagnostics for authored references the importer cannot verify
  * by shape alone.
  *
- * `<instatic-loop data-source-id="…">` carries a string that must name a
+ * `<fourno-loop data-source-id="…">` carries a string that must name a
  * registered loop source. Nothing checked it: the id was copied verbatim into
  * props, `site_insert_html` reported success, the document persisted intact,
  * and at publish time `loopPrefetch` turned the unregistered source into a

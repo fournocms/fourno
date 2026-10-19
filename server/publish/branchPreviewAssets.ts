@@ -3,14 +3,14 @@
  *
  * A published page's scripts live on disk (the active slot) or in the
  * database; a branch preview builds its bundles on demand and keeps them
- * here, in memory, under `/_instatic/assets/preview/<build>/…`. The build id
+ * here, in memory, under `/_fourno/assets/preview/<build>/…`. The build id
  * is a hash of everything the bundle depends on, so repeated views of the
  * same branch state reuse one build, and a changed script mints a new one.
  * Bounded: the oldest builds are dropped past the cap.
  */
 import type { BuiltRuntimeAssetFile } from './runtime/bundleScripts'
 
-export const BRANCH_PREVIEW_ASSET_PREFIX = '/_instatic/assets/preview/'
+export const BRANCH_PREVIEW_ASSET_PREFIX = '/_fourno/assets/preview/'
 const MAX_BUILDS = 32
 
 interface PreviewAsset {

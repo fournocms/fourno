@@ -3,14 +3,14 @@
  * persistence, mirroring the editor-layout sidebar-width pattern.
  *
  * Storage shape: `{ version: 1, widths: { [tableId]: number } }` under the
- * key `instatic-data-grid-primary-widths-v1`. Validated by TypeBox; corrupted
+ * key `fourno-data-grid-primary-widths-v1`. Validated by TypeBox; corrupted
  * blobs gracefully fall back to defaults rather than throwing.
  */
 import { useState } from 'react'
 import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { safeParseJson } from '@core/utils/jsonValidate'
 
-const STORAGE_KEY = 'instatic-data-grid-primary-widths-v1'
+const STORAGE_KEY = 'fourno-data-grid-primary-widths-v1'
 
 const PRIMARY_COLUMN_DEFAULT_WIDTH = 280
 const PRIMARY_COLUMN_MIN_WIDTH = 200

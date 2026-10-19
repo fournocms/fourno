@@ -61,7 +61,7 @@ export const MediaNode = Node.create({
   },
 
   parseHTML() {
-    return [{ tag: 'figure[data-instatic-media]' }]
+    return [{ tag: 'figure[data-fourno-media]' }]
   },
 
   renderHTML({ HTMLAttributes, node }) {
@@ -71,7 +71,7 @@ export const MediaNode = Node.create({
       : ['img', { src: attrs.src, alt: attrs.alt }]
     return [
       'figure',
-      mergeAttributes(HTMLAttributes, { 'data-instatic-media': '' }),
+      mergeAttributes(HTMLAttributes, { 'data-fourno-media': '' }),
       inner,
     ]
   },

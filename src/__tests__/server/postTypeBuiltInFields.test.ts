@@ -33,7 +33,7 @@ import {
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 
 async function setupDb(): Promise<{ db: DbClient; cleanup: () => Promise<void> }> {
-  const dir = await mkdtemp(join(tmpdir(), 'instatic-posttype-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fourno-posttype-'))
   const db = createSqliteClient(join(dir, 'test.db'))
   await runMigrations(db, sqliteMigrations)
   return {

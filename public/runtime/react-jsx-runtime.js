@@ -9,10 +9,10 @@
  * each plugin uses the host's React JSX runtime — same instance, same
  * dispatcher, no duplicate-React crash.
  */
-const G = globalThis.__instatic?.ReactJsxRuntime
+const G = globalThis.__fourno?.ReactJsxRuntime
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host React JSX runtime not initialized. Did the host bundle finish loading before the plugin import?",
+    "[@fourno/runtime] Host React JSX runtime not initialized. Did the host bundle finish loading before the plugin import?",
   )
 }
 

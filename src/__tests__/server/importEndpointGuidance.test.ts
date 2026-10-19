@@ -21,7 +21,7 @@ import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { handleImportRoute } from '../../../server/handlers/cms/import'
 
 async function setupDb(): Promise<{ db: DbClient; cleanup: () => Promise<void> }> {
-  const dir = await mkdtemp(join(tmpdir(), 'instatic-import-guide-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fourno-import-guide-'))
   const db = createSqliteClient(join(dir, 'test.db'))
   await runMigrations(db, sqliteMigrations)
   return {

@@ -136,7 +136,7 @@ export function BreakpointFrame({
     // active page's editable content — spliced inside the template wrapper —
     // does NOT show the hint.
     const region = closestReadonlyRegion(event.target)
-    const label = region?.getAttribute('data-instatic-readonly-label') ?? null
+    const label = region?.getAttribute('data-fourno-readonly-label') ?? null
     setReadonlyHint(
       label ? { text: `Part of ${label} — double-click to edit`, point: clientPointToEditorDoc(event) } : null,
     )

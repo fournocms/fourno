@@ -3,7 +3,7 @@
  *
  * Every repository call on the branched tables (`site`, `data_tables`,
  * `data_rows`) takes a `BranchScope` explicitly. CMS requests resolve theirs
- * once, from the `X-Instatic-Branch` header, in the dispatcher; paths that
+ * once, from the `X-Fourno-Branch` header, in the dispatcher; paths that
  * are only ever meaningful for the live site (publishing, scheduling, public
  * routes, forms, plugins, the dashboard, MCP headless reads) pass
  * `MAIN_SCOPE`.
@@ -20,7 +20,7 @@ export interface BranchScope {
 
 export const MAIN_SCOPE: BranchScope = Object.freeze({ branchId: MAIN_BRANCH_ID })
 
-export const BRANCH_HEADER = 'x-instatic-branch'
+export const BRANCH_HEADER = 'x-fourno-branch'
 
 /** Error code the client keys on to fall back to main. */
 export const BRANCH_NOT_FOUND_CODE = 'branch_not_found'

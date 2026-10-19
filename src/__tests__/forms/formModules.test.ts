@@ -63,9 +63,9 @@ describe('base form primitive modules', () => {
     }, ['<input name="email">'])
 
     expect(output.html).toContain('<form')
-    expect(output.html).toContain('data-instatic-form-id="newsletter"')
-    expect(output.html).toContain('data-instatic-form-mode="cms"')
-    expect(output.html).toContain('data-instatic-success-message="Thanks"')
+    expect(output.html).toContain('data-fourno-form-id="newsletter"')
+    expect(output.html).toContain('data-fourno-form-mode="cms"')
+    expect(output.html).toContain('data-fourno-success-message="Thanks"')
     expect(output.html).toContain('<input type="text" name="company"')
     expect(output.html).toContain('<input name="email">')
     expect(output.html).toContain('</form>')
@@ -73,7 +73,7 @@ describe('base form primitive modules', () => {
 
   it('renders labels and text-like controls as semantic HTML', () => {
     expect(LabelModule.render({ text: 'Email', targetMode: 'auto', targetId: '' }, []).html)
-      .toBe('<label data-instatic-label-target="auto">Email</label>')
+      .toBe('<label data-fourno-label-target="auto">Email</label>')
 
     const input = InputModule.render({
       inputType: 'email',
@@ -95,8 +95,8 @@ describe('base form primitive modules', () => {
 
     expect(input).toContain('<input')
     expect(input).toContain('type="email"')
-    expect(input).toContain('data-instatic-form-control="input"')
-    expect(input).toContain('data-instatic-field-id="email"')
+    expect(input).toContain('data-fourno-form-control="input"')
+    expect(input).toContain('data-fourno-field-id="email"')
     expect(input).toContain('name="email"')
     expect(input).toContain('required')
     expect(input).toContain('autocomplete="email"')
@@ -115,7 +115,7 @@ describe('base form primitive modules', () => {
       rows: 4,
       minLength: 0,
       maxLength: 500,
-    }, []).html).toBe('<textarea data-instatic-form-control="textarea" data-instatic-field-id="message" name="message" id="message-input" placeholder="Message" rows="4" maxlength="500">Hello</textarea>')
+    }, []).html).toBe('<textarea data-fourno-form-control="textarea" data-fourno-field-id="message" name="message" id="message-input" placeholder="Message" rows="4" maxlength="500">Hello</textarea>')
 
     expect(OptionModule.render({ value: 'pro', label: 'Pro', selected: true, disabled: false }, []).html)
       .toBe('<option value="pro" selected>Pro</option>')
@@ -131,7 +131,7 @@ describe('base form primitive modules', () => {
       disabled: false,
       multiple: false,
     }, ['<option value="pro">Pro</option>']).html)
-      .toBe('<select data-instatic-form-control="select" data-instatic-field-id="plan" name="plan" id="plan-select" required><option value="pro">Pro</option></select>')
+      .toBe('<select data-fourno-form-control="select" data-fourno-field-id="plan" name="plan" id="plan-select" required><option value="pro">Pro</option></select>')
   })
 
   it('renders choice controls, submit, and form messages', () => {
@@ -143,7 +143,7 @@ describe('base form primitive modules', () => {
       checked: true,
       required: true,
       disabled: false,
-    }, []).html).toBe('<input type="checkbox" data-instatic-form-control="checkbox" data-instatic-field-id="agree" name="agree" id="agree-input" value="yes" checked required>')
+    }, []).html).toBe('<input type="checkbox" data-fourno-form-control="checkbox" data-fourno-field-id="agree" name="agree" id="agree-input" value="yes" checked required>')
 
     expect(RadioModule.render({
       fieldId: 'plan',
@@ -153,7 +153,7 @@ describe('base form primitive modules', () => {
       checked: false,
       required: false,
       disabled: false,
-    }, []).html).toBe('<input type="radio" data-instatic-form-control="radio" data-instatic-field-id="plan" name="plan" id="plan-pro" value="pro">')
+    }, []).html).toBe('<input type="radio" data-fourno-form-control="radio" data-fourno-field-id="plan" name="plan" id="plan-pro" value="pro">')
 
     expect(SubmitModule.render({ label: 'Subscribe', disabled: false, formId: '' }, []).html)
       .toBe('<button type="submit">Subscribe</button>')
@@ -162,7 +162,7 @@ describe('base form primitive modules', () => {
       formId: 'newsletter',
       kind: 'success',
       text: 'Thanks',
-    }, []).html).toBe('<div data-instatic-form-message="success" data-instatic-form-id="newsletter" role="status">Thanks</div>')
+    }, []).html).toBe('<div data-fourno-form-message="success" data-fourno-form-id="newsletter" role="status">Thanks</div>')
   })
 
   it('escapes authored form text and attributes through the publisher boundary', () => {
@@ -218,15 +218,15 @@ describe('base form primitive modules', () => {
       redirectUrl: 'javascript:alert(1)',
     }, [])
 
-    expect(formOutput.html).toContain('data-instatic-form-id="Contact-Form"')
+    expect(formOutput.html).toContain('data-fourno-form-id="Contact-Form"')
     expect(formOutput.html).toContain('action="https://example.com/submit"')
-    expect(formOutput.html).toContain('data-instatic-success-redirect="#"')
+    expect(formOutput.html).toContain('data-fourno-success-redirect="#"')
     expect(formOutput.html).not.toContain('javascript:')
     expect(formOutput.js).toBeUndefined()
 
     expect(SubmitModule.render({ ...SubmitModule.defaults, formId: 'Contact Form!' }, []).html)
       .toBe('<button type="submit" form="Contact-Form">Submit</button>')
     expect(FormMessageModule.render({ ...FormMessageModule.defaults, formId: 'Contact Form!' }, []).html)
-      .toContain('data-instatic-form-id="Contact-Form"')
+      .toContain('data-fourno-form-id="Contact-Form"')
   })
 })

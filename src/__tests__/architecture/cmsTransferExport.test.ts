@@ -340,11 +340,11 @@ describe('handleExportRoute — GET ?includeMedia=1', () => {
     expect(source).not.toContain('readFile(join(uploadsDir')
   })
 
-  test('returns a zip archive with media metadata in the Instatic manifest and bytes under media/', async () => {
+  test('returns a zip archive with media metadata in the Fourno manifest and bytes under media/', async () => {
     const mediaDb = createSqliteClient(':memory:')
     await runMigrations(mediaDb, sqliteMigrations)
     const mediaCookie = await seedAuth(mediaDb)
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-export-media-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-export-media-'))
     try {
       await writeFile(join(uploadsDir, 'logo.png'), Buffer.from('fake-png-bytes'))
       await createMediaAsset(mediaDb, {
@@ -514,7 +514,7 @@ describe('handleExportRoute — POST /export/estimate with embedded media', () =
     await runMigrations(mediaDb, sqliteMigrations)
     const mediaCookie = await seedAuth(mediaDb)
 
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-export-estimate-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-export-estimate-'))
     try {
       // Seed one media asset whose bytes live on disk. 5000 raw bytes → a
       // Base64 payload that isn't a clean multiple of 3 (exercises padding).

@@ -49,15 +49,15 @@ describe('plugin secret settings repository', () => {
   let originalSecretKey: string | undefined
 
   beforeEach(async () => {
-    originalSecretKey = process.env.INSTATIC_SECRET_KEY
-    process.env.INSTATIC_SECRET_KEY = TEST_MASTER_KEY
+    originalSecretKey = process.env.FOURNO_SECRET_KEY
+    process.env.FOURNO_SECRET_KEY = TEST_MASTER_KEY
     __resetMasterKeyCacheForTesting()
     testDb = await createTestDb()
   })
 
   afterEach(async () => {
-    if (originalSecretKey === undefined) delete process.env.INSTATIC_SECRET_KEY
-    else process.env.INSTATIC_SECRET_KEY = originalSecretKey
+    if (originalSecretKey === undefined) delete process.env.FOURNO_SECRET_KEY
+    else process.env.FOURNO_SECRET_KEY = originalSecretKey
     __resetMasterKeyCacheForTesting()
     await testDb.cleanup()
   })

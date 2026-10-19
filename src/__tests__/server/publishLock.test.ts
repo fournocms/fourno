@@ -11,7 +11,7 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 /**
  * ISS-038: publish version allocation is a non-atomic read → bake (await) →
  * bump split. Two concurrent publishes both read version N and stamp every
- * <instatic-hole> shell with N+1, then each bump independently to N+2 —
+ * <fourno-hole> shell with N+1, then each bump independently to N+2 —
  * leaving the baked shells permanently mis-stamped (served as stale). Running
  * each publish under withPublishLock serializes the read/bake/bump window.
  */

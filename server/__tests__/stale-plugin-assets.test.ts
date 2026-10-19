@@ -47,7 +47,7 @@ const versionsOf = async (pluginId: string): Promise<string[]> =>
   (await readdir(join(uploadsDir, 'plugins', pluginId), { withFileTypes: true }))
     .filter((e) => e.isDirectory()).map((e) => e.name).sort()
 
-beforeEach(async () => { uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-sweep-')) })
+beforeEach(async () => { uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-sweep-')) })
 afterEach(async () => { await rm(uploadsDir, { recursive: true, force: true }) })
 
 describe('sweepStalePluginVersionAssets', () => {

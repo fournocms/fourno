@@ -1,6 +1,6 @@
 export type MediaViewMode = 'list' | 'grid'
 
-const MEDIA_VIEW_MODE_STORAGE_KEY = 'instatic-media-page-view-mode'
+const MEDIA_VIEW_MODE_STORAGE_KEY = 'fourno-media-page-view-mode'
 
 export function readStoredMediaViewMode(): MediaViewMode {
   try {

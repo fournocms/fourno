@@ -73,10 +73,10 @@ async function expectDynamicFragmentVisitor(
 
   visitor.on('response', (response) => {
     const url = new URL(response.url())
-    if (url.pathname.startsWith('/_instatic/hole/')) {
+    if (url.pathname.startsWith('/_fourno/hole/')) {
       holeResponses.push(responseRecord(response.url(), response.status(), response.headers()))
     }
-    if (url.pathname === '/_instatic/hole-runtime.js') {
+    if (url.pathname === '/_fourno/hole-runtime.js') {
       runtimeResponses.push(responseRecord(response.url(), response.status(), response.headers()))
     }
   })
@@ -86,14 +86,14 @@ async function expectDynamicFragmentVisitor(
     expect(response, 'public page response').not.toBeNull()
     expect(response!.status(), 'public page status').toBe(200)
     const shellHtml = await response!.text()
-    expect(shellHtml).toContain('<instatic-hole')
-    expect(shellHtml).toContain('/_instatic/hole-runtime.js')
+    expect(shellHtml).toContain('<fourno-hole')
+    expect(shellHtml).toContain('/_fourno/hole-runtime.js')
     expect(shellHtml).not.toContain(options.expectedText)
 
     await expect(visitor.getByText(options.expectedText, { exact: true })).toBeVisible({
       timeout: 10_000,
     })
-    await expect(visitor.locator('instatic-hole')).toHaveCount(0)
+    await expect(visitor.locator('fourno-hole')).toHaveCount(0)
     await expect(visitor.locator('[data-testid="canvas-root"]')).toHaveCount(0)
     await expectNoHorizontalOverflow(visitor)
 

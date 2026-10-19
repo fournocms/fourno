@@ -38,8 +38,8 @@ export function MediaUploadPlaceholderView(props: MediaUploadPlaceholderViewProp
     <NodeViewWrapper
       as="figure"
       className={styles.frame}
-      data-instatic-upload-placeholder=""
-      data-instatic-upload-status={attrs.status}
+      data-fourno-upload-placeholder=""
+      data-fourno-upload-status={attrs.status}
       role="status"
       aria-live="polite"
       aria-busy={attrs.status === 'uploading'}

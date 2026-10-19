@@ -277,7 +277,7 @@ async function stageArchiveMediaEntries(input: {
   selectedManifest: SiteBundleArchiveManifest
 }): Promise<StagedArchiveMedia> {
   const stagedMedia: StagedArchiveMedia = {
-    stagingDir: await mkdtemp(join(tmpdir(), 'instatic-import-media-')),
+    stagingDir: await mkdtemp(join(tmpdir(), 'fourno-import-media-')),
     entries: [],
   }
 

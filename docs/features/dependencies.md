@@ -100,7 +100,7 @@ GET /admin/api/cms/registry/packages/:name/advisories?version=  → { advisories
 ## Related
 
 - [`site-shell.md`](site-shell.md) — `SitePackageJson`, `SiteRuntimeConfig`, the dependency lock and the importmap the publisher emits.
-- [`publisher.md`](publisher.md) — how locked packages are served from `/_instatic/runtime/cache/<hash>/`.
+- [`publisher.md`](publisher.md) — how locked packages are served from `/_fourno/runtime/cache/<hash>/`.
 - [`auth-and-access.md`](auth-and-access.md) — the `site.read` / `runtime.dependencies` capabilities.
 - [`../server.md`](../server.md) — CMS route dispatch and the boot-time config that sets the registry URL.
 - [`../design.md`](../design.md) — the tile-card pattern the panel is built on.

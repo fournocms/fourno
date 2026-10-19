@@ -1,8 +1,8 @@
 # Release Workflow
 
-This maintainer guide covers publishing Instatic Docker images.
+This maintainer guide covers publishing Fourno Docker images.
 
-End users do not need this page to deploy Instatic. They follow [railway.md](railway.md), [render.md](render.md), [vps.md](vps.md), or [docker-image.md](docker-image.md). Maintainers use this page to keep `ghcr.io/corebunch/instatic` release tags aligned with source tags and deployment templates.
+End users do not need this page to deploy Fourno. They follow [railway.md](railway.md), [render.md](render.md), [vps.md](vps.md), or [docker-image.md](docker-image.md). Maintainers use this page to keep `ghcr.io/fourno/fourno` release tags aligned with source tags and deployment templates.
 
 ---
 
@@ -11,9 +11,9 @@ End users do not need this page to deploy Instatic. They follow [railway.md](rai
 Release image tags:
 
 ```txt
-ghcr.io/corebunch/instatic:latest
-ghcr.io/corebunch/instatic:<semver>
-ghcr.io/corebunch/instatic:<major>.<minor>
+ghcr.io/fourno/fourno:latest
+ghcr.io/fourno/fourno:<semver>
+ghcr.io/fourno/fourno:<major>.<minor>
 ```
 
 Release flow:
@@ -38,13 +38,13 @@ docs/deployment/docker-image.md
 docs/deployment/railway.md
 ```
 
-The checked-in Render Blueprints use `ghcr.io/corebunch/instatic:latest` for new one-click installs. `scripts/build-release-bundle.ts` rewrites the release-bundle copies to the semver image tag automatically.
+The checked-in Render Blueprints use `ghcr.io/fourno/fourno:latest` for new one-click installs. `scripts/build-release-bundle.ts` rewrites the release-bundle copies to the semver image tag automatically.
 
 After the release image is published, copy the two Render Blueprint files into the dedicated template repositories as their root `render.yaml` files when their non-versioned template configuration changes:
 
 ```txt
-corebunch/instatic-render-sqlite
-corebunch/instatic-render-postgres
+fourno/fourno-render-sqlite
+fourno/fourno-render-postgres
 ```
 
 ## Tag A Release
@@ -57,15 +57,15 @@ git push origin v0.0.1
 The release workflow publishes:
 
 ```txt
-ghcr.io/corebunch/instatic:0.0.1
-ghcr.io/corebunch/instatic:0.0
-ghcr.io/corebunch/instatic:latest
+ghcr.io/fourno/fourno:0.0.1
+ghcr.io/fourno/fourno:0.0
+ghcr.io/fourno/fourno:latest
 ```
 
 It also uploads:
 
 ```txt
-instatic-0.0.1-release-bundle.tar.gz
+fourno-0.0.1-release-bundle.tar.gz
 ```
 
 Release notes should link to:
@@ -107,8 +107,8 @@ docker compose -f compose.prod.yml -f compose.build.yml up -d --build
 Or build and tag an image manually:
 
 ```sh
-docker build -t ghcr.io/corebunch/instatic:dev .
-INSTATIC_IMAGE=ghcr.io/corebunch/instatic:dev docker compose -f compose.prod.yml up -d
+docker build -t ghcr.io/fourno/fourno:dev .
+FOURNO_IMAGE=ghcr.io/fourno/fourno:dev docker compose -f compose.prod.yml up -d
 ```
 
 ## GitHub Actions Shape
@@ -127,17 +127,17 @@ The first release targets `linux/amd64` because QEMU-based arm64 publishing made
 
 ## Image Registry
 
-GHCR (`ghcr.io/corebunch/instatic`) is the only published registry. It is produced directly by the release workflow, is public, and has no aggressive anonymous pull-rate limits — use it in every Compose file, template, and deployment guide. There is no Docker Hub mirror; if one is ever wanted, add a `Mirror To Docker Hub` job plus `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
+GHCR (`ghcr.io/fourno/fourno`) is the only published registry. It is produced directly by the release workflow, is public, and has no aggressive anonymous pull-rate limits — use it in every Compose file, template, and deployment guide. There is no Docker Hub mirror; if one is ever wanted, add a `Mirror To Docker Hub` job plus `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
 
 ## GHCR Visibility
 
-After the first successful tagged release, open the package page for `ghcr.io/corebunch/instatic` in GitHub Packages and set visibility to public.
+After the first successful tagged release, open the package page for `ghcr.io/fourno/fourno` in GitHub Packages and set visibility to public.
 
 Verify anonymous pulls work:
 
 ```sh
 docker logout ghcr.io
-docker pull ghcr.io/corebunch/instatic:latest
+docker pull ghcr.io/fourno/fourno:latest
 ```
 
 ## Related

@@ -27,7 +27,7 @@ describe('removeDataRowArtefact', () => {
     cleanup: () => Promise<void>
   }> {
     const { db, cleanup: dbCleanup } = await createTestDb()
-    const uploadsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'fourno-uploads-'))
     const rowId = crypto.randomUUID()
     const slug = 'ghost-post'
     // 'pages' is a seeded system table with route_base '' → public path "/<slug>".

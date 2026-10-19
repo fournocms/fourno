@@ -57,7 +57,7 @@ describe('branch preview links', () => {
     expect(issued.status).toBe(201)
     const { url, preview } = await readJson<{ url: string; preview: { branchId: string } }>(issued)
     expect(preview.branchId).toBe('preview-me')
-    expect(url).toMatch(/\/_instatic\/preview\/[A-Za-z0-9_-]{20,}$/)
+    expect(url).toMatch(/\/_fourno\/preview\/[A-Za-z0-9_-]{20,}$/)
 
     const active = await readJson<{ preview: { id: string } | null }>(
       await harness.cms(`${BRANCHES}/preview-me/preview`, { cookie: owner }),
@@ -69,7 +69,7 @@ describe('branch preview links', () => {
     expect(entry.status).toBe(302)
     expect(entry.headers.get('location')).toBe('/')
     const cookie = cookieFrom(entry)
-    expect(cookie.startsWith('instatic_branch_preview=')).toBe(true)
+    expect(cookie.startsWith('fourno_branch_preview=')).toBe(true)
     expect(entry.headers.get('set-cookie')).toContain('HttpOnly')
 
     // With the cookie the root renders the branch draft, banner included.
@@ -80,14 +80,14 @@ describe('branch preview links', () => {
     const html = await previewed.text()
     expect(html).toContain('Branch-only headline')
     expect(html).toContain('Previewing branch <strong>Preview Me</strong>')
-    expect(html).toContain('/_instatic/preview/exit')
+    expect(html).toContain('/_fourno/preview/exit')
 
     // Without the cookie nothing is published yet, so the root is not the branch.
     const plain = await handleServerRequest(publicRequest('/'), { db: harness.db })
     expect(plain.status).not.toBe(200)
 
     // Exit clears the cookie.
-    const exit = await handleServerRequest(publicRequest('/_instatic/preview/exit', cookie), { db: harness.db })
+    const exit = await handleServerRequest(publicRequest('/_fourno/preview/exit', cookie), { db: harness.db })
     expect(exit.status).toBe(302)
     expect(exit.headers.get('set-cookie')).toContain('Max-Age=0')
 

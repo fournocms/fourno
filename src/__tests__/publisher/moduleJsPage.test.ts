@@ -37,7 +37,7 @@ describe('publishPage jsModuleIds', () => {
     })
     const site = makeSite({ pages: [page] })
     const { html, jsModuleIds } = publishPage(page, site, registry)
-    expect(html).toContain('<instatic-hole')
+    expect(html).toContain('<fourno-hole')
     expect(jsModuleIds).toEqual(['test.jsy', 'test.live'])
   })
 

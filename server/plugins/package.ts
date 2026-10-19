@@ -64,7 +64,7 @@ export async function readPluginPackage(file: File): Promise<PluginPackage> {
   }
 
   // Install-time sandbox scan — defense-in-depth against bundles that
-  // didn't go through `instatic-plugin build` (raw zips, third-party packagers).
+  // didn't go through `fourno-plugin build` (raw zips, third-party packagers).
   // The server entrypoint and module pack BOTH run inside the QuickJS
   // sandbox; both must be free of Node/Bun primitives.
   const serverEntry = manifest.entrypoints?.server

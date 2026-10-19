@@ -4,7 +4,7 @@
  * Polymorphic: the composer either splices matched content (a page tree or a
  * nested template) in place of this node, OR — for the innermost outlet on an
  * entry route — leaves it here to render the current entry's body. The
- * `data-instatic-content-region` marker is what the Content workspace's Live
+ * `data-fourno-content-region` marker is what the Content workspace's Live
  * mode mounts Tiptap against, so it is emitted unconditionally.
  *
  * The outlet renders as an author-chosen semantic element (default `<main>`),
@@ -57,7 +57,7 @@ export const OutletModule: ModuleDefinition<OutletStoredProps> = {
   render: (props) => {
     const tag = resolveHtmlTag(props.tag, props.customTag)
     const html = typeof props.html === 'string' ? props.html : ''
-    return { html: `<${tag} data-instatic-content-region>${html}</${tag}>` }
+    return { html: `<${tag} data-fourno-content-region>${html}</${tag}>` }
   },
 }
 

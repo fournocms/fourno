@@ -1,6 +1,6 @@
 /**
  * Resolve plugin-build / plugin-dev configuration without an explicit
- * `instatic-plugin login` step. The dev workflow is filesystem-direct — the CLI
+ * `fourno-plugin login` step. The dev workflow is filesystem-direct — the CLI
  * writes built plugin files into the running CMS's `uploads/plugins/<id>/<version>/`
  * directory, and the host's server module loader picks the changes up
  * automatically via the `?v=Date.now()` cache buster on its dynamic import.
@@ -8,11 +8,11 @@
  * That means the only thing the CLI needs to know is *where the host's
  * uploads directory lives*. Resolution order, highest-priority first:
  *
- *   1. CLI flag:   `instatic-plugin dev --uploads <path>`
- *   2. Environment: `INSTATIC_UPLOADS_DIR=<path> instatic-plugin dev`
+ *   1. CLI flag:   `fourno-plugin dev --uploads <path>`
+ *   2. Environment: `FOURNO_UPLOADS_DIR=<path> fourno-plugin dev`
  *   3. Auto-detect: walk up from the plugin source dir looking for an
  *      `uploads/plugins/` sibling — covers the common case of editing a
- *      first-party plugin inside the instatic monorepo.
+ *      first-party plugin inside the fourno monorepo.
  *
  * No login, no API tokens, no env-mode flag. The filesystem is the gate.
  * Whoever can write to `uploads/plugins/` already has the same effective
@@ -71,7 +71,7 @@ export function resolvePluginDevConfig(
     }
   }
 
-  const envUploads = env.INSTATIC_UPLOADS_DIR
+  const envUploads = env.FOURNO_UPLOADS_DIR
   if (envUploads && envUploads.trim()) {
     return {
       uploadsDir: isAbsolute(envUploads)
@@ -92,11 +92,11 @@ export function resolvePluginDevConfig(
       ``,
       `Provide it explicitly with one of:`,
       `  • --uploads <path>            (CLI flag)`,
-      `  • INSTATIC_UPLOADS_DIR=<path>        (environment variable)`,
+      `  • FOURNO_UPLOADS_DIR=<path>        (environment variable)`,
       ``,
-      `…or run \`instatic-plugin dev\` from a plugin folder whose ancestor contains an`,
+      `…or run \`fourno-plugin dev\` from a plugin folder whose ancestor contains an`,
       `\`uploads/plugins/\` directory (the default for first-party plugins inside`,
-      `the instatic monorepo).`,
+      `the fourno monorepo).`,
     ].join('\n'),
   )
 }

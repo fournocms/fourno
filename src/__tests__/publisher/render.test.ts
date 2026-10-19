@@ -186,7 +186,7 @@ describe('renderNode', () => {
       canHaveChildren: true,
       render: (props, children) => ({
         html: `<div class="${props.className}">${children.join('')}</div>`,
-        css: '.instatic-container { display: block; }',
+        css: '.fourno-container { display: block; }',
       }),
     },
   )
@@ -307,7 +307,7 @@ describe('renderNode', () => {
     })
     const c = ctx(page)
     const html = render('root', c)
-    expect(html).toContain('<!-- instatic: unknown module')
+    expect(html).toContain('<!-- fourno: unknown module')
     expect(html).toContain('unknown.widget')
   })
 
@@ -539,7 +539,7 @@ describe('renderNode', () => {
       // This locks in the original Case-1 behaviour for the case it was meant
       // to handle: a module render() that already emits a class on the root.
       const classedDef = makeModule('base.classed', {
-        render: () => ({ html: '<button class="instatic-btn">Click</button>' }),
+        render: () => ({ html: '<button class="fourno-btn">Click</button>' }),
       })
       const reg = makeRegistry({ 'base.classed': classedDef })
       const siteDoc = makeSite({
@@ -564,7 +564,7 @@ describe('renderNode', () => {
         page, site: siteDoc, registry: reg, breakpointId: undefined,
       })
 
-      expect(html).toBe('<button class="cta instatic-btn">Click</button>')
+      expect(html).toBe('<button class="cta fourno-btn">Click</button>')
     })
 
     it('html starting with a comment: skips the comment and classes the first element', () => {
@@ -757,7 +757,7 @@ describe('publishPage', () => {
     expect(moduleIndex).toBeGreaterThan(resetIndex)
   })
 
-  // ─── External CSS mode (per-site bundle served at /_instatic/css/) ──────────────
+  // ─── External CSS mode (per-site bundle served at /_fourno/css/) ──────────────
 
   it('emits four <link> tags pointing at the site bundle in external mode', () => {
     const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Hi' } } })
@@ -772,10 +772,10 @@ describe('publishPage', () => {
       cssBundle,
     })
 
-    expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/reset-aaaaaaaaaaaa.css">')
-    expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/framework-bbbbbbbbbbbb.css">')
-    expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/style-cccccccccccc.css">')
-    expect(html).toContain('<link rel="stylesheet" href="/_instatic/css/userStyles-dddddddddddd.css">')
+    expect(html).toContain('<link rel="stylesheet" href="/_fourno/css/reset-aaaaaaaaaaaa.css">')
+    expect(html).toContain('<link rel="stylesheet" href="/_fourno/css/framework-bbbbbbbbbbbb.css">')
+    expect(html).toContain('<link rel="stylesheet" href="/_fourno/css/style-cccccccccccc.css">')
+    expect(html).toContain('<link rel="stylesheet" href="/_fourno/css/userStyles-dddddddddddd.css">')
 
     // No inline <style> block for site-wide CSS in external mode.
     expect(html).not.toMatch(/<style>\s*\n[^<]*:where\(\*\)/)
@@ -838,7 +838,7 @@ describe('publishPage', () => {
     const page = makePage({ root: { moduleId: 'base.text', props: { text: 'Hi' } } })
     const { html } = publishPage(page, site, registry)
     expect(html).toContain('<style>')
-    expect(html).not.toMatch(/<link\s+rel="stylesheet"\s+href="\/_instatic\/css\//)
+    expect(html).not.toMatch(/<link\s+rel="stylesheet"\s+href="\/_fourno\/css\//)
   })
 
   it('injects framework color variables and used generated utility CSS', () => {

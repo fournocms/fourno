@@ -1,5 +1,5 @@
 /**
- * Custom Vitest matchers for the instatic test suite.
+ * Custom Vitest matchers for the fourno test suite.
  *
  * Import this file as a side-effect in any test that uses the custom matchers:
  *   import '../matchers'

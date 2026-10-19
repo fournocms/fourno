@@ -1,12 +1,12 @@
-name: instatic-prod
+name: fourno-prod
 
 services:
   postgres:
     image: postgres:16
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-instatic}
-      POSTGRES_USER: ${POSTGRES_USER:-instatic}
+      POSTGRES_DB: ${POSTGRES_DB:-fourno}
+      POSTGRES_USER: ${POSTGRES_USER:-fourno}
       # Placeholder default lets the file load without an .env (e.g. SQLite mode,
       # which disables this service). Postgres deployments MUST override this in
       # .env — see docs/deployment/vps.md.
@@ -20,16 +20,16 @@ services:
       retries: 10
 
   app:
-    image: ${INSTATIC_IMAGE:-ghcr.io/corebunch/instatic:latest}
+    image: ${FOURNO_IMAGE:-ghcr.io/fourno/fourno:latest}
     restart: unless-stopped
     ports:
       - "${HOST_PORT:-3001}:3001"
     environment:
       PORT: "3001"
-      DATABASE_URL: postgres://${POSTGRES_USER:-instatic}:${POSTGRES_PASSWORD:-CHANGEME_set_POSTGRES_PASSWORD_in_env}@postgres:5432/${POSTGRES_DB:-instatic}
+      DATABASE_URL: postgres://${POSTGRES_USER:-fourno}:${POSTGRES_PASSWORD:-CHANGEME_set_POSTGRES_PASSWORD_in_env}@postgres:5432/${POSTGRES_DB:-fourno}
       UPLOADS_DIR: /app/uploads
       STATIC_DIR: /app/dist
-      INSTATIC_SECRET_KEY: ${INSTATIC_SECRET_KEY:-}
+      FOURNO_SECRET_KEY: ${FOURNO_SECRET_KEY:-}
       TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
     volumes:
       - uploads:/app/uploads

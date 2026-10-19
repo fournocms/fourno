@@ -5,7 +5,7 @@
  * editor, but they do not need Site-editor-only modules: CanvasRoot,
  * PropertiesPanel, DnD, import wizards, or CodeMirror. Keeping this layout
  * separate lets those workspaces render their own canvas/sidebar content
- * without downloading the instatic graph on first paint.
+ * without downloading the fourno graph on first paint.
  */
 
 import { lazy, Suspense, useRef, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react'

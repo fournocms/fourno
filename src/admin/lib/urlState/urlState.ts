@@ -13,7 +13,7 @@
  * admin router because selection changes only touch the query string, never the
  * pathname. The router's route match must NOT re-run for row/page selection.
  * Writing via `replaceState` without dispatching the router's
- * `instatic:locationchange` event keeps the route stable while the address bar stays
+ * `fourno:locationchange` event keeps the route stable while the address bar stays
  * current.
  *
  * `replaceState` (never `pushState`) is used so flipping between rows/pages

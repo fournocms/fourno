@@ -189,7 +189,7 @@ See [docs/features/agent.md](../features/agent.md).
 |-----------------------------------------------|----------------------------------------------------------------------------------|
 | `media-migration-invariants.test.ts`          | Migrating an asset between adapters preserves all variants and references.       |
 | `media-presentation-pipeline.test.ts`         | Publisher's `<picture>` / `srcset` materialization is correct.                   |
-| `media-signed-redirect-serving.test.ts`       | `/_instatic/media/<adapterId>/<storagePath>` redirects with a fresh signed URL.  |
+| `media-signed-redirect-serving.test.ts`       | `/_fourno/media/<adapterId>/<storagePath>` redirects with a fresh signed URL.  |
 | `media-storage-no-bytes-in-sandbox.test.ts`   | Plugin sandboxes can't read raw media bytes; only host adapters can.             |
 | `media-storage-panel.test.ts`                 | Media storage panel UI matches the registered adapter set.                       |
 
@@ -203,8 +203,8 @@ See [docs/features/media.md](../features/media.md).
 | `publish-html-filter-context.test.ts`         | Plugin `publish.html` filters receive the right context shape.                   |
 | `static-artefact-served-before-render.test.ts`| `publicRouter.ts` calls `readArtefact` BEFORE `resolvePublicRoute`; the fast-path fires when `canonicalRenderQuery(url.searchParams) === ''` — junk params (UTM, etc.) collapse to `''` and serve the artefact, only render-affecting loop-pagination params (`loop_<nodeId>_page`) fall through to the live renderer. |
 | `publish-bumps-cache-version.test.ts`         | Every publish / unpublish entry point (`publishDraftSite`, `publishDataRow`, `updateDataRowStatus`) calls `bumpPublishVersion()` imported from `publishState.ts` so Layer B evicts on every state change visitors can see. |
-| `hole-runtime-asset-route.test.ts`            | The router registers `tryServeHoleRuntimeAsset` and `tryServeHole` BEFORE `tryServePublicRoute`. The `/_instatic/hole/*` namespace can never fall through to slug resolution. |
-| `module-js-asset-route.test.ts`               | The router registers `tryServeModuleJsAsset` BEFORE `tryServePublicRoute`, and wires it from `server/handlers/cms/moduleJs`, so `/_instatic/module-js/*` requests cannot be swallowed by public-slug resolution. |
+| `hole-runtime-asset-route.test.ts`            | The router registers `tryServeHoleRuntimeAsset` and `tryServeHole` BEFORE `tryServePublicRoute`. The `/_fourno/hole/*` namespace can never fall through to slug resolution. |
+| `module-js-asset-route.test.ts`               | The router registers `tryServeModuleJsAsset` BEFORE `tryServePublicRoute`, and wires it from `server/handlers/cms/moduleJs`, so `/_fourno/module-js/*` requests cannot be swallowed by public-slug resolution. |
 
 The following test lives in `src/__tests__/server/` (not `architecture/`) but enforces a load-bearing publisher performance invariant:
 
@@ -263,7 +263,7 @@ The following test lives in `src/__tests__/server/` (not `architecture/`) but en
 
 | Test (server/)                                | What it enforces                                                                 |
 |-----------------------------------------------|----------------------------------------------------------------------------------|
-| `dockerConfig.test.ts`                        | Dockerfile uses a multi-stage build (build → production-deps → runtime), `ARG INSTATIC_VERSION` and OCI version label are present, TypeScript path aliases (`tsconfig*.json`) are copied into the runtime stage, `esbuild` is in `dependencies` (not `devDependencies`) so the runtime script bundler is available in production. `compose.prod.yml` uses the GHCR image, has healthchecks, persistent volumes, and `depends_on: condition: service_healthy`. `POSTGRES_PASSWORD` carries a `CHANGEME` placeholder default (no `:?` guard) so the file loads in SQLite mode without a `.env`. `INSTATIC_SECRET_KEY` is documented in `.env.production.example` and referenced in `compose.prod.yml`. |
+| `dockerConfig.test.ts`                        | Dockerfile uses a multi-stage build (build → production-deps → runtime), `ARG FOURNO_VERSION` and OCI version label are present, TypeScript path aliases (`tsconfig*.json`) are copied into the runtime stage, `esbuild` is in `dependencies` (not `devDependencies`) so the runtime script bundler is available in production. `compose.prod.yml` uses the GHCR image, has healthchecks, persistent volumes, and `depends_on: condition: service_healthy`. `POSTGRES_PASSWORD` carries a `CHANGEME` placeholder default (no `:?` guard) so the file loads in SQLite mode without a `.env`. `FOURNO_SECRET_KEY` is documented in `.env.production.example` and referenced in `compose.prod.yml`. |
 
 See [docs/deployment/](../deployment/).
 

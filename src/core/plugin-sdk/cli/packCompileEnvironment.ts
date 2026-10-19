@@ -11,7 +11,7 @@
  *      `base.*` modules through `HTML_TO_MODULE_RULES`, which resolves
  *      defaults from the registry.
  *
- * The CLI evaluates the author's `instatic-plugin.config.ts` (where
+ * The CLI evaluates the author's `fourno-plugin.config.ts` (where
  * `definePack` runs), so it installs both first. Kept out of the SDK
  * builders themselves so happy-dom and the module bundle never reach a
  * browser bundle through the SDK barrel — only the CLI (which always runs

@@ -75,14 +75,14 @@ const rootModule = makeModule('base.body', {
 
 const buttonModule = makeModule('base.button', {
   canHaveChildren: false,
-  render: () => ({ html: '<button class="instatic-btn">Click me</button>' }),
+  render: () => ({ html: '<button class="fourno-btn">Click me</button>' }),
 })
 
 const headingModule = makeModule('base.text', {
   canHaveChildren: false,
   render: (props) => ({
-    html: `<h2 class="instatic-heading">${props['text'] ?? ''}</h2>`,
-    css: '.instatic-heading { font-size: 1.5rem; }',
+    html: `<h2 class="fourno-heading">${props['text'] ?? ''}</h2>`,
+    css: '.fourno-heading { font-size: 1.5rem; }',
   }),
 })
 
@@ -302,7 +302,7 @@ describe('Gate 5 — publishPage injects user class name attribute on rendered e
       [classId]: makeClass(classId, { color: 'blue' }),
     })
     const { html } = publishPage(page, site, reg)
-    // The button module renders <button class="instatic-btn">; user class should be prepended
+    // The button module renders <button class="fourno-btn">; user class should be prepended
     expect(html).toMatch(new RegExp(`<button[^>]*class="${classId}`))
   })
 

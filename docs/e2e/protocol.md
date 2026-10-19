@@ -1,4 +1,4 @@
-# Instatic User E2E Protocol
+# Fourno User E2E Protocol
 
 ## Purpose
 

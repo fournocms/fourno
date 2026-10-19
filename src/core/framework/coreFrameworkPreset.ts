@@ -3,7 +3,7 @@
  *
  * Maps the Core Framework default project (the colors, typography scale,
  * spacing scale and utility-class generators a fresh Core Framework project
- * ships with) into Instatic's structured `FrameworkSettings` shape.
+ * ships with) into Fourno's structured `FrameworkSettings` shape.
  *
  * Sources mirrored verbatim from the Core Framework repo
  * (`packages/core/src/...`):
@@ -14,7 +14,7 @@
  *   • Spacing     — `data/defaults.ts` (SPACING_CALCULATOR_INITIAL_STATE) —
  *                   already mirrored by `buildDefaultSpacingSettings`.
  *   • Preferences — `data/defaults.ts` (DEFAULT_PREFERENCES): rootFontSize 10,
- *                   screen 320–1400, rem. Instatic adds `emitRootFontSize`
+ *                   screen 320–1400, rem. Fourno adds `emitRootFontSize`
  *                   so the 10px root is actually set on `<html>`.
  *
  * Two import modes (`includeUtilities`):
@@ -28,7 +28,7 @@
  *               NO utility classes. Color `generateUtilities` is all-off and
  *               the typography / spacing class generators are dropped.
  *
- * Shade / tint values are generated from a count by Instatic's own algorithm
+ * Shade / tint values are generated from a count by Fourno's own algorithm
  * (the schema stores a count, not hand-authored values), so they are close to
  * — but not byte-identical with — Core Framework's hand-tuned shade swatches.
  */
@@ -63,7 +63,7 @@ export interface CoreFrameworkImportOptions {
 // ---------------------------------------------------------------------------
 
 /**
- * Core Framework's `gen` tokens map onto Instatic utility kinds. Core Framework
+ * Core Framework's `gen` tokens map onto Fourno utility kinds. Core Framework
  * never generates `fill` utilities in its default preset, so it is not part of
  * this union — `genToUtilities` always emits `fill: false`.
  */

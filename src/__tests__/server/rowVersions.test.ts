@@ -57,7 +57,7 @@ describe('row version history', () => {
     const onBranch = await harness.cms(`${ROWS}/${home!.id}/versions/${second.id}/restore`, {
       method: 'POST',
       cookie: owner,
-      headers: { 'x-instatic-branch': 'history' },
+      headers: { 'x-fourno-branch': 'history' },
     })
     expect(onBranch.status).toBe(200)
     expect((await getDataRow(harness.db, { branchId: 'history' }, home!.id))!.cells.title).toBe('Second')

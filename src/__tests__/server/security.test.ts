@@ -296,7 +296,7 @@ describe('stampSocketIp', () => {
     // passing the real value into stampSocketIp).
     const req = makeReq('http://localhost:3001/admin/api/cms/login', {
       method: 'POST',
-      headers: { 'x-instatic-socket-ip': '198.51.100.1' },
+      headers: { 'x-fourno-socket-ip': '198.51.100.1' },
     })
     stampSocketIp(req, '127.0.0.1')
     expect(clientIp(req)).toBe('127.0.0.1')
@@ -305,7 +305,7 @@ describe('stampSocketIp', () => {
   it('strips any inbound spoof even when no real peer is available', () => {
     const req = makeReq('http://localhost:3001/admin/api/cms/login', {
       method: 'POST',
-      headers: { 'x-instatic-socket-ip': '198.51.100.1' },
+      headers: { 'x-fourno-socket-ip': '198.51.100.1' },
     })
     stampSocketIp(req, null)
     expect(clientIp(req)).toBeNull()

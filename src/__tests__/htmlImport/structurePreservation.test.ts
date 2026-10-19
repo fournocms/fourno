@@ -2,7 +2,7 @@
  * structurePreservation.test.ts — text/phrasing elements that wrap nested
  * markup recurse (instead of flattening), and <pre> preserves whitespace.
  *
- * Reproduces the two import regressions reported on the instatic site:
+ * Reproduces the two import regressions reported on the fourno site:
  *   - `<h2>Get the<br/>file-based CMS.</h2>` rendered "Get thefile-based CMS."
  *   - `<span><span>Auth & access</span><span>Sessions…</span></span>` merged into
  *     "Auth & accessSessions…"

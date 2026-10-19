@@ -1,7 +1,7 @@
 /**
  * `html` tagged template — the safe-by-default render helper.
  *
- *   import { html } from '@instatic/plugin-sdk'
+ *   import { html } from '@fourno/plugin-sdk'
  *
  *   render: ({ props }) => html`
  *     <aside class="callout">
@@ -33,7 +33,7 @@ export function escapeHtml(value: string): string {
   return value.replace(HTML_ESCAPE_RE, (ch) => HTML_ESCAPE_MAP[ch])
 }
 
-const RAW_BRAND = Symbol.for('@instatic/plugin-sdk/raw')
+const RAW_BRAND = Symbol.for('@fourno/plugin-sdk/raw')
 
 interface RawHtml {
   [RAW_BRAND]: true

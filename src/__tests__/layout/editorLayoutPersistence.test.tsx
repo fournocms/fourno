@@ -21,7 +21,7 @@ import type { CmsCurrentUser } from '@core/persistence'
 import { pageToCells } from '@core/data/pageFromRow'
 import '@modules/base/index'
 
-const LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
+const LAYOUT_STORAGE_KEY = 'fourno-editor-layout-v2'
 const SRC_ROOT = join(import.meta.dirname, '../..')
 
 const originalFetch = globalThis.fetch

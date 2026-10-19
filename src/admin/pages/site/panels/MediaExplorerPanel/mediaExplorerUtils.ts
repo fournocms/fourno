@@ -6,7 +6,7 @@ import type { CmsMediaAsset } from '@core/persistence/cmsMedia'
 import { formatBytes } from '@admin/lib/formatBytes'
 import type { MediaBucket, MediaFilter } from './mediaExplorerModel'
 
-const VIEW_MODE_STORAGE_KEY = 'instatic-media-explorer-view-mode'
+const VIEW_MODE_STORAGE_KEY = 'fourno-media-explorer-view-mode'
 
 export function readStoredViewMode(): 'list' | 'grid' {
   try {

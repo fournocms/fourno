@@ -64,7 +64,7 @@ function protectedResourceMetadata(req: Request): Response {
   if (!endpoints) return mcpIssuerUnavailableResponse()
   return metadataResponse({
     resource: endpoints.resource,
-    resource_name: 'Instatic MCP',
+    resource_name: 'Fourno MCP',
     authorization_servers: [endpoints.issuer],
     scopes_supported: [...MCP_OAUTH_SUPPORTED_SCOPES],
     bearer_methods_supported: ['header'],

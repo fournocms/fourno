@@ -363,7 +363,7 @@ describe('Account security endpoints', () => {
     if (!user) throw new Error('Expected setup user')
     expect(user.avatarMediaId).toBeNull()
 
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-avatar-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-avatar-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
 
     try {

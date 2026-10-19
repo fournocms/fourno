@@ -18,7 +18,7 @@
  * When a `toolRequest` arrives, the browser dispatches it through the
  * executor (which validates inputs and mutates the Zustand store), then POSTs
  * the result via `postToolResult` so the server-side MCP tool handler can
- * return the result to Claude. There is no separate <instatic:actions> DSL — every
+ * return the result to Claude. There is no separate <fourno:actions> DSL — every
  * page mutation is a real MCP tool call.
  */
 

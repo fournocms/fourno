@@ -4,7 +4,7 @@
  * Each export is a thin adapter around a host design-system primitive
  * (`Button`, `Input`, `Switch`, `Select`, `Stack`, `Card`, …). Plugins
  * receive this surface by importing named exports from
- * `@instatic/host-ui` (resolved at runtime by the editor's import map).
+ * `@fourno/host-ui` (resolved at runtime by the editor's import map).
  *
  * Two reasons for the wrapper layer:
  *   1. The plugin SDK contract (`PluginUi*Props`) stays stable even as the

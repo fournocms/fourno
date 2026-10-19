@@ -1,13 +1,13 @@
 /**
  * One-command production-mode runner for local use.
  *
- * `bun run start` does what a single deploy would do, but in your dev
+ * `pnpm start` does what a single deploy would do, but in your dev
  * tree against your dev data:
  *
- *   1. Builds the admin SPA (`bun run build` → `./dist/`).
+ *   1. Builds the admin SPA (`tsc -b && vite build` → `./dist/`).
  *   2. Frees port 3001 — if anything is already listening it prompts
- *      whether to kill the holder and take over (same UX as `bun run dev`).
- *   3. Spawns the server (`bun run server/index.ts`) — no `--watch`, no
+ *      whether to kill the holder and take over (same UX as `pnpm dev`).
+ *   3. Spawns the server (`node --import tsx server/index.ts`) — no watch, no
  *      Vite, the built SPA served from `./dist`.
  *
  * Defaults map to "production mode on the dev DB":
@@ -16,10 +16,10 @@
  *   STATIC_DIR=./dist
  *   UPLOADS_DIR=./uploads
  *
- * Override any of these via env (`PORT=4000 bun run start`, etc.).
+ * Override any of these via env (`PORT=4000 pnpm start`, etc.).
  */
 
-import { bunRunCommand } from './lib/bunCommand'
+import { childExited, runCommandSync, startChild, tscCommand, viteCommand } from './lib/nodeCommand'
 import { ensurePortFree } from './lib/freePort'
 
 const CMS_PORT = Number(process.env.PORT ?? '3001')
@@ -30,19 +30,17 @@ function log(msg: string): void {
 
 function runStep(name: string, command: string[]): void {
   log(`${name}...`)
-  const result = Bun.spawnSync(command, {
-    stdout: 'inherit',
-    stderr: 'inherit',
-  })
-  if (result.exitCode !== 0) {
-    log(`${name} failed (exit ${result.exitCode}). Aborting.`)
-    process.exit(result.exitCode ?? 1)
+  const exitCode = runCommandSync(command, { stdio: 'inherit' })
+  if (exitCode !== 0) {
+    log(`${name} failed (exit ${exitCode}). Aborting.`)
+    process.exit(exitCode)
   }
 }
 
 // --- build ---------------------------------------------------------------
 
-runStep('Building admin SPA (bun run build)', bunRunCommand('build'))
+runStep('Type-checking (tsc -b)', tscCommand('-b'))
+runStep('Building admin SPA (vite build)', viteCommand('build'))
 
 // --- port pre-flight -----------------------------------------------------
 
@@ -54,11 +52,9 @@ log('')
 log(`Starting server on http://localhost:${CMS_PORT}`)
 log('')
 
-const child = Bun.spawn(bunRunCommand('server/index.ts'), {
-  env: { ...process.env, PORT: String(CMS_PORT) },
-  stdin: 'inherit',
-  stdout: 'inherit',
-  stderr: 'inherit',
+const child = startChild([process.execPath, '--import', 'tsx', 'server/index.ts'], {
+  ...process.env,
+  PORT: String(CMS_PORT),
 })
 
 let shuttingDown = false
@@ -70,7 +66,7 @@ function forward(signal: NodeJS.Signals): void {
 process.on('SIGINT', () => forward('SIGINT'))
 process.on('SIGTERM', () => forward('SIGTERM'))
 
-const code = await child.exited
+const code = await childExited(child)
 if (!shuttingDown && code !== 0) {
   log(`server exited with code ${code}`)
 }

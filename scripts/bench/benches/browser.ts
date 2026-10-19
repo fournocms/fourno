@@ -16,7 +16,7 @@
  *
  * Outputs additional artifacts to `.tmp/benchmarks/`:
  *   - `browser-<scenario>.trace.zip`  — Playwright trace (only when --trace=ALL or --trace=NAME)
- *     Open with: `bunx playwright show-trace <path>`
+ *     Open with: `pnpm exec playwright show-trace <path>`
  *
  * Skips with a clear message if:
  *   - playwright-core isn't installed
@@ -44,7 +44,7 @@ import {
   type FrameStability,
 } from '../lib/browser'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 
 const ADMIN_EMAIL_ENV = 'INSTATIC_BENCH_ADMIN_EMAIL'
 const ADMIN_PASSWORD_ENV = 'INSTATIC_BENCH_ADMIN_PASSWORD'
@@ -334,7 +334,7 @@ export const browserBench: BenchModule = {
                   label: 'browser',
                   metrics: { detected: '—' },
                   notes:
-                    'Run `bunx playwright install chromium` (one-time, ~280 MB) OR install Chrome/Chromium/Edge OR pass --chrome-path=PATH.',
+                    'Run `pnpm exec playwright install chromium` (one-time, ~280 MB) OR install Chrome/Chromium/Edge OR pass --chrome-path=PATH.',
                 },
               ],
             },
@@ -565,7 +565,7 @@ export const browserBench: BenchModule = {
       const traceRows: BenchRow[] = traces.map((t) => ({
         label: t.name,
         metrics: { artifact: t.path.replace(REPO_ROOT + '/', '') },
-        notes: `Open with \`bunx playwright show-trace ${t.path.replace(REPO_ROOT + '/', '')}\``,
+        notes: `Open with \`pnpm exec playwright show-trace ${t.path.replace(REPO_ROOT + '/', '')}\``,
       }))
 
       const coldLogin = loadScenarios.find((s) => s.label.startsWith('cold /admin (login'))

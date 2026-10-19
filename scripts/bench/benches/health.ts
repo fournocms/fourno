@@ -15,30 +15,35 @@
  * is missing, the row notes "unavailable" rather than crashing the
  * suite.
  */
+import { spawn } from 'node:child_process'
 import { resolve } from 'node:path'
 import type { BenchModule, BenchResult, BenchRow } from '../lib/types'
 import { fmtMs } from '../lib/stats'
 import { log } from '../lib/log'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 
 async function runCommand(args: readonly string[], timeoutMs: number): Promise<{ stdout: string; stderr: string; ms: number; exit: number; timedOut: boolean }> {
   const t0 = performance.now()
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    const proc = Bun.spawn({
-      cmd: args as string[],
+    const [executable, ...rest] = args
+    const proc = spawn(executable ?? '', rest, {
       cwd: REPO_ROOT,
-      stdout: 'pipe',
-      stderr: 'pipe',
-      // No `signal` field needed — we kill manually below if it doesn't finish.
+      stdio: ['ignore', 'pipe', 'pipe'],
+      signal: controller.signal,
     })
-    const [stdout, stderr] = await Promise.all([
-      new Response(proc.stdout).text(),
-      new Response(proc.stderr).text(),
-    ])
-    const exit = await proc.exited
+    const stdoutChunks: Buffer[] = []
+    const stderrChunks: Buffer[] = []
+    proc.stdout.on('data', (chunk: Buffer) => stdoutChunks.push(chunk))
+    proc.stderr.on('data', (chunk: Buffer) => stderrChunks.push(chunk))
+    const exit = await new Promise<number>((resolveExit, rejectExit) => {
+      proc.once('error', rejectExit)
+      proc.once('close', (code) => resolveExit(code ?? -1))
+    })
+    const stdout = Buffer.concat(stdoutChunks).toString('utf8')
+    const stderr = Buffer.concat(stderrChunks).toString('utf8')
     return { stdout, stderr, ms: performance.now() - t0, exit, timedOut: false }
   } catch (err) {
     return { stdout: '', stderr: (err as Error).message, ms: performance.now() - t0, exit: -1, timedOut: false }
@@ -61,7 +66,7 @@ export const healthBench: BenchModule = {
 
     // fallow health
     log.step('Running fallow health')
-    const fallow = await runCommand(['bunx', '--bun', 'fallow', 'health'], 120_000)
+    const fallow = await runCommand(['npx', '--yes', 'fallow', 'health'], 120_000)
     {
       const fallowText = both(fallow)
       const maint = fallowText.match(/maintainability\s+([0-9.]+)\s*\(([^)]+)\)/i)
@@ -79,7 +84,7 @@ export const healthBench: BenchModule = {
 
     // fallow dead-code
     log.step('Running fallow dead-code')
-    const dead = await runCommand(['bunx', '--bun', 'fallow', 'dead-code'], 60_000)
+    const dead = await runCommand(['npx', '--yes', 'fallow', 'dead-code'], 60_000)
     {
       const deadText = both(dead)
       const filesMatch = deadText.match(/(\d+)\s+files?\s*·\s*(\d+)\s+exports?\s*·\s*(\d+)\s+types?/i)
@@ -97,7 +102,7 @@ export const healthBench: BenchModule = {
     // jscpd
     log.step('Running jscpd duplication scan')
     const jscpd = await runCommand(
-      ['bunx', '--bun', 'jscpd', 'src', '--silent', '--reporters', 'consoleFull', '--min-lines', '10', '--min-tokens', '70'],
+      [resolve(REPO_ROOT, 'node_modules/.bin/jscpd'), 'src', '--silent', '--reporters', 'consoleFull', '--min-lines', '10', '--min-tokens', '70'],
       180_000,
     )
     {
@@ -117,7 +122,7 @@ export const healthBench: BenchModule = {
     // madge circular-deps
     log.step('Running madge --circular')
     const madge = await runCommand(
-      ['bunx', '--bun', 'madge', '--circular', '--ts-config', 'tsconfig.json', '--extensions', 'ts,tsx', 'src'],
+      [resolve(REPO_ROOT, 'node_modules/.bin/madge'), '--circular', '--ts-config', 'tsconfig.json', '--extensions', 'ts,tsx', 'src'],
       60_000,
     )
     {
@@ -152,7 +157,7 @@ export const healthBench: BenchModule = {
         {
           title: 'Static analysis snapshot',
           intro:
-            'Tool versions resolved via `bunx`. fallow gives the maintainability score, jscpd quantifies duplication, madge surfaces import cycles.',
+            'fallow resolved via `npx`, jscpd and madge from devDependencies. fallow gives the maintainability score, jscpd quantifies duplication, madge surfaces import cycles.',
           rows,
         },
       ],

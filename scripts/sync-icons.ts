@@ -15,7 +15,7 @@
  *
  *     "pixel-art-icons": "file:./vendor/pixel-art-icons"
  *
- * so `bun install` symlinks it into `node_modules/pixel-art-icons/` and every
+ * so `pnpm install` copies it into `node_modules/pixel-art-icons/` and every
  * existing import keeps resolving exactly the same way — no SSH key, no
  * private repo access, no source-code churn.
  *
@@ -41,7 +41,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, wri
 import { dirname, extname, join, relative, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
-const ROOT = resolve(import.meta.dir, '..')
+const ROOT = resolve(import.meta.dirname, '..')
 const SRC_DIR = join(ROOT, 'src')
 const VENDOR_DIR = join(ROOT, 'vendor/pixel-art-icons')
 const VENDOR_ICONS_DIR = join(VENDOR_DIR, 'icons')
@@ -402,17 +402,19 @@ function main(): number {
     `[sync-icons] vendor/pixel-art-icons/ is fresh — ${imported.size} icons + types.`,
   )
 
-  // Bun's `file:` deps are copied into node_modules at install time, so
+  // pnpm copies `file:` deps into node_modules at install time, so
   // re-running install after a sync is required for the new icons to be
-  // visible to dev/build/test. Do it for the developer.
+  // visible to dev/build/test. Do it for the developer. `npm_execpath` is
+  // the pnpm CLI that launched this script; spawning it through Node avoids
+  // the `.cmd` shim on Windows.
   console.error(`[sync-icons] refreshing node_modules/pixel-art-icons/ ...`)
-  const bunInstall = spawnSync('bun', ['install'], {
-    cwd: ROOT,
-    stdio: 'inherit',
-  })
-  if (bunInstall.status !== 0) {
+  const pnpmCli = process.env.npm_execpath
+  const pnpmInstall = pnpmCli
+    ? spawnSync(process.execPath, [pnpmCli, 'install'], { cwd: ROOT, stdio: 'inherit' })
+    : spawnSync('pnpm', ['install'], { cwd: ROOT, stdio: 'inherit' })
+  if (pnpmInstall.status !== 0) {
     throw new Error(
-      `[sync-icons] \`bun install\` failed (exit ${bunInstall.status}). Run it manually.`,
+      `[sync-icons] \`pnpm install\` failed (exit ${pnpmInstall.status}). Run it manually.`,
     )
   }
   return 0

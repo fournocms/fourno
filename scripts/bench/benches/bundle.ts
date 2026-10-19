@@ -20,7 +20,7 @@ import type { BenchModule, BenchResult, BenchRow } from '../lib/types'
 import { fmtBytes } from '../lib/stats'
 import { log } from '../lib/log'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 const DIST = resolve(REPO_ROOT, 'dist')
 const DIST_ASSETS = resolve(DIST, 'assets')
 const DIST_INDEX_HTML = resolve(DIST, 'index.html')

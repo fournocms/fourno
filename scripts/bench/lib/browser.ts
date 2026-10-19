@@ -10,15 +10,16 @@
  *   1. Uses a pre-installed Playwright Chromium (cached at
  *      `~/Library/Caches/ms-playwright` on macOS,
  *      `~/.cache/ms-playwright` on Linux). Install with
- *      `bunx playwright install chromium` (run once).
+ *      `pnpm exec playwright install chromium` (run once).
  *   2. Falls back to a system Chrome/Edge/Brave via `--chrome-path=`.
- *   3. Self-skips with a clear "run `bunx playwright install chromium`"
+ *   3. Self-skips with a clear "run `pnpm exec playwright install chromium`"
  *      message if neither is available.
  *
  * Authentication uses the JSON login endpoint (`POST /admin/api/cms/login`)
  * — much faster + more deterministic than scripting the login form,
  * and our scenarios actually need a session cookie, not a UI dance.
  */
+import { writeFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 
 // Playwright types — imported only for type checking. Runtime uses dynamic
@@ -113,7 +114,7 @@ export async function launchBrowser(opts: LaunchOptions = {}): Promise<BrowserSe
     const msg = (err as Error).message
     if (msg.includes('Executable doesn\'t exist') || msg.includes('looks like Playwright')) {
       throw new Error(
-        'Playwright Chromium not found. Run `bunx playwright install chromium` once (or pass --chrome-path=PATH for a system browser).',
+        'Playwright Chromium not found. Run `pnpm exec playwright install chromium` once (or pass --chrome-path=PATH for a system browser).',
         { cause: err },
       )
     }
@@ -420,7 +421,7 @@ export async function readDomNodeCount(page: Page): Promise<number> {
 /**
  * Start a Playwright trace covering the next slice of work. Returns a
  * disposer that stops + saves the trace to disk. Open in the Playwright
- * Trace Viewer with `bunx playwright show-trace <file>`.
+ * Trace Viewer with `pnpm exec playwright show-trace <file>`.
  */
 export async function startTrace(
   context: BrowserContext,
@@ -451,7 +452,7 @@ export async function startCpuProfile(
   await cdp.send('Profiler.start')
   return async () => {
     const { profile } = await cdp.send('Profiler.stop')
-    await Bun.write(outputFile, JSON.stringify(profile))
+    await writeFile(outputFile, JSON.stringify(profile))
     await cdp.send('Profiler.disable').catch(() => {})
   }
 }

@@ -22,7 +22,7 @@ import type { BenchModule, BenchResult, BenchRow, BenchContext } from '../lib/ty
 import { summarize, fmtMs, fmtNum } from '../lib/stats'
 import { log } from '../lib/log'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 
 async function loadDb() {
   const { createSqliteClient } = await import('../../../server/db/sqlite')

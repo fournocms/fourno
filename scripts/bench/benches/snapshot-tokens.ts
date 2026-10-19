@@ -33,7 +33,7 @@ import { fmtNum } from '../lib/stats'
 import { log } from '../lib/log'
 import { createTokenCounter, type TokenCounter } from '../lib/anthropicTokens'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 const DEV_DB_PATH = resolve(REPO_ROOT, '.tmp/dev.db')
 
 // Pacing between count_tokens calls so a big site doesn't trip provider rate limits.

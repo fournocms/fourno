@@ -3,10 +3,10 @@ import { spawnSync } from 'node:child_process'
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 
-const ROOT = resolve(import.meta.dir, '..')
+const ROOT = resolve(import.meta.dirname, '..')
 const OUT_DIR = join(ROOT, '.tmp', 'release')
 
-const version = Bun.argv[2] ?? process.env.INSTATIC_VERSION
+const version = process.argv[2] ?? process.env.INSTATIC_VERSION
 if (!version) {
   throw new Error('Usage: bun run release:bundle -- <semver>')
 }

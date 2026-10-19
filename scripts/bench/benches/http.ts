@@ -22,7 +22,7 @@ import { summarize, fmtMs, fmtNum } from '../lib/stats'
 import { log } from '../lib/log'
 import { startServer, type ServerHandle } from '../lib/server'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 const DIST_INDEX_HTML = resolve(REPO_ROOT, 'dist/index.html')
 
 interface Endpoint {

@@ -39,7 +39,7 @@ import { healthBench } from './benches/health'
 import { browserBench } from './benches/browser'
 import { snapshotTokensBench } from './benches/snapshot-tokens'
 
-const REPO_ROOT = resolve(import.meta.dir, '../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../..')
 
 // `browser` and `snapshot-tokens` are NOT in the default run. `browser` needs
 // Chromium and optional INSTATIC_BENCH_ADMIN_EMAIL / INSTATIC_BENCH_ADMIN_PASSWORD
@@ -120,7 +120,7 @@ Flags:
   --trace=NAME[,NAME]  For the browser bench: wrap the named scenarios in a Playwright
                        trace and write to .tmp/benchmarks/browser-traces/<name>.trace.zip.
                        Pass --trace=ALL for every scenario. Open with
-                       \`bunx playwright show-trace <file>\`.
+                       \`pnpm exec playwright show-trace <file>\`.
   --list               Print available bench names and exit.
   --help               Show this help.
 
@@ -221,7 +221,7 @@ async function main(): Promise<void> {
     runAt: new Date(),
     durationMs: suiteWallMs,
     host: `${os.platform()} ${os.arch()} ${os.cpus()[0]?.model ?? ''}`.trim(),
-    bun: Bun.version,
+    runtime: `Node ${process.versions.node}`,
   })
 
   mkdirSync(dirname(flags.output), { recursive: true })

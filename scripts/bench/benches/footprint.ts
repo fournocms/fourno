@@ -16,7 +16,7 @@ import type { BenchModule, BenchResult, BenchRow } from '../lib/types'
 import { fmtBytes, fmtNum } from '../lib/stats'
 import { log } from '../lib/log'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 
 function dirSize(path: string): { bytes: number; files: number } {
   let bytes = 0

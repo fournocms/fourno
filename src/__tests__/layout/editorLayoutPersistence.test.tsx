@@ -554,7 +554,8 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
       name: /resize ai assistant panel/i,
     })).toBeNull()
 
-    fireEvent.click(within(agentHost).getByRole('button', { name: /undock ai assistant panel/i }))
+    // The panel header renders once the agent's credentials resource settles.
+    fireEvent.click(await within(agentHost).findByRole('button', { name: /undock ai assistant panel/i }))
 
     expect(sidebar.getAttribute('data-expanded')).toBe('false')
     expect(agentHost.getAttribute('data-mode')).toBe('floating')

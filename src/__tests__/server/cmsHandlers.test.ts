@@ -830,7 +830,7 @@ describe('CMS handlers', () => {
      * `Origin` is set on the constructed Headers post-hoc because happy-dom
      * (loaded via the test setup) strictly follows the Fetch spec's
      * "forbidden request headers" rule: passing `origin` in the Request
-     * constructor's `headers` init silently drops it. In production, Bun.serve
+     * constructor's `headers` init silently drops it. In production, the server
      * receives the raw HTTP Origin header from the wire — no such filtering
      * applies. Mutating headers after Request construction works in both
      * environments, so we use that path here.

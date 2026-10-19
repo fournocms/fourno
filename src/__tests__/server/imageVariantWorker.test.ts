@@ -1,7 +1,7 @@
 /**
  * Image-variant worker pool — end-to-end test.
  *
- * Spawns the real `Bun.Worker`, sends a real image through the protocol,
+ * Spawns the real worker thread, sends a real image through the protocol,
  * and asserts the worker probes metadata, encodes a BlurHash, and produces
  * one variant per target width smaller than the source. The point of this
  * test is to gate the worker round-trip itself — `mediaVariants.ts` is

@@ -12,7 +12,7 @@
  *
  * Workers here are injected stubs — `workers` / `pendingRequests` are the
  * real shared host state, so the timeout path exercised is the production
- * one end to end (minus the actual Bun.Worker).
+ * one end to end (minus the actual worker thread).
  */
 import { afterEach, describe, expect, it } from 'vitest'
 import { requestFromWorker } from '../../../server/plugins/host/workerPool'

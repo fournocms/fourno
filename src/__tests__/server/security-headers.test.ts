@@ -5,7 +5,7 @@
  * upload-specific `Content-Security-Policy` added to `hardenUploadResponse`
  * (server/static.ts).
  *
- * Note: `applySecurityHeaders` is called from the Bun.serve fetch handler in
+ * Note: `applySecurityHeaders` is called from the HTTP server fetch handler in
  * server/index.ts (not from handleServerRequest), so the tests here exercise
  * the function directly. The upload CSP tests go through handleServerRequest
  * to verify end-to-end behaviour within the router.

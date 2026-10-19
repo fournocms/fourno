@@ -18,7 +18,6 @@ import {
 } from '../../../server/repositories/data'
 import { insertDataTableIfAbsent } from '../../../server/repositories/data/tables'
 import { getDraftSite, saveDraftSite } from '../../../server/repositories/site'
-import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { createSite } from '../../../server/repositories/setup'
 
 let testDb: TestDb

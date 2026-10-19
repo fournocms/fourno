@@ -67,7 +67,7 @@ describe('framework root font size', () => {
 
   it('the variables-only preset opts in too', () => {
     const framework = applyFrameworkPreset({}, 'variables').framework!
-    expect(generateFrameworkRootCss(framework)).toStartWith(ROOT_62_5)
+    expect(generateFrameworkRootCss(framework).slice(0, ROOT_62_5.length)).toBe(ROOT_62_5)
   })
 
   it('an existing site whose preferences predate the flag renders exactly as before', () => {
@@ -110,9 +110,8 @@ describe('framework root font size', () => {
       preferences: { ...LEGACY_PREFERENCES, emitRootFontSize: true, ...patch },
     })
 
-    expect(generateFrameworkRootCss(withPreferences({ rootFontSize: 12 }))).toStartWith(
-      'html {\n  font-size: 75%;\n}',
-    )
+    const root75 = 'html {\n  font-size: 75%;\n}'
+    expect(generateFrameworkRootCss(withPreferences({ rootFontSize: 12 })).slice(0, root75.length)).toBe(root75)
     expect(generateFrameworkRootCss(withPreferences({ rootFontSize: 16 }))).not.toMatch(/^html\s*\{/m)
     expect(generateFrameworkRootCss(withPreferences({ isRem: false }))).not.toMatch(/^html\s*\{/m)
   })

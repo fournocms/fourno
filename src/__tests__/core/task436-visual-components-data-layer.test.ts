@@ -44,65 +44,15 @@ import { useEditorStore } from '@site/store/store'
 import { validateSite, validateVisualComponents } from '@core/persistence/validate'
 import type { SiteDocument } from '@core/page-tree'
 import { safeParseValue } from '@core/utils/typeboxHelpers'
-
-// ---------------------------------------------------------------------------
-// Lazy-loaded functional modules (fail gracefully if not yet implemented)
-// ---------------------------------------------------------------------------
-
-let validateComponentName: (
-  name: string,
-  existing: Array<{ id: string; name: string }>,
-  selfId?: string
-) => { ok: true } | { ok: false; error: string; reason: string }
-
-let getReferencedComponentIds: (node: unknown) => Set<string>
-let wouldCreateCycle: (
-  visualComponents: unknown[],
-  hostVcId: string,
-  candidateChildVcId: string
-) => boolean
-
-try {
-   
-  const nvMod = require('@core/visualComponents')
-  validateComponentName = nvMod.validateComponentName
-} catch {
-  validateComponentName = undefined as unknown as typeof validateComponentName
-}
-
-try {
-   
-  const rgMod = require('@core/visualComponents')
-  getReferencedComponentIds = rgMod.getReferencedComponentIds
-  wouldCreateCycle          = rgMod.wouldCreateCycle
-} catch {
-  getReferencedComponentIds = undefined as unknown as typeof getReferencedComponentIds
-  wouldCreateCycle          = undefined as unknown as typeof wouldCreateCycle
-}
+import {
+  getReferencedComponentIds,
+  validateComponentName,
+  wouldCreateCycle,
+} from '@core/visualComponents'
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-function requireNV(fn: typeof validateComponentName) {
-  if (!fn) {
-    throw new Error(
-      '[Task #436 not implemented] validateComponentName is not exported from\n' +
-      '  src/core/visualComponents/nameValidation.ts\n\n' +
-      'Implement the module and export validateComponentName to make this gate green.',
-    )
-  }
-}
-
-function requireRG(fn: unknown) {
-  if (!fn) {
-    throw new Error(
-      '[Task #436 not implemented] recursionGuard function not found in\n' +
-      '  src/core/visualComponents/recursionGuard.ts\n\n' +
-      'Implement and export getReferencedComponentIds + wouldCreateCycle.',
-    )
-  }
-}
 
 /** Store helpers — mirrors filesDataLayer.test.ts pattern */
 function freshStore() {
@@ -239,7 +189,6 @@ describe('Gate TS-2 — BaseNode.propBindings optional field declared', () => {
 
 describe('Gate NV-1 — EMPTY: empty string rejected', () => {
   it('validateComponentName("", []) returns {ok:false, error:"EMPTY"}', () => {
-    requireNV(validateComponentName)
     const result = validateComponentName('', [])
     expect(result.ok).toBe(false)
     expect((result as { error: string }).error).toBe('EMPTY')
@@ -248,7 +197,6 @@ describe('Gate NV-1 — EMPTY: empty string rejected', () => {
 
 describe('Gate NV-2 — lowercase-starting names are now allowed (free-form)', () => {
   it('validateComponentName("card", []) returns {ok:true}', () => {
-    requireNV(validateComponentName)
     const result = validateComponentName('card', [])
     expect(result.ok).toBe(true)
   })
@@ -256,7 +204,6 @@ describe('Gate NV-2 — lowercase-starting names are now allowed (free-form)', (
 
 describe('Gate NV-3 — digit-starting names are now allowed (free-form)', () => {
   it('validateComponentName("123Card", []) returns {ok:true}', () => {
-    requireNV(validateComponentName)
     const result = validateComponentName('123Card', [])
     expect(result.ok).toBe(true)
   })
@@ -264,7 +211,6 @@ describe('Gate NV-3 — digit-starting names are now allowed (free-form)', () =>
 
 describe('Gate NV-4 — names containing spaces are now allowed (free-form)', () => {
   it('validateComponentName("Hero Section", []) returns {ok:true}', () => {
-    requireNV(validateComponentName)
     const result = validateComponentName('Hero Section', [])
     expect(result.ok).toBe(true)
   })
@@ -274,7 +220,6 @@ describe('Gate NV-5 — names matching a base module display name are now allowe
   it('validateComponentName("Button", []) returns {ok:true}', () => {
     // Components are stored entities, not generated source files — sharing a
     // name with a base module is harmless.
-    requireNV(validateComponentName)
     const result = validateComponentName('Button', [])
     expect(result.ok).toBe(true)
   })
@@ -282,7 +227,6 @@ describe('Gate NV-5 — names matching a base module display name are now allowe
 
 describe('Gate NV-6 — PROJECT_DUPLICATE: duplicate name in same site rejected', () => {
   it('validateComponentName("Card", [{id:"vc-1", name:"Card"}]) returns {ok:false, error:"PROJECT_DUPLICATE"}', () => {
-    requireNV(validateComponentName)
     const existing = [{ id: 'vc-1', name: 'Card' }]
     const result = validateComponentName('Card', existing)
     expect(result.ok).toBe(false)
@@ -292,7 +236,6 @@ describe('Gate NV-6 — PROJECT_DUPLICATE: duplicate name in same site rejected'
 
 describe('Gate NV-7 — basic name accepted', () => {
   it('validateComponentName("Card", []) returns {ok:true}', () => {
-    requireNV(validateComponentName)
     const result = validateComponentName('Card', [])
     expect(result.ok).toBe(true)
   })
@@ -300,7 +243,6 @@ describe('Gate NV-7 — basic name accepted', () => {
 
 describe('Gate NV-8 — multi-word name with spaces accepted', () => {
   it('validateComponentName("My Button", []) returns {ok:true}', () => {
-    requireNV(validateComponentName)
     const result = validateComponentName('My Button', [])
     expect(result.ok).toBe(true)
   })
@@ -308,7 +250,6 @@ describe('Gate NV-8 — multi-word name with spaces accepted', () => {
 
 describe('Gate NV-9 — selfId skip: renaming to own existing name is allowed', () => {
   it('validateComponentName("Card", [{id:"vc-1", name:"Card"}], "vc-1") returns {ok:true}', () => {
-    requireNV(validateComponentName)
     const existing = [{ id: 'vc-1', name: 'Card' }]
     // selfId matches vc-1 — should NOT trigger PROJECT_DUPLICATE
     const result = validateComponentName('Card', existing, 'vc-1')
@@ -322,7 +263,6 @@ describe('Gate NV-9 — selfId skip: renaming to own existing name is allowed', 
 
 describe('Gate RG-1 — getReferencedComponentIds: leaf node returns empty set', () => {
   it('a node with no children and moduleId !== base.visual-component-ref returns empty set', () => {
-    requireRG(getReferencedComponentIds)
     const leafNode = {
       id: 'n1',
       moduleId: 'base.text',
@@ -337,7 +277,6 @@ describe('Gate RG-1 — getReferencedComponentIds: leaf node returns empty set',
 
 describe('Gate RG-2 — getReferencedComponentIds: direct componentRef found', () => {
   it('a VC whose tree root is a base.visual-component-ref returns its componentId', () => {
-    requireRG(getReferencedComponentIds)
     const refNode = {
       id: 'n1',
       moduleId: 'base.visual-component-ref',
@@ -354,7 +293,6 @@ describe('Gate RG-2 — getReferencedComponentIds: direct componentRef found', (
 
 describe('Gate RG-3 — getReferencedComponentIds: nested componentRef discovered', () => {
   it('a componentRef nested inside the flat tree is found', () => {
-    requireRG(getReferencedComponentIds)
     const containerNode = {
       id: 'container',
       moduleId: 'base.container',
@@ -396,7 +334,6 @@ function makeSimpleVC(id: string, name: string, extraNodes: Record<string, unkno
 
 describe('Gate RG-4 — wouldCreateCycle: returns false when no cycle', () => {
   it('adding Banner inside Card (no cross-reference) → no cycle', () => {
-    requireRG(wouldCreateCycle)
     const vcs = [
       makeSimpleVC('vc-card', 'Card'),
       makeSimpleVC('vc-banner', 'Banner'),
@@ -408,7 +345,6 @@ describe('Gate RG-4 — wouldCreateCycle: returns false when no cycle', () => {
 
 describe('Gate RG-5 — wouldCreateCycle: detects self-cycle', () => {
   it('adding Card inside Card → cycle detected', () => {
-    requireRG(wouldCreateCycle)
     const vcs = [makeSimpleVC('vc-card', 'Card')]
     const result = wouldCreateCycle(vcs, 'vc-card', 'vc-card')
     expect(result).toBe(true)
@@ -417,7 +353,6 @@ describe('Gate RG-5 — wouldCreateCycle: detects self-cycle', () => {
 
 describe('Gate RG-6 — wouldCreateCycle: detects 2-step cycle', () => {
   it('A contains B; trying to add A inside B → cycle detected', () => {
-    requireRG(wouldCreateCycle)
     // Banner's flat tree already contains a visualComponentRef to Card
     const vcBanner = {
       id: 'vc-banner',
@@ -458,7 +393,6 @@ describe('Gate RG-6 — wouldCreateCycle: detects 2-step cycle', () => {
 
 describe('Gate RG-7 — wouldCreateCycle: detects 3-step cycle', () => {
   it('A→B→C; trying to add A inside C → cycle detected', () => {
-    requireRG(wouldCreateCycle)
     // C contains B, B contains A. Trying to add A inside C would create A→B→C→A
     const vcC = {
       id: 'vc-c',
@@ -503,7 +437,6 @@ describe('Gate RG-7 — wouldCreateCycle: detects 3-step cycle', () => {
 
 describe('Gate RG-8 — wouldCreateCycle: handles unknown candidate id gracefully', () => {
   it('candidate vc not in the array → returns false (no crash)', () => {
-    requireRG(wouldCreateCycle)
     const vcs = [makeSimpleVC('vc-card', 'Card')]
     // candidate doesn't exist — should not throw, just return false
     expect(() => wouldCreateCycle(vcs, 'vc-card', 'vc-nonexistent')).not.toThrow()
@@ -1082,7 +1015,6 @@ describe('Gate PT-4 — description field on VCParam survives validateVisualComp
 
 describe('Gate RG-9 — getReferencedComponentIds finds all vcRefs in flat tree regardless of nesting', () => {
   it('finds vcRefs at multiple depths in the flat tree.nodes map', () => {
-    requireRG(getReferencedComponentIds)
 
     // VC with two vcRef nodes: one direct child of root, one grandchild via container
     const vc = {
@@ -1127,7 +1059,6 @@ describe('Gate RG-9 — getReferencedComponentIds finds all vcRefs in flat tree 
   })
 
   it('all vcRefs in a flat tree with many sibling nodes are collected', () => {
-    requireRG(getReferencedComponentIds)
 
     const vc = {
       tree: {
@@ -1151,8 +1082,6 @@ describe('Gate RG-9 — getReferencedComponentIds finds all vcRefs in flat tree 
 
 describe('Gate RG-10 — wouldCreateCycle detects cycle via flat tree vcRef', () => {
   it('a vcRef in the flat tree that would create a cycle is detected', () => {
-    requireRG(wouldCreateCycle)
-    requireRG(getReferencedComponentIds)
 
     // vc-a's flat tree root node is a vcRef to vc-b
     const vcA = {

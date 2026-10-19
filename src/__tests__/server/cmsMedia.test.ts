@@ -402,7 +402,7 @@ describe('CMS media handlers', () => {
         mimeType: 'image/png',
         uploadedByUserId: 'admin_1',
       })
-      expect(payload.asset.publicPath).toStartWith('/uploads/')
+      expect(payload.asset.publicPath).toMatch(/^\/uploads\//)
       expect(db.media).toHaveLength(1)
       // The on-disk extension is server-chosen (`.png`), not user-supplied —
       // the original filename's extension is irrelevant once stripped.

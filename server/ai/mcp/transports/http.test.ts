@@ -32,7 +32,7 @@ function mcpRequest(
   if (token) headers.Authorization = `Bearer ${token}`
   const req = new Request('http://localhost/_instatic/mcp', { method: 'POST', headers, body })
   // happy-dom strips browser-controlled headers such as Origin from Request
-  // init, though Bun.serve receives them on real network requests.
+  // init, though the server receives them on real network requests.
   for (const [name, value] of Object.entries(extraHeaders)) {
     req.headers.set(name, value)
   }

@@ -46,6 +46,13 @@ import {
 } from '../../../server/repositories/pluginSchedules'
 import type { DbClient } from '../../../server/db/client'
 
+// The worker dispatch is mocked so no live VM is needed. `vi.mock` is hoisted
+// above the imports, so the scheduler sees the stub from its first import.
+const { runScheduleInWorker } = vi.hoisted(() => ({
+  runScheduleInWorker: vi.fn(async () => ({ status: 'ok' as const, durationMs: 1 })),
+}))
+vi.mock('../../../server/plugins/host/rpc', () => ({ runScheduleInWorker }))
+
 // ---------------------------------------------------------------------------
 // Cadence math — pure function, no DB needed
 // ---------------------------------------------------------------------------
@@ -169,12 +176,7 @@ describe('plugin scheduler — DB', () => {
         overlap: 'skip',
         maxDurationMs: 5000,
       })
-      // Mock the worker dispatch so we don't need a live VM. Two
-      // concurrent run-now calls — only ONE should win the claim.
-      const dispatch = vi.fn(async () => ({ status: 'ok' as const, durationMs: 1 }))
-      vi.mock('../../../server/plugins/host/rpc', () => ({
-        runScheduleInWorker: dispatch,
-      }))
+      // Two concurrent run-now calls — only ONE should win the claim.
       const [first, second] = await Promise.all([
         runScheduleNow(db, 'test.sched', 'test.sched.race'),
         runScheduleNow(db, 'test.sched', 'test.sched.race'),
@@ -205,12 +207,9 @@ describe('plugin scheduler — DB', () => {
         update plugin_schedules set next_run_at = ${future}
         where plugin_id = ${'test.sched'} and schedule_id = ${'test.sched.far-future'}
       `
-      const dispatch = vi.fn(async () => ({ status: 'ok' as const, durationMs: 1 }))
-      vi.mock('../../../server/plugins/host/rpc', () => ({
-        runScheduleInWorker: dispatch,
-      }))
+      runScheduleInWorker.mockClear()
       await tickPluginScheduler(db)
-      expect(dispatch).not.toHaveBeenCalled()
+      expect(runScheduleInWorker).not.toHaveBeenCalled()
     } finally {
       await cleanup()
     }

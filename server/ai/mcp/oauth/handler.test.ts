@@ -40,7 +40,7 @@ function request(path: string, init?: RequestInit): Request {
  * A request whose own URL and `Host` header name a host the operator never
  * configured. happy-dom (loaded by the test setup) strips the Fetch-spec
  * forbidden `Host` header from the constructor init, so it is set afterwards,
- * the same way a real Bun.serve request carries it.
+ * the same way a real server request carries it.
  */
 function hostileRequest(path: string, init?: RequestInit): Request {
   const req = new Request(`http://${HOSTILE_HOST}${path}`, init)

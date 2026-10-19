@@ -38,7 +38,7 @@ const HOSTILE_HOST = 'attacker.example:18020'
 /**
  * happy-dom (loaded by the test setup) strips the Fetch-spec forbidden `Host`
  * header from the Request constructor's `headers` init, so it is set on the
- * Headers object afterwards, the same way a real Bun.serve request carries it.
+ * Headers object afterwards, the same way a real server request carries it.
  */
 function hostileRequest(headers: Record<string, string> = {}): Request {
   const req = new Request(`http://${HOSTILE_HOST}/_instatic/mcp`, { headers })

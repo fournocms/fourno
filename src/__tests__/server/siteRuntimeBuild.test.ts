@@ -76,7 +76,7 @@ describe('site runtime build', () => {
       placement: 'head',
       priority: 10,
     })
-    expect(result.runtimeAssets.scripts[0].src).toStartWith('/_instatic/assets/runtime/')
+    expect(result.runtimeAssets.scripts[0].src).toMatch(/^\/_instatic\/assets\/runtime\//)
     const entryAsset = result.files.find((file) => file.publicPath === result.runtimeAssets.scripts[0].src)
     expect(entryAsset?.content).toContain('hello-runtime')
   })

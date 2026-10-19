@@ -1,8 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 type ChallengeModule = typeof import('../../../server/forms/challenge')
-
-let importCounter = 0
 
 async function importChallengeWithEnv(env: {
   formSecret?: string
@@ -18,8 +16,10 @@ async function importChallengeWithEnv(env: {
   else process.env.INSTATIC_SECRET_KEY = env.secretKey
 
   try {
-    importCounter += 1
-    return await import(`../../../server/forms/challenge.ts?secret-test=${importCounter}`)
+    // The secret is read when the module graph evaluates, so each call needs
+    // a fresh evaluation under its own env.
+    vi.resetModules()
+    return await import('../../../server/forms/challenge')
   } finally {
     if (originalFormSecret === undefined) delete process.env.INSTATIC_FORM_SECRET
     else process.env.INSTATIC_FORM_SECRET = originalFormSecret

@@ -1,6 +1,20 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { fetch as undiciFetch } from 'undici'
 import { uploadMediaMcpTool } from './uploadMediaTool'
 import type { ToolContext } from '../../runtime/types'
+
+// The SSRF-safe download issues its request through undici's own `fetch` (the
+// connection pin rides on undici's `dispatcher`), so that is the fetch to
+// stub. No test in this file may reach the network.
+vi.mock('undici', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('undici')>()),
+  fetch: vi.fn(() => Promise.reject(new Error('unexpected network access in test'))),
+}))
+const fetchMock = vi.mocked(undiciFetch)
+
+afterEach(() => {
+  fetchMock.mockClear()
+})
 
 // The handler validates input, the source selector, and the SSRF guard BEFORE
 // it ever touches `ctx.db` or the storage layer, so these paths need no real
@@ -65,10 +79,10 @@ describe('media_upload', () => {
       started = resolve
     })
     let observedSignal: AbortSignal | null = null
-    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((_input, init) => {
+    fetchMock.mockImplementationOnce((_input, init) => {
       observedSignal = init?.signal ?? null
       started()
-      return new Promise<Response>((_resolve, reject) => {
+      return new Promise((_resolve, reject) => {
         observedSignal?.addEventListener(
           'abort',
           () => reject(observedSignal?.reason),
@@ -77,18 +91,14 @@ describe('media_upload', () => {
       })
     })
 
-    try {
-      const pending = upload(
-        { filename: 'x.png', sourceUrl: 'https://8.8.8.8/a.png' },
-        controller.signal,
-      )
-      await fetchStarted
-      controller.abort()
+    const pending = upload(
+      { filename: 'x.png', sourceUrl: 'https://8.8.8.8/a.png' },
+      controller.signal,
+    )
+    await fetchStarted
+    controller.abort()
 
-      await expect(pending).rejects.toThrow(/abort/i)
-      expect(observedSignal?.aborted).toBe(true)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(pending).rejects.toThrow(/abort/i)
+    expect(observedSignal?.aborted).toBe(true)
   })
 })

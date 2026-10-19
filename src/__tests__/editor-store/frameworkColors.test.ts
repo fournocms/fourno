@@ -48,7 +48,7 @@ describe('framework color store actions', () => {
       lightValue: 'hsla(238, 100%, 62%, 1)',
       darkModeEnabled: true,
     })
-    expect(token.darkValue).toStartWith('hsla(')
+    expect(token.darkValue).toMatch(/^hsla\(/)
     expect(token.darkValue).not.toBe(token.lightValue)
 
     const textClass = state.site!.styleRules[frameworkColorClassId(token.id, 'base', 'text')]

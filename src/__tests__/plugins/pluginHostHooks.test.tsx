@@ -76,11 +76,10 @@ describe('useEditorStore permission gate', () => {
     render(<PluginEditorPanel panelId="acme.workflow.review" />)
 
     // No editor state leaked; the panel body shows the boundary fallback
-    // instead of the plugin subtree.
+    // instead of the plugin subtree. (Its wording differs between dev and
+    // production builds, so the fallback is located by its role + location.)
     expect(screen.queryByText('breakpoint:desktop')).toBeNull()
-    expect(
-      (document.body.textContent ?? '').includes('failed to load'),
-    ).toBe(true)
+    expect(screen.getByRole('alert').getAttribute('data-error-location')).toBe('plugin-editor-panel')
   })
 
   it('the thrown error names the plugin and the missing permission', () => {

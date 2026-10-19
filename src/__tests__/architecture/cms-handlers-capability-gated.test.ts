@@ -66,7 +66,7 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   ['mediaVariants.ts', 'Variant generation helper called by gated parent handlers.'],
   ['mediaStorageReader.ts', 'Adapter read helper called by gated parent handlers.'],
   ['imageVariantProtocol.ts', 'Worker protocol type definitions; no handlers.'],
-  ['imageVariantWorker.ts', 'Worker thread entrypoint; runs out-of-band, not a Bun.serve route.'],
+  ['imageVariantWorker.ts', 'Worker thread entrypoint; runs out-of-band, not an HTTP route.'],
   ['imageVariantWorkerHost.ts', 'Worker host helper; called by gated parent handlers.'],
   // Loop runtime — `/_instatic/loop/...` is a runtime endpoint for published
   // pages, not a CMS admin route. Reached only via the public router.
@@ -119,7 +119,7 @@ function listHandlerFiles(dir: string): string[] {
     const full = join(dir, entry)
     const s = statSync(full)
     if (s.isDirectory()) {
-      // Test files are never Bun.serve routes — skip the `__tests__` tree.
+      // Test files are never HTTP routes — skip the `__tests__` tree.
       if (entry === '__tests__') continue
       out.push(...listHandlerFiles(full))
     } else if (s.isFile() && extname(entry) === '.ts') {

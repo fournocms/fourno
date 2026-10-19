@@ -15,6 +15,7 @@
 
 import { describe, it, expect } from 'vitest'
 import { escapeHtml, isSafeUrl, safeUrl, sanitiseCssValue } from '@core/publisher'
+import { buildStyle } from '@modules/base/utils/escape'
 
 // ===========================================================================
 // escapeHtml
@@ -423,7 +424,6 @@ describe('canonical sanitiseCssValue — import verification', () => {
   it('buildStyle in escape.ts now blocks {} (was missing before Task #296)', () => {
     // This test catches the regression that prompted Task #296:
     // escape.ts's sanitiseCssValue did NOT block {} before consolidation
-    const { buildStyle } = require('@modules/base/utils/escape')
     // A CSS value with } would previously pass through escape.ts but was blocked
     // by ClassStyleInjector.sanitiseValue — they were inconsistent.
     // After consolidation, both use the same canonical function → {} is blocked.

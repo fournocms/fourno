@@ -54,7 +54,7 @@ describe('user role-assignment authorization', () => {
 
       expect(res.status).toBe(403)
       const body = await readJson<{ error: string }>(res)
-      expect(body.error).toStartWith("You cannot assign capabilities you don't hold:")
+      expect(body.error).toMatch(/^You cannot assign capabilities you don't hold:/)
 
       const me = await readJson<{ user: { role: { id: string }; capabilities: string[] } }>(
         await harness.cms('/admin/api/cms/me', { cookie: manager.cookie }),

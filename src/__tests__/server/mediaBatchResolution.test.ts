@@ -10,7 +10,7 @@
  *   Verifies that N path lookups collapse into ONE query, and that paths
  *   absent from the database are absent from the returned map.
  *
- * Both sets of tests run against an in-memory bun:sqlite DbClient (via
+ * Both sets of tests run against an in-memory better-sqlite3 DbClient (via
  * createTestDb) OR against a query-counting createFakeDb for the zero-query
  * case where we can't inspect SQLite internals.
  */

@@ -127,7 +127,7 @@ export class TypeScriptLanguageClient {
 export function createTypeScriptLanguageClient(
   workerFactory?: TypeScriptWorkerFactory,
 ): TypeScriptLanguageClient | null {
-  // The language service is browser-only. Bun also exposes a global Worker,
+  // The language service is browser-only. Bun and Deno expose a global Worker,
   // including during DOM-emulated tests, but that is not the transport this
   // client is designed to own and can outlive React cleanup at process exit.
   if (!workerFactory && (typeof window === 'undefined' || typeof window.Worker === 'undefined')) {

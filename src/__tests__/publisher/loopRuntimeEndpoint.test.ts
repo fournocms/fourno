@@ -74,7 +74,11 @@ describe('loop runtime endpoint', () => {
 
   it('does not depend on document.currentScript, which is null in a module', () => {
     // The regression guard: currentScript is spec-null inside `type="module"`,
-    // so reading it can only ever yield the fallback.
-    expect(LOOP_RUNTIME_JS).not.toContain('currentScript')
+    // so reading it can only ever yield the fallback. The string comes from
+    // `Function.prototype.toString()`, which keeps source comments under the
+    // test transform (the production transpile drops them), so comments are
+    // stripped before checking the code.
+    const runtimeCode = LOOP_RUNTIME_JS.replace(/\/\/.*$/gm, '')
+    expect(runtimeCode).not.toContain('currentScript')
   })
 })

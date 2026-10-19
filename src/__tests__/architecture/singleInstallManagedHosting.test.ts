@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { readFileSync } from 'fs'
+import { globSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 const ROOT = join(import.meta.dirname, '../../..')
@@ -35,7 +35,7 @@ describe('Single-install CMS architecture', () => {
 
     const offenders: string[] = []
     for (const root of RUNTIME_SOURCE_ROOTS) {
-      for (const file of new Bun.Glob('**/*.{ts,tsx}').scanSync(join(ROOT, root))) {
+      for (const file of globSync('**/*.{ts,tsx}', { cwd: join(ROOT, root) })) {
         const path = join(root, file)
         const src = read(path)
         for (const pattern of forbidden) {

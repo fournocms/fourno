@@ -33,7 +33,14 @@ import { ConflictsStep } from '@admin/modals/SiteImport/steps/ConflictsStep'
 import { AnalyzeStep } from '@admin/modals/SiteImport/steps/AnalyzeStep'
 import { SiteImportModal } from '@admin/modals/SiteImport'
 import type { ImportSelection } from '@admin/modals/SiteImport'
-import { commitImportPlan } from '@core/siteImport'
+import {
+  commitImportPlan,
+  EmptyImportError,
+  OversizeImportError,
+  PathTraversalError,
+  TooManyFilesError,
+  ZipBombError,
+} from '@core/siteImport'
 import { pageToCells } from '@core/data/pageFromRow'
 import { BUNDLE_ARCHIVE_MANIFEST_PATH } from '@core/data/bundleArchive'
 import { CORE_CAPABILITIES } from '@core/capabilities'
@@ -1339,7 +1346,6 @@ describe('describeIngestError — human-readable error messages', () => {
   }
 
   function describeIngestError(err: unknown): string {
-    const { EmptyImportError, OversizeImportError, ZipBombError, TooManyFilesError, PathTraversalError } = require('@core/siteImport')
     if (err instanceof EmptyImportError) return 'No importable files found. Drop at least one HTML or CSS file.'
     if (err instanceof OversizeImportError) return `Import is too large (${Math.round((err as InstanceType<typeof OversizeImportError>).sizeBytes / 1024 / 1024)} MB). Maximum is ${formatByteLimit((err as InstanceType<typeof OversizeImportError>).limitBytes)}.`
     if (err instanceof ZipBombError) return 'ZIP archive is too large when uncompressed. Maximum uncompressed size is 5 GB.'
@@ -1349,13 +1355,11 @@ describe('describeIngestError — human-readable error messages', () => {
   }
 
   it('EmptyImportError → "No importable files found…"', () => {
-    const { EmptyImportError } = require('@core/siteImport')
     const err = new EmptyImportError()
     expect(describeIngestError(err)).toContain('No importable files found')
   })
 
   it('OversizeImportError → includes size in MB', () => {
-    const { OversizeImportError } = require('@core/siteImport')
     const err = new OversizeImportError(250 * 1024 * 1024, 200 * 1024 * 1024)
     const msg = describeIngestError(err)
     expect(msg).toContain('250 MB')
@@ -1363,13 +1367,11 @@ describe('describeIngestError — human-readable error messages', () => {
   })
 
   it('ZipBombError → "ZIP archive is too large when uncompressed"', () => {
-    const { ZipBombError } = require('@core/siteImport')
     const err = new ZipBombError(6 * 1024 * 1024 * 1024, 5 * 1024 * 1024 * 1024)
     expect(describeIngestError(err)).toContain('ZIP archive is too large')
   })
 
   it('TooManyFilesError → includes count and limit', () => {
-    const { TooManyFilesError } = require('@core/siteImport')
     const err = new TooManyFilesError(15000, 10000)
     const msg = describeIngestError(err)
     expect(msg).toContain('15000')
@@ -1377,7 +1379,6 @@ describe('describeIngestError — human-readable error messages', () => {
   })
 
   it('PathTraversalError → includes unsafe path', () => {
-    const { PathTraversalError } = require('@core/siteImport')
     const err = new PathTraversalError('../evil/file.html')
     const msg = describeIngestError(err)
     expect(msg).toContain('../evil/file.html')

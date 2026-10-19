@@ -161,7 +161,7 @@ function makeSnapshotWithLoop(loopNodeId: string, sourceId: string) {
  * Minimal GET request stub. The hole handler only reads `req.method` and
  * `req.headers.get('cookie')`. We bypass the global `Headers` here because the
  * test runtime (happy-dom) enforces the browser forbidden-header rule and drops
- * the `Cookie` header — Bun.serve's native incoming Request does not, so a stub
+ * the `Cookie` header — the server adapter's incoming Request does not, so a stub
  * faithfully models production while keeping the test deterministic.
  */
 function makeReq(cookie?: string): Request {

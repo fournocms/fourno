@@ -3,7 +3,6 @@ import { createCapabilityTestHarness, type CapabilityTestHarness } from '../../.
 import { createDataRow } from '../../repositories/data'
 import { authorizeMcpContentTool } from './contentAuthorization'
 import { MAIN_SCOPE } from '../../branches/scope'
-import { MAIN_SCOPE } from '../../branches/scope'
 
 describe('MCP content row authorization', () => {
   let harness: CapabilityTestHarness

@@ -301,9 +301,15 @@ if (typeof (globalThis as { EventSource?: unknown }).EventSource === 'undefined'
 // Imported dynamically so it runs AFTER the happy-dom globals above are
 // installed — a static top-level import would be hoisted and pull in React
 // before `document` exists.
+//
+// `findBy*` / `waitFor` default to a 1 s budget. A full editor-shell first
+// render can exceed that when every worker is busy (Vitest transforms each
+// module per file, and the suite runs files in parallel), so the async query
+// budget is raised; the per-test timeout in vitest.config.ts still bounds it.
 {
   const { afterEach } = await import('vitest')
-  const { cleanup } = await import('@testing-library/react')
+  const { cleanup, configure } = await import('@testing-library/react')
+  configure({ asyncUtilTimeout: 5_000 })
   const { __resetToastBusForTests } = await import('@ui/components/Toast/toastBus')
   afterEach(() => {
     cleanup()

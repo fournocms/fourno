@@ -95,9 +95,9 @@ describe('runtime dependency resolution', () => {
     expect(runtimeDependencyLockHash(a)).toBe(runtimeDependencyLockHash(b))
   })
 
-  it('creates an isolated Bun install workspace with lifecycle scripts disabled', async () => {
+  it('creates an isolated npm install workspace with lifecycle scripts disabled', async () => {
     const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-cache-test-'))
-    const calls: Array<{ command: string[]; cwd: string }> = []
+    const calls: Array<{ command: string[]; cwd: string; env: Record<string, string> }> = []
     const lock: SiteDependencyLock = {
       version: 1,
       updatedAt: 100,
@@ -114,10 +114,11 @@ describe('runtime dependency resolution', () => {
     try {
       const cache = await ensureRuntimeDependencyCache(lock, {
         cacheRoot,
+        npmCommand: [process.execPath, '/opt/node/lib/node_modules/npm/bin/npm-cli.js'],
         runInstall: async (command, options) => {
-          calls.push({ command, cwd: options.cwd })
+          calls.push({ command, cwd: options.cwd, env: options.env })
           await mkdir(join(options.cwd, 'node_modules'), { recursive: true })
-          await writeFile(join(options.cwd, 'bun.lock'), '', 'utf8')
+          await writeFile(join(options.cwd, 'package-lock.json'), '{}', 'utf8')
         },
       })
       const generatedPackage = JSON.parse(await readFile(join(cache.workspaceDir, 'package.json'), 'utf8')) as {
@@ -127,7 +128,18 @@ describe('runtime dependency resolution', () => {
       expect(cache.nodeModulesDir).toBe(join(cache.workspaceDir, 'node_modules'))
       expect(generatedPackage.dependencies).toEqual({ 'canvas-confetti': '1.9.3' })
       expect(calls).toHaveLength(1)
-      expect(calls[0].command).toEqual([process.execPath, 'install', '--ignore-scripts'])
+      expect(calls[0].command).toEqual([
+        process.execPath,
+        '/opt/node/lib/node_modules/npm/bin/npm-cli.js',
+        'install',
+        '--ignore-scripts',
+        '--omit=dev',
+        '--no-audit',
+        '--no-fund',
+        '--no-update-notifier',
+      ])
+      // A nested npm invocation inherits the lifecycle-script refusal too.
+      expect(calls[0].env.npm_config_ignore_scripts).toBe('true')
       // Install runs in a temp sibling dir, then the dir is atomically renamed
       // into its final hash slot. The cwd passed to runInstall must therefore
       // NOT be the final workspaceDir.

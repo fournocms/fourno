@@ -20,6 +20,9 @@
  *   - Per-bench logs at `.tmp/benchmarks/<name>.log` for deeper digging
  *   - Stdout: a streaming progress log + a one-line summary per bench
  */
+// Must stay first: the publisher/publish/editor-store benches import the module registry,
+// whose editor components pull in `*.module.css` that Node cannot load without this stub.
+import '../../server/runtime/cssModuleStub'
 import { resolve, dirname } from 'node:path'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'

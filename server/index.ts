@@ -1,4 +1,5 @@
 import './runtime/cssModuleStub'
+import './runtime/webStorageGuard'
 import { timingSafeEqual } from 'node:crypto'
 import { createDbClient } from './db'
 import { runMigrations } from './db/runMigrations'

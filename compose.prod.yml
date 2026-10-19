@@ -37,7 +37,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "bun", "run", "server/healthcheck.ts"]
+      test: ["CMD", "node", "--import", "tsx", "server/healthcheck.ts"]
       interval: 30s
       timeout: 5s
       start_period: 20s

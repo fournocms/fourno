@@ -8,7 +8,7 @@ const OUT_DIR = join(ROOT, '.tmp', 'release')
 
 const version = process.argv[2] ?? process.env.INSTATIC_VERSION
 if (!version) {
-  throw new Error('Usage: bun run release:bundle -- <semver>')
+  throw new Error('Usage: pnpm release:bundle -- <semver>')
 }
 
 const bundleName = `instatic-${version}`
@@ -99,7 +99,7 @@ DATABASE_URL=sqlite:/app/storage/data/cms.db
 UPLOADS_DIR=/app/storage/uploads
 STATIC_DIR=/app/dist
 RAILWAY_RUN_UID=0
-INSTATIC_SECRET_KEY=<output of bun run scripts/generate-secret-key.ts>
+INSTATIC_SECRET_KEY=<output of pnpm tsx scripts/generate-secret-key.ts>
 PUBLIC_ORIGIN=https://\${{RAILWAY_PUBLIC_DOMAIN}}
 \`\`\`
 

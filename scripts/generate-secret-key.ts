@@ -1,11 +1,11 @@
-#!/usr/bin/env bun
+#!/usr/bin/env tsx
 /**
  * Generate a fresh 32-byte (256-bit) base64 AES key suitable for
  * `INSTATIC_SECRET_KEY`.
  *
  * Usage:
  *
- *     bun run scripts/generate-secret-key.ts
+ *     pnpm tsx scripts/generate-secret-key.ts
  *
  * Prints the key (and a setup hint) to stdout. The key is generated via
  * `crypto.getRandomValues`, never written to disk by this script — that's

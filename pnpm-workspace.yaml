@@ -4,7 +4,6 @@
 # else is blocked (pnpm's default), so a compromised transitive dependency
 # cannot execute code at install time.
 onlyBuiltDependencies:
-  - better-sqlite3
   - esbuild
 
 # Refuse to resolve versions published less than a week ago — a cheap guard
@@ -18,3 +17,7 @@ verifyDepsBeforeRun: install
 # Optional native accelerator (msgpackr, via a dev tool); the JS fallback is fine.
 ignoredBuiltDependencies:
   - msgpackr-extract
+  # Ships prebuilt binaries per platform (prebuilds/); pnpm would otherwise
+  # run `node-gyp rebuild` because of the binding.gyp, which needs a toolchain
+  # (python, make, g++) that slim images do not have.
+  - better-sqlite3

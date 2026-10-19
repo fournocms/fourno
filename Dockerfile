@@ -1,26 +1,28 @@
 # syntax=docker/dockerfile:1
 
-# The one place the Bun version lives for the image; CI reads it from
-# package.json "packageManager" instead, so bumping Bun is two lines.
-ARG BUN_VERSION=1.4.2
+# The one place the Node major lives for the image. pnpm's version is not
+# repeated here: corepack reads it from package.json "packageManager".
+ARG NODE_VERSION=24
 
-FROM oven/bun:${BUN_VERSION} AS build
+FROM node:${NODE_VERSION}-bookworm-slim AS base
+RUN corepack enable
 WORKDIR /app
-# vendor/pixel-art-icons is a `file:` dep — `bun install` needs it on disk to
+
+FROM base AS build
+# vendor/pixel-art-icons is a `file:` dep — `pnpm install` needs it on disk to
 # resolve the dependency, so copy it alongside the manifest before installing.
-COPY package.json bun.lock ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY vendor ./vendor
-RUN bun install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 COPY . .
-RUN bun run build
+RUN pnpm build
 
-FROM oven/bun:${BUN_VERSION} AS production-deps
-WORKDIR /app
-COPY package.json bun.lock ./
+FROM base AS production-deps
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY vendor ./vendor
-RUN bun install --frozen-lockfile --production
+RUN pnpm install --frozen-lockfile --prod
 
-FROM oven/bun:${BUN_VERSION} AS runtime
+FROM node:${NODE_VERSION}-bookworm-slim AS runtime
 WORKDIR /app
 
 ARG INSTATIC_VERSION=dev
@@ -42,18 +44,18 @@ ENV PORT=3001
 ENV STATIC_DIR=/app/dist
 ENV UPLOADS_DIR=/app/uploads
 
-COPY --from=production-deps --chown=bun:bun /app/node_modules ./node_modules
-COPY --from=build --chown=bun:bun /app/dist ./dist
-COPY --chown=bun:bun package.json bun.lock ./
-COPY --chown=bun:bun tsconfig*.json ./
-COPY --chown=bun:bun server ./server
-COPY --chown=bun:bun src ./src
+COPY --from=production-deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/dist ./dist
+COPY --chown=node:node package.json ./
+COPY --chown=node:node tsconfig*.json ./
+COPY --chown=node:node server ./server
+COPY --chown=node:node src ./src
 
-RUN mkdir -p /app/uploads /app/data && chown -R bun:bun /app
+RUN mkdir -p /app/uploads /app/data && chown -R node:node /app
 
-USER bun
+USER node
 EXPOSE 3001
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD ["bun", "run", "server/healthcheck.ts"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 CMD ["node", "--import", "tsx", "server/healthcheck.ts"]
 
-CMD ["bun", "run", "server/index.ts"]
+CMD ["node", "--import", "tsx", "server/index.ts"]

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 
 describe('self-host docker config', () => {
-  it('defines a postgres dev service for `bun run dev` to manage', () => {
+  it('defines a postgres dev service for `pnpm dev` to manage', () => {
     const compose = readFileSync('docker-compose.yml', 'utf8')
     expect(compose).toContain('postgres:')
     expect(compose).toContain('postgres:16')
@@ -22,20 +22,20 @@ describe('self-host docker config', () => {
   it('defines a production Docker image that builds assets before runtime startup', () => {
     const dockerfile = readFileSync('Dockerfile', 'utf8')
 
-    expect(dockerfile).toContain('ARG BUN_VERSION=1.4.2')
-    expect(dockerfile).toContain('FROM oven/bun:${BUN_VERSION} AS build')
-    expect(dockerfile).toContain('RUN bun run build')
-    expect(dockerfile).toContain('FROM oven/bun:${BUN_VERSION} AS runtime')
+    expect(dockerfile).toContain('ARG NODE_VERSION=24')
+    expect(dockerfile).toContain('FROM node:${NODE_VERSION}-bookworm-slim AS base')
+    expect(dockerfile).toContain('RUN pnpm build')
+    expect(dockerfile).toContain('FROM node:${NODE_VERSION}-bookworm-slim AS runtime')
     expect(dockerfile).toContain('ARG INSTATIC_VERSION=dev')
     expect(dockerfile).toContain('LABEL org.opencontainers.image.version="${INSTATIC_VERSION}"')
-    expect(dockerfile).toContain('CMD ["bun", "run", "server/index.ts"]')
-    expect(dockerfile).not.toContain('vite build && bun run server/index.ts')
+    expect(dockerfile).toContain('CMD ["node", "--import", "tsx", "server/index.ts"]')
+    expect(dockerfile).not.toContain('vite build && node')
   })
 
   it('keeps TypeScript path aliases available in the runtime image', () => {
     const dockerfile = readFileSync('Dockerfile', 'utf8')
 
-    expect(dockerfile).toContain('COPY --chown=bun:bun tsconfig*.json ./')
+    expect(dockerfile).toContain('COPY --chown=node:node tsconfig*.json ./')
   })
 
   it('installs the runtime script bundler in production dependencies', () => {

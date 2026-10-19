@@ -4,7 +4,7 @@
  *
  * Why this exists
  * ───────────────
- * `ensureRuntimeDependencyCache(lock)` runs `bun install` against the site's
+ * `ensureRuntimeDependencyCache(lock)` runs `npm install` against the site's
  * locked dependencies in a content-addressed workspace dir
  * (`<cacheRoot>/deps/<hash>/`). Published pages need to *fetch* those installed
  * files at runtime so an importmap entry like `"three" → "/_instatic/runtime/cache/
@@ -21,7 +21,7 @@
  * Cache validity
  * ──────────────
  * Each cache dir has a `.instatic-install-complete` sentinel written after
- * `bun install` succeeds. We refuse to serve when the sentinel is missing —
+ * `npm install` succeeds. We refuse to serve when the sentinel is missing —
  * a stale or partial install must complete before responses go out.
  *
  * Headers
@@ -31,6 +31,7 @@
  * can keep responses indefinitely.
  */
 import { existsSync } from 'node:fs'
+import { readFile, stat } from 'node:fs/promises'
 import { resolve as resolvePath } from 'node:path'
 import { isPathWithin } from '../../util/pathWithin'
 import { nodeModulesDirForHash, sentinelPathForHash } from './dependencyCache'
@@ -93,15 +94,15 @@ export async function tryServeRuntimePackage(req: Request, pathname: string): Pr
   if (!resolved) return new Response('not found', { status: 404 })
 
   // Refuse to serve from an in-progress / abandoned install. The sentinel is
-  // written atomically *after* `bun install` succeeds (see dependencyCache.ts).
+  // written atomically *after* `npm install` succeeds (see dependencyCache.ts).
   if (!existsSync(sentinelPathForHash(resolved.hash))) {
     return new Response('runtime dependency cache not ready', { status: 404 })
   }
 
-  const file = Bun.file(resolved.absPath)
-  if (!(await file.exists())) return new Response('not found', { status: 404 })
+  const fileInfo = await stat(resolved.absPath).catch(() => null)
+  if (!fileInfo?.isFile()) return new Response('not found', { status: 404 })
 
-  return new Response(file, {
+  return new Response(new Uint8Array(await readFile(resolved.absPath)), {
     headers: {
       'content-type': contentTypeForPath(resolved.absPath),
       // Content-addressed by lock hash — a different lock yields different

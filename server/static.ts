@@ -1,6 +1,7 @@
 import { extname, resolve, sep } from 'node:path'
-import { brotliCompressSync, constants as zlibConstants } from 'node:zlib'
+import { brotliCompressSync, gzipSync, constants as zlibConstants } from 'node:zlib'
 import { readdirSync } from 'node:fs'
+import { readFile, stat } from 'node:fs/promises'
 import { SESSION_COOKIE_NAME } from './auth/tokens'
 
 const MIME_TYPES: Record<string, string> = {
@@ -115,9 +116,25 @@ async function compressForEncoding(
   }
 
   if (!entry.gzip) {
-    entry.gzip = Bun.gzipSync(bytes) as ResponseBytes
+    entry.gzip = new Uint8Array(gzipSync(bytes)) as ResponseBytes
   }
   return entry.gzip
+}
+
+/** A regular file's bytes and mtime, or `null` when the path is missing or not a file. */
+async function readRegularFile(
+  filePath: string,
+): Promise<{ bytes: ResponseBytes; lastModifiedMs: number } | null> {
+  try {
+    const info = await stat(filePath)
+    if (!info.isFile()) return null
+    const contents = await readFile(filePath)
+    const bytes = new Uint8Array(contents.buffer, contents.byteOffset, contents.byteLength) as ResponseBytes
+    return { bytes, lastModifiedMs: info.mtimeMs }
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return null
+    throw err
+  }
 }
 
 export async function serveStaticFile(
@@ -128,23 +145,22 @@ export async function serveStaticFile(
   const filePath = resolveStaticPath(staticDir, pathname)
   if (!filePath) return null
 
-  const file = Bun.file(filePath)
-  if (!(await file.exists())) return null
+  const file = await readRegularFile(filePath)
+  if (!file) return null
 
   const cacheControl = pathname.startsWith('/assets/')
     ? 'public, max-age=31536000, immutable'
     : 'no-cache'
   const mime = contentType(filePath)
 
-  const buffer = await file.arrayBuffer()
-  const bytes = new Uint8Array(buffer) as ResponseBytes
+  const bytes = file.bytes
   const acceptEncoding = req?.headers.get('accept-encoding') ?? null
   const encoding = isCompressible(filePath, bytes.byteLength)
     ? selectEncoding(acceptEncoding)
     : null
 
   if (encoding) {
-    const compressed = await compressForEncoding(filePath, bytes, encoding, file.lastModified)
+    const compressed = await compressForEncoding(filePath, bytes, encoding, file.lastModifiedMs)
     // Body bytes are owned by us — no risk of consumer mutation.
     return new Response(compressed, {
       headers: {
@@ -486,10 +502,10 @@ export async function serveAdminApp(staticDir: string, req?: Request): Promise<R
   //                      so a styled login skeleton would flash badly).
   const filePath = resolveStaticPath(staticDir, '/index.html')
   if (!filePath) return null
-  const file = Bun.file(filePath)
-  if (!(await file.exists())) return null
+  const file = await readRegularFile(filePath)
+  if (!file) return null
 
-  const html = await file.text()
+  const html = new TextDecoder().decode(file.bytes)
   const transformed = requestHasSessionCookie(req)
     ? injectAuthenticatedHints(html, staticDir)
     : injectLoginSkeleton(html)
@@ -516,7 +532,7 @@ export async function serveAdminApp(staticDir: string, req?: Request): Promise<R
     })
   }
   if (encoding === 'gzip') {
-    const compressed = Bun.gzipSync(bytes) as ResponseBytes
+    const compressed = new Uint8Array(gzipSync(bytes)) as ResponseBytes
     return new Response(compressed, {
       headers: {
         'content-type': 'text/html; charset=utf-8',

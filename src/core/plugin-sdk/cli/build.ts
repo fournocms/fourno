@@ -1,8 +1,8 @@
 /**
  * Plugin build pipeline.
  *
- * Reads `<dir>/instatic-plugin.config.ts`, evaluates it via `import()` (Bun
- * transpiles TypeScript natively), and writes the runtime zip layout that
+ * Reads `<dir>/instatic-plugin.config.ts`, evaluates it via `import()` (the
+ * CLI runs under tsx, which transpiles TypeScript on import), and writes the runtime zip layout that
  * the host package installer expects:
  *
  *   <dir>/dist/
@@ -16,7 +16,7 @@
  *
  * Then zips `dist/` into `<dir-parent>/<plugin-dir-name>.plugin.zip`.
  *
- * Bundling: each entrypoint is bundled with `Bun.build()` as ESM. Plugin
+ * Bundling: each entrypoint is bundled with esbuild as ESM. Plugin
  * authors get one self-contained bundle per entrypoint with no
  * node_modules in the zip.
  */
@@ -25,6 +25,7 @@ import { copyFile, mkdir, rm, writeFile } from 'node:fs/promises'
 import { basename, dirname, join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { spawn } from 'node:child_process'
+import { build as esbuild } from 'esbuild'
 import type { PluginDefinition } from '../builders/definePlugin'
 import { assertSandboxSafe } from '@core/plugins/sandboxScan'
 import { installPackCompileEnvironment } from './packCompileEnvironment'
@@ -54,7 +55,7 @@ export async function readPluginDefinition(sourceDir: string): Promise<PluginDef
  * Externals for plugin **admin/editor** bundles (admin pages, editor
  * entrypoints, canvas modules).
  *
- * Bun.build leaves these names as bare imports. At runtime, the host's
+ * esbuild leaves these names as bare imports. At runtime, the host's
  * import map (`index.html`) resolves them to the host's React instance,
  * design-system primitives, plugin SDK helpers, and editor/settings
  * hooks — so plugins share host React + host UI without bundling a
@@ -62,7 +63,7 @@ export async function readPluginDefinition(sourceDir: string): Promise<PluginDef
  * the editor's design-system contract stable across plugin upgrades.
  *
  * Two bundle modes that DO NOT externalize:
- *   - `serverSide: true` — server entrypoints load in the host's Bun
+ *   - `serverSide: true` — server entrypoints load in the host's plugin
  *     worker; no browser host runtime there.
  *   - `frontendBundle: true` — frontend scripts run on PUBLISHED pages,
  *     which never load the editor's import map. A bare `import 'react'`
@@ -170,7 +171,7 @@ interface BundleOptions {
  * SDK's `definePack` builder default-exports the array of modules).
  */
 function generateSandboxFacade(entrypointAbsolutePath: string, kind: 'server' | 'modules'): string {
-  // Bun's bundler accepts absolute paths in import specifiers.
+  // esbuild accepts absolute paths in import specifiers.
   const importPath = JSON.stringify(entrypointAbsolutePath)
   if (kind === 'server') {
     return [
@@ -211,7 +212,7 @@ async function bundleEntrypoint(
     }
     for (const specifier of options.externalSpecifiers ?? []) {
       externalSet.add(specifier)
-      // Bun.build (and esbuild) treat `name/*` as a glob — required to
+      // esbuild treats `name/*` as a glob — required to
       // externalize subpath imports like `three/examples/jsm/...` while
       // letting the bare `three` resolve via the same external.
       externalSet.add(`${specifier}/*`)
@@ -234,36 +235,34 @@ async function bundleEntrypoint(
   }
 
   try {
-    const result = await Bun.build({
-      entrypoints: [entryToBundle],
-      target: 'browser',
+    const result = await esbuild({
+      entryPoints: [entryToBundle],
+      bundle: true,
+      write: false,
+      platform: 'browser',
       format: options.sandbox ? 'iife' : 'esm',
       splitting: false,
       minify: false,
       external,
-      // Force production JSX. Without this, Bun's transpiler emits
-      // `import { jsxDEV } from "react/jsx-dev-runtime"` for every JSX
-      // expression — and that's fatal in a production host because React
-      // 19's `react-jsx-dev-runtime.production.js` intentionally exports
-      // `jsxDEV` as `void 0`. Plugin bundles then crash with
-      // "TypeError: jsxDEV is not a function" as soon as any of their
-      // components render. The runtime shim at
-      // `public/runtime/react-jsx-dev-runtime.js` falls back to
-      // `jsx`/`jsxs` defensively (for third-party plugins not built with
-      // this CLI), but bundles built here should import the production
-      // runtime directly. Bun's transpiler keys this off
-      // `process.env.NODE_ENV`, so inlining it as a define is enough —
-      // the `jsx` build-config field exists in the type defs but is not
-      // honored by the transpiler in Bun 1.3.
+      logLevel: 'silent',
+      // Automatic JSX runtime, production flavour: `react/jsx-runtime`'s
+      // `jsx`/`jsxs`. React 19's `react-jsx-dev-runtime.production.js`
+      // exports `jsxDEV` as `void 0`, so a bundle importing the dev runtime
+      // crashes with "jsxDEV is not a function" in a production host. The
+      // runtime shim at `public/runtime/react-jsx-dev-runtime.js` falls back
+      // to `jsx`/`jsxs` defensively (for third-party plugins not built with
+      // this CLI), but bundles built here import the production runtime
+      // directly.
+      jsx: 'automatic',
+      jsxDev: false,
       define: { 'process.env.NODE_ENV': '"production"' },
+    }).catch((err: unknown) => {
+      const messages = (err as { errors?: { text: string }[] }).errors?.map((e) => e.text).join('\n')
+      throw new Error(`Failed to bundle ${sourcePath}:\n${messages ?? String(err)}`, { cause: err })
     })
-    if (!result.success) {
-      const messages = result.logs.map((l) => l.message).join('\n')
-      throw new Error(`Failed to bundle ${sourcePath}:\n${messages}`)
-    }
-    const built = result.outputs[0]
-    if (!built) throw new Error(`No output from Bun.build for ${sourcePath}`)
-    const text = await built.text()
+    const built = result.outputFiles[0]
+    if (!built) throw new Error(`No output from esbuild for ${sourcePath}`)
+    const text = built.text
 
     if (options.sandbox) {
       // Defense in depth — fail the build NOW if the bundled output (after

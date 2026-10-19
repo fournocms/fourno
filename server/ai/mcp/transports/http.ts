@@ -1,5 +1,5 @@
 /**
- * Streamable HTTP MCP endpoint, bridged to Bun's `Bun.serve` Web `Request`/
+ * Streamable HTTP MCP endpoint, bridged to the server's Web `Request`/
  * `Response` model.
  *
  * The v2 SDK's `createMcpHandler` speaks Web Standards (Request, Response,

@@ -14,7 +14,7 @@
  * and frontend bundles still need a manual page reload (browser cache).
  */
 import { watch } from 'node:fs'
-import { cp, mkdir, readdir, rm, stat } from 'node:fs/promises'
+import { cp, mkdir, readFile, readdir, rm, stat } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import { buildPlugin } from './build'
 import {
@@ -133,7 +133,7 @@ async function resolveVersionDir(
   distDir: string,
 ): Promise<string> {
   const manifestPath = join(distDir, 'plugin.json')
-  const manifest = JSON.parse(await Bun.file(manifestPath).text()) as { version: string }
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as { version: string }
   return join(targets.uploadsDir, 'plugins', pluginId, manifest.version)
 }
 

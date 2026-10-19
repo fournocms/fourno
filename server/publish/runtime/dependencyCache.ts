@@ -1,8 +1,9 @@
+import { spawn } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { dirname, join, resolve } from 'node:path'
 import type { SiteDependencyLock } from '@core/site-runtime'
 import { isPublicNpmRegistry, npmRegistryUrl } from '../../registry/config'
 
@@ -25,7 +26,8 @@ export type RuntimeInstallRunner = (
 
 interface EnsureRuntimeDependencyCacheOptions {
   cacheRoot?: string
-  bunExecutable?: string
+  /** The npm invocation prefix (`[node, npm-cli.js]`); defaults to the npm bundled with this Node. */
+  npmCommand?: string[]
   runInstall?: RuntimeInstallRunner
   /** Override the install timeout (ms). Mainly for tests. */
   installTimeoutMs?: number
@@ -51,7 +53,7 @@ const INSTALL_SENTINEL_FILE = '.instatic-install-complete'
 const DEFAULT_MAX_RUNTIME_PACKAGES = 100
 
 /**
- * Hard upper bound on the time a single `bun install` invocation may run.
+ * Hard upper bound on the time a single `npm install` invocation may run.
  * Without this, a stuck registry lookup or hung child process pins the request
  * and ties up server capacity indefinitely.
  */
@@ -105,41 +107,58 @@ export function sentinelPathForHash(hash: string, cacheRoot: string = cacheRootD
   return join(workspaceDirForHash(hash, cacheRoot), INSTALL_SENTINEL_FILE)
 }
 
+/**
+ * The npm that ships with the running Node, invoked through `node npm-cli.js`
+ * so no shell (and no `npm.cmd` on Windows) is involved. Official Node
+ * installs and images place it at `<prefix>/lib/node_modules/npm` (POSIX) or
+ * next to `node.exe` (Windows); anything else falls back to `npm` on PATH.
+ */
+function bundledNpmCommand(): string[] {
+  const nodeDir = dirname(process.execPath)
+  const candidates = process.platform === 'win32'
+    ? [join(nodeDir, 'node_modules', 'npm', 'bin', 'npm-cli.js')]
+    : [join(nodeDir, '..', 'lib', 'node_modules', 'npm', 'bin', 'npm-cli.js')]
+  const npmCli = candidates.find((candidate) => existsSync(candidate))
+  return npmCli ? [process.execPath, npmCli] : ['npm']
+}
+
 async function defaultRunInstall(command: string[], options: RuntimeInstallOptions): Promise<void> {
-  const proc = Bun.spawn(command, {
+  const [executable, ...args] = command
+  if (!executable) throw new Error('[runtime dependency cache] empty install command')
+  const child = spawn(executable, args, {
     cwd: options.cwd,
     env: options.env,
-    stdout: 'pipe',
-    stderr: 'pipe',
+    stdio: ['ignore', 'pipe', 'pipe'],
   })
 
   // Honor an external abort (used to enforce the install timeout). Killing
-  // the child causes `proc.exited` to resolve with a non-zero exit code below,
-  // which we surface as a clean error message.
+  // the child makes it exit with a signal, which we surface as a clean error
+  // message below.
   const onAbort = () => {
-    try {
-      proc.kill()
-    } catch {
-      // The process may already have exited; that's fine.
-    }
+    child.kill()
   }
   options.signal?.addEventListener('abort', onAbort, { once: true })
 
   try {
-    // Drain stdout/stderr concurrently with awaiting exit. Without this, a
-    // noisy child process can fill the pipe buffer and block waiting for
-    // someone to read it — never reaching the exit syscall — which would
-    // leave us with a partially extracted node_modules/ tree.
-    const [exitCode, stdoutText, stderrText] = await Promise.all([
-      proc.exited,
-      new Response(proc.stdout).text(),
-      new Response(proc.stderr).text(),
-    ])
+    // Drain stdout/stderr while waiting for exit. Without this, a noisy child
+    // process can fill the pipe buffer and block waiting for someone to read
+    // it — never reaching the exit syscall — which would leave us with a
+    // partially extracted node_modules/ tree.
+    const stdoutChunks: Buffer[] = []
+    const stderrChunks: Buffer[] = []
+    child.stdout.on('data', (chunk: Buffer) => stdoutChunks.push(chunk))
+    child.stderr.on('data', (chunk: Buffer) => stderrChunks.push(chunk))
+    const exitCode = await new Promise<number | null>((resolveExit, rejectExit) => {
+      child.once('error', rejectExit)
+      child.once('close', (code) => resolveExit(code))
+    })
     if (exitCode === 0) return
 
     if (options.signal?.aborted) {
       throw new Error('[runtime dependency cache] install timed out')
     }
+    const stderrText = Buffer.concat(stderrChunks).toString('utf8')
+    const stdoutText = Buffer.concat(stdoutChunks).toString('utf8')
     throw new Error(
       `[runtime dependency cache] install failed (${exitCode}): ${stderrText || stdoutText}`,
     )
@@ -185,7 +204,7 @@ async function performInstall(
   }
 
   // Slow path: install atomically. We materialize the workspace into a temp
-  // sibling dir, run `bun install`, write the sentinel marker, and only then
+  // sibling dir, run `npm install`, write the sentinel marker, and only then
   // rename the temp dir into its final hash-based slot. A partial install
   // therefore never appears as a valid cache entry — the next request will
   // simply re-attempt the install.
@@ -214,7 +233,17 @@ async function performInstall(
     const abort = new AbortController()
     const timer = setTimeout(() => abort.abort(), installTimeoutMs)
     try {
-      const command = [options.bunExecutable ?? process.execPath, 'install', '--ignore-scripts']
+      // Lifecycle scripts never run: `--ignore-scripts` plus the matching
+      // config env var, so a nested npm invocation inherits the refusal too.
+      const command = [
+        ...(options.npmCommand ?? bundledNpmCommand()),
+        'install',
+        '--ignore-scripts',
+        '--omit=dev',
+        '--no-audit',
+        '--no-fund',
+        '--no-update-notifier',
+      ]
       // The same registry the resolver read metadata from — a private mirror
       // configured through NPM_REGISTRY_URL must also serve the tarballs.
       const registryUrl = npmRegistryUrl()
@@ -223,8 +252,8 @@ async function performInstall(
         env: {
           PATH: process.env.PATH ?? '',
           HOME: process.env.HOME ?? '',
-          BUN_CONFIG_IGNORE_SCRIPTS: '1',
-          ...(isPublicNpmRegistry(registryUrl) ? {} : { NPM_CONFIG_REGISTRY: registryUrl }),
+          npm_config_ignore_scripts: 'true',
+          ...(isPublicNpmRegistry(registryUrl) ? {} : { npm_config_registry: registryUrl }),
         },
         signal: abort.signal,
       })
@@ -272,7 +301,7 @@ export async function ensureRuntimeDependencyCache(
   const hash = runtimeDependencyLockHash(lock)
 
   // Concurrency dedupe: if a request for this exact lock is already running,
-  // join it instead of spawning a duplicate `bun install`. This collapses the
+  // join it instead of spawning a duplicate `npm install`. This collapses the
   // thundering-herd that happens when several preview rebuilds queue up
   // before the first install completes.
   const existing = inFlightInstalls.get(hash)

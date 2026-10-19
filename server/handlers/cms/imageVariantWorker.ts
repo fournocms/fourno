@@ -1,5 +1,5 @@
 /**
- * Image-variant worker entry — runs inside a `Bun.Worker` spawned by
+ * Image-variant worker entry — runs inside a worker thread spawned by
  * `imageVariantWorkerHost.ts`. The worker's job is the CPU-bound chunk of
  * the upload pipeline:
  *
@@ -21,12 +21,13 @@ import sharp from 'sharp'
 import { encode as encodeBlurHash } from 'blurhash'
 import type { ImageVariantJobRequest, ImageVariantJobResponse, ImageVariantPayload } from './imageVariantProtocol'
 import { toArrayBuffer } from '../../binary'
+import { onHostMessage, postToHost } from '../../runtime/workerPort'
 
 /** libwebp's hard cap on either output dimension. */
 const MAX_WEBP_DIMENSION = 16383
 
 function send(msg: ImageVariantJobResponse, transfer: ArrayBuffer[] = []): void {
-  ;(self as unknown as { postMessage: (m: unknown, transfer?: ArrayBuffer[]) => void }).postMessage(msg, transfer)
+  postToHost(msg, transfer)
 }
 
 async function handleJob(req: ImageVariantJobRequest): Promise<void> {
@@ -135,9 +136,9 @@ async function handleJob(req: ImageVariantJobRequest): Promise<void> {
   }
 }
 
-;(self as unknown as { onmessage: (e: MessageEvent) => void }).onmessage = (event: MessageEvent) => {
-  const msg = event.data as ImageVariantJobRequest
+onHostMessage((message) => {
+  const msg = message as ImageVariantJobRequest
   if (msg && msg.kind === 'image-variant-job') {
     void handleJob(msg)
   }
-}
+})

@@ -3,7 +3,7 @@
  * locked runtime dependencies + the populated dep cache on disk.
  *
  *   ┌─ site.runtime.dependencyLock  (resolved versions, SRI, tarball URL)
- *   ├─ ensureRuntimeDependencyCache  (bun install → node_modules/)
+ *   ├─ ensureRuntimeDependencyCache  (npm install → node_modules/)
  *   └─ buildRuntimePackageImportmap  ← we resolve each package's ESM entry
  *                                       to a `/_instatic/runtime/cache/<hash>/...`
  *                                       URL the host serves.

@@ -106,17 +106,21 @@ export async function handleServerRequest(
  * with HEAD by convention) reported a healthy published site as permanently
  * missing. See issue #306.
  *
- * Dropping the body is `Bun.serve`'s job and it already does it: a HEAD
+ * Dropping the body is the Node HTTP layer's job and it already does it: a HEAD
  * response goes out with the headers a GET would have produced, `content-length`
  * included, and no content. Handlers stay body-agnostic.
  *
- * Cloning is safe here — the copy keeps the URL, the cookies, and the synthetic
- * `x-bun-socket-ip` header that `stampSocketIp` writes at the `Bun.serve`
- * boundary, so `clientIp()` attribution is unaffected. HEAD carries no body,
- * so there is nothing to re-stream.
+ * Cloning is safe here — the copy keeps the URL, the cookies, the abort
+ * signal, and the synthetic `x-instatic-socket-ip` header that `stampSocketIp`
+ * writes at the server boundary, so `clientIp()` attribution is unaffected.
+ * HEAD carries no body, so there is nothing to re-stream. The copy is built
+ * from the URL and headers rather than `new Request(req)`, which only accepts
+ * the runtime's own `Request` class, not the server adapter's lazy one.
  */
 function asGetForHead(req: Request): Request {
-  return req.method === 'HEAD' ? new Request(req, { method: 'GET' }) : req
+  return req.method === 'HEAD'
+    ? new Request(req.url, { method: 'GET', headers: req.headers, signal: req.signal })
+    : req
 }
 
 // ---------------------------------------------------------------------------

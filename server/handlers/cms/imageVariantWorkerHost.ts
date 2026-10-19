@@ -3,8 +3,8 @@
  *
  * Submits a job to the next available worker (or queues it when all are
  * busy), waits for the worker's reply, and returns it. Workers are lazily
- * spawned on first use and reused for the life of the process — `bun
- * test` and `bun --watch` both reuse the same pool across requests.
+ * spawned on first use and reused for the life of the process — the test
+ * runner and `tsx watch` both reuse the same pool across requests.
  *
  * Concurrency:
  *   - Pool size defaults to `2` (one big upload doesn't starve a
@@ -31,6 +31,7 @@
  *     a flat, fixed-size set.
  */
 
+import { spawnWorker, type WorkerHandle } from '../../runtime/worker'
 import type {
   ImageVariantJobRequest,
   ImageVariantJobResponse,
@@ -38,7 +39,7 @@ import type {
 } from './imageVariantProtocol'
 
 interface WorkerSlot {
-  worker: Worker
+  worker: WorkerHandle
   /** Correlation id of the job currently owned by this worker, or `null` when idle. */
   currentCorrelationId: string | null
 }
@@ -78,15 +79,16 @@ function nextCorrelationId(): string {
 }
 
 function spawnSlot(): WorkerSlot {
-  const worker = new Worker(new URL('./imageVariantWorker.ts', import.meta.url).href)
-  const slot: WorkerSlot = { worker, currentCorrelationId: null }
-  worker.addEventListener('message', (event: MessageEvent) => {
-    handleWorkerMessage(slot, event.data)
-  })
-  worker.addEventListener('error', (event: ErrorEvent) => {
-    console.error('[imageVariantWorker] uncaught error:', event.message, event.error)
-    handleWorkerError(slot, event.message)
-  })
+  const slot: WorkerSlot = {
+    worker: spawnWorker(new URL('./imageVariantWorker.ts', import.meta.url), {
+      onMessage: (message) => handleWorkerMessage(slot, message),
+      onCrash: (reason) => {
+        console.error('[imageVariantWorker] uncaught error:', reason)
+        handleWorkerError(slot, reason)
+      },
+    }),
+    currentCorrelationId: null,
+  }
   return slot
 }
 

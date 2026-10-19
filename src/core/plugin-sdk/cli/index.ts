@@ -6,11 +6,11 @@
  *   instatic-plugin build [<plugin-dir>]
  *   instatic-plugin dev   [<plugin-dir>] [--uploads <path>]
  *
- * Run via Bun:
- *   bun run instatic-plugin <cmd>
+ * Run via pnpm (tsx executes the TypeScript entry):
+ *   pnpm instatic-plugin <cmd>
  *
  * The CLI lives inside the SDK so plugin authors get the same code that
- * powers the host's `bun run instatic-plugin` script. No HTTP, no auth, no env
+ * powers the host's `pnpm instatic-plugin` script. No HTTP, no auth, no env
  * gate — the dev command writes built files directly into the host's
  * `uploads/plugins/<id>/<version>/` directory.
  */

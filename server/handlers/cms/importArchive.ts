@@ -14,7 +14,7 @@
  */
 
 import { createWriteStream } from 'node:fs'
-import { copyFile, mkdir, mkdtemp, rm, rename, unlink, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, readFile, rm, rename, unlink, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { once } from 'node:events'
 import { tmpdir } from 'node:os'
@@ -210,7 +210,7 @@ export async function importStagedArchiveMediaEntries(input: {
     // or sanitisation logic changes. The staged file is fully buffered here to
     // sniff its magic bytes (unavoidable — MIME detection needs the head).
     const safeBytes = validateAndSanitizeMediaBytes(
-      new Uint8Array(await Bun.file(stagedPath).arrayBuffer()),
+      new Uint8Array(await readFile(stagedPath)),
       asset,
     )
 

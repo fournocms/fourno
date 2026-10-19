@@ -1,9 +1,18 @@
-import { SQL } from 'bun'
+import postgres from 'postgres'
 import type { DbClient, DbResult } from './client'
 
+type PostgresSql = postgres.Sql | postgres.TransactionSql
+
+/**
+ * Postgres via `postgres` (porsager/postgres.js): tagged-template queries
+ * with server-side parameters, `unsafe()` for raw SQL, `begin()` for
+ * transactions on a pooled connection. Server NOTICE messages (`… already
+ * exists, skipping` from idempotent DDL) are not operator-relevant and are
+ * dropped instead of printed.
+ */
 export function createPostgresClient(connectionString: string): DbClient {
-  const sql = new SQL(connectionString)
-  return wrapSql(sql, true)
+  const sql = postgres(connectionString, { onnotice: () => {} })
+  return wrapSql(sql, sql)
 }
 
 /**
@@ -33,9 +42,9 @@ export function normalizePostgresRow<Row>(row: Row): Row {
 }
 
 /**
- * Affected-or-returned row count for a Bun SQL result.
+ * Affected-or-returned row count for a postgres.js result.
  *
- * Bun exposes the command's row count on the result array's `.count` property:
+ * postgres.js exposes the command's row count on the result array's `.count` property:
  * for SELECT / RETURNING it equals the number of returned rows, and for a
  * non-RETURNING UPDATE / DELETE / INSERT it is the number of *affected* rows
  * (which PostgreSQL streams as a CommandComplete tag, not as data rows — so
@@ -49,20 +58,23 @@ function resultRowCount<Row>(result: Row[]): number {
 }
 
 /**
- * Wrap a Bun SQL handle in the DbClient interface.
+ * Wrap a postgres.js handle in the DbClient interface.
  *
- * `ownsPool` distinguishes the client returned by `createPostgresClient`,
- * which owns the connection pool, from the transaction-scoped client handed
- * to a `.transaction()` callback, which borrows it. Only the owner may close
- * the pool; closing it mid-transaction would tear the connection out from
- * under the surrounding `sql.begin()`.
+ * `pool` is set only on the client returned by `createPostgresClient`, which
+ * owns the connection pool. The transaction-scoped client handed to a
+ * `.transaction()` callback borrows a pooled connection and gets `null`: only
+ * the owner may end the pool, since ending it mid-transaction would tear the
+ * connection out from under the surrounding `sql.begin()`. A `.transaction()`
+ * call on a transaction-scoped client opens a savepoint.
  */
-function wrapSql(sql: SQL, ownsPool = false): DbClient {
+function wrapSql(sql: PostgresSql, pool: postgres.Sql | null): DbClient {
   const fn = (async <Row = Record<string, unknown>>(
     strings: TemplateStringsArray,
     ...values: unknown[]
   ): Promise<DbResult<Row>> => {
-    const rows = await sql<Row[]>(strings, ...values)
+    // postgres.js types rows as `object`; the DbClient contract leaves the
+    // row shape to the caller's generic, exactly as the SQLite adapter does.
+    const rows = (await sql(strings, ...(values as postgres.ParameterOrFragment<never>[]))) as unknown as Row[]
     return { rows: rows.map(normalizePostgresRow), rowCount: resultRowCount(rows) }
   }) as DbClient
 
@@ -70,19 +82,22 @@ function wrapSql(sql: SQL, ownsPool = false): DbClient {
     rawSql: string,
     params?: unknown[],
   ): Promise<DbResult<Row>> => {
-    const rows = params !== undefined
-      ? await sql.unsafe<Row[]>(rawSql, params as unknown[])
-      : await sql.unsafe<Row[]>(rawSql)
+    const result = params !== undefined
+      ? await sql.unsafe(rawSql, params as postgres.ParameterOrJSON<never>[])
+      : await sql.unsafe(rawSql)
+    const rows = result as unknown as Row[]
     return { rows: rows.map(normalizePostgresRow), rowCount: resultRowCount(rows) }
   }
 
   fn.transaction = async <T>(cb: (tx: DbClient) => Promise<T>): Promise<T> => {
-    return await sql.begin(async (txSql) => cb(wrapSql(txSql as unknown as SQL)))
+    const run = (txSql: postgres.TransactionSql): Promise<T> => cb(wrapSql(txSql, null))
+    const result = 'begin' in sql ? await sql.begin(run) : await sql.savepoint(run)
+    return result as T
   }
 
   fn.close = async (): Promise<void> => {
-    if (!ownsPool) return
-    await sql.close()
+    if (!pool) return
+    await pool.end()
   }
 
   return Object.assign(fn, { dialect: 'postgres' as const })

@@ -4,7 +4,7 @@ import { publicOriginIsHttps } from './auth/security'
  * Apply security response headers to every outbound response.
  *
  * This is the single point that stamps security headers onto the Response
- * the Bun.serve fetch handler returns. Placing the gate here (rather than
+ * the server's fetch handler returns. Placing the gate here (rather than
  * inside handleServerRequest) ensures OPTIONS preflight and unhandled-crash
  * error responses also carry the headers.
  *

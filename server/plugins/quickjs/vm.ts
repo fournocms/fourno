@@ -3,8 +3,8 @@
  * bootstrap + plugin source, wires host functions, and returns a PluginVm.
  *
  * Sandbox topology:
- *   ┌─ Bun host (main process)
- *   │  ┌─ Bun.Worker (crash isolation, CPU yield)
+ *   ┌─ Node host (main process)
+ *   │  ┌─ worker thread (crash isolation, CPU yield)
  *   │  │  ┌─ QuickJS-WASM context (security sandbox — THIS file)
  *   │  │  │  ┌─ Bootstrap (SDK facade + handler registries + minimal runtime)
  *   │  │  │  └─ Plugin source (IIFE → globalThis.__plugin_exports)
@@ -28,12 +28,8 @@
  *     `runtime.executePendingJobs()` after each settle and during eval polling.
  */
 
-// @ts-expect-error — Bun `type: 'file'` embed import of a .wasm asset. Under
-// `bun run` it resolves to the on-disk path; under `bun build --compile` the
-// WASM is embedded into the single-file binary, which is the only way a
-// compiled server can load it (compiled binaries cannot resolve loose
-// node_modules files at runtime).
-import quickjsWasmPath from '../../../node_modules/@jitl/quickjs-wasmfile-release-sync/dist/emscripten-module.wasm' with { type: 'file' }
+import { readFile } from 'node:fs/promises'
+import { createRequire } from 'node:module'
 import { RELEASE_SYNC, type QuickJSContext, type QuickJSHandle, type QuickJSWASMModule } from 'quickjs-emscripten'
 import { newQuickJSWASMModuleFromVariant, newVariant } from 'quickjs-emscripten-core'
 import { BOOTSTRAP_SOURCE } from './bootstrap/index'
@@ -83,7 +79,12 @@ let wasmModulePromise: Promise<QuickJSWASMModule> | null = null
 export function getWasmModule(): Promise<QuickJSWASMModule> {
   if (!wasmModulePromise) {
     wasmModulePromise = (async () => {
-      const wasmBinary = await Bun.file(quickjsWasmPath).arrayBuffer()
+      // The variant package exports its WASM file as `./wasm`; reading it
+      // ourselves (instead of letting emscripten fetch it relative to its own
+      // module URL) keeps the load a plain file read on every platform.
+      const wasmPath = createRequire(import.meta.url).resolve('@jitl/quickjs-wasmfile-release-sync/wasm')
+      const wasmFile = await readFile(wasmPath)
+      const wasmBinary = wasmFile.buffer.slice(wasmFile.byteOffset, wasmFile.byteOffset + wasmFile.byteLength) as ArrayBuffer
       return newQuickJSWASMModuleFromVariant(newVariant(RELEASE_SYNC, { wasmBinary }))
     })()
   }
@@ -145,13 +146,13 @@ export async function createPluginVm(args: {
   }
 
   /**
-   * Pending host-side timers. Bun.setTimeout returns a Timer handle (Node-
-   * compatible) that we keep here so `dispose()` can stop every in-flight
+   * Pending host-side timers. setTimeout returns a Timeout handle that we
+   * keep here so `dispose()` can stop every in-flight
    * fire before tearing down the VM — otherwise a timer scheduled by the
    * plugin would fire into a dead context and crash the worker.
    *
    * We use any-typed handles because the cross-platform Timer / Timeout
-   * shape differs between Bun, Node, and the WebWorker DOM lib. We only
+   * shape differs between Node and the WebWorker DOM lib. We only
    * pass them to clearTimeout, which accepts all three.
    */
   const pendingTimers = new Set<ReturnType<typeof setTimeout>>()

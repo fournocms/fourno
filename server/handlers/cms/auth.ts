@@ -123,7 +123,7 @@ async function verifyUserTotpCode(user: AuthUser, code: string): Promise<boolean
 /**
  * Layer 1 — per-IP rate limit. Blanket protection so a single attacker IP
  * cannot grind through many target accounts. Skipped when no IP is surfaced
- * (Bun.serve without a proxy in front); the per-(ip, email) tuple limiter
+ * (no socket peer address and no proxy in front); the per-(ip, email) tuple limiter
  * still applies.
  */
 async function enforceLoginIpRateLimit(

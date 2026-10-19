@@ -34,8 +34,8 @@
  *   - `configurePublicOrigins` — boot-time list of normalized public origins.
  *   - `clientIp`               — the nearest untrusted client IP from a
  *                                trusted proxy chain, or the socket peer
- *                                address stamped by the Bun.serve boundary.
- *   - `stampSocketIp`          — called once at the Bun.serve boundary; strips
+ *                                address stamped by the server boundary.
+ *   - `stampSocketIp`          — called once at the server boundary; strips
  *                                any inbound spoof of the synthetic header
  *                                and stamps the real socket peer address so
  *                                `clientIp` has a non-proxy fallback.
@@ -144,14 +144,14 @@ export function originAllowed(req: Request): boolean {
 
 /**
  * Internal synthetic header used to ferry the socket peer address from the
- * `Bun.serve` fetch boundary (where `server.requestIP(req)` is available)
+ * server fetch boundary (where the connection's peer address is available)
  * down to the handler stack (where only `Request` is in scope).
  *
  * The header is intentionally namespaced so it can't be confused with a
  * standard one, and any inbound version is stripped in `stampSocketIp`
  * before we set our own value — clients cannot spoof it.
  */
-const BUN_SOCKET_IP_HEADER = 'x-bun-socket-ip'
+const SOCKET_IP_HEADER = 'x-instatic-socket-ip'
 
 interface ParsedIpAddress {
   family: 4 | 6
@@ -313,18 +313,18 @@ function isTrustedProxyPeer(rawIp: string): boolean {
 }
 
 /**
- * Called once per request at the `Bun.serve` fetch boundary, before any
+ * Called once per request at the server fetch boundary, before any
  * handler logic runs. Strips any inbound copy of the synthetic header
  * (defense against spoofing) and stamps the real socket peer address that
- * Bun surfaces via `server.requestIP(req)`.
+ * the HTTP server adapter reads off the connection (`server/runtime/httpServer.ts`).
  *
  * This is how `clientIp(req)` can return a real address in dev or any
  * self-hosted deployment that isn't fronted by a proxy setting
  * `X-Forwarded-For`.
  */
 export function stampSocketIp(req: Request, address: string | null): void {
-  req.headers.delete(BUN_SOCKET_IP_HEADER)
-  if (address) req.headers.set(BUN_SOCKET_IP_HEADER, address)
+  req.headers.delete(SOCKET_IP_HEADER)
+  if (address) req.headers.set(SOCKET_IP_HEADER, address)
 }
 
 /**
@@ -334,14 +334,14 @@ export function stampSocketIp(req: Request, address: string | null): void {
  *      `X-Forwarded-For` right-to-left and return the nearest untrusted IP.
  *      That avoids trusting a spoofed leftmost value preserved by the proxy.
  *   2. Otherwise ignore forwarding headers and fall back to the synthetic
- *      `x-bun-socket-ip` header that `stampSocketIp` writes from
- *      `server.requestIP(req)`. That covers dev (`bun run dev`) and any
+ *      `x-instatic-socket-ip` header that `stampSocketIp` writes from
+ *      the connection peer address. That covers dev (`pnpm dev`) and any
  *      self-hosted deployment without a fronting proxy.
  *   3. If neither is available, return `null` — audit/activity logs render
  *      this as "unknown" rather than persisting a fake address.
  */
 export function clientIp(req: Request): string | null {
-  const socketIp = req.headers.get(BUN_SOCKET_IP_HEADER)
+  const socketIp = req.headers.get(SOCKET_IP_HEADER)
   if (!socketIp) return null
 
   const forwardedFor = req.headers.get('x-forwarded-for')

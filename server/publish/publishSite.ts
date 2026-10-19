@@ -100,7 +100,7 @@ async function publishDraftSiteLocked(
   uploadsDir?: string,
 ): Promise<PublishResult> {
   // ── Phase 1: read inputs + run every expensive non-DB build ──────────────
-  // Dependency installs (`bun install` on a cold cache) and per-page esbuild
+  // Dependency installs (`npm install` on a cold cache) and per-page esbuild
   // runs take seconds; the SQLite adapter serializes ALL transactions through
   // one chain, so doing this inside the transaction stalled every concurrent
   // write (autosaves, row publishes) behind it. `withPublishLock` already

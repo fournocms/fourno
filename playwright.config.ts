@@ -61,7 +61,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'bun run e2e:dev',
+    command: 'pnpm e2e:dev',
     url: ADMIN_BASE_URL,
     reuseExistingServer: process.env.E2E_REUSE_SERVER === '1',
     timeout: 120_000,

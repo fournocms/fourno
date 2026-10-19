@@ -4,7 +4,7 @@
 /**
  * Plugin-runtime shim for `react/jsx-dev-runtime`.
  *
- * Bun.build emits `import { jsxDEV } from 'react/jsx-dev-runtime'` in
+ * Bundlers emit `import { jsxDEV } from 'react/jsx-dev-runtime'` in
  * dev / non-production bundles. The browser resolves that bare specifier
  * through the host's import map to this file, which re-exports the host's
  * own JSX dev runtime — so plugins share the host's React instance even
@@ -14,8 +14,8 @@
  * exports `jsxDEV` as `void 0`. Plugins built with the dev JSX transform
  * therefore crash with "jsxDEV is not a function" in a production host.
  * The fix is to build plugins with production JSX: `instatic-plugin build`
- * passes `define: { 'process.env.NODE_ENV': '"production"' }` to
- * `Bun.build`, which makes Bun's transpiler emit `react/jsx-runtime`
+ * passes `define: { 'process.env.NODE_ENV': '"production"' }` and
+ * `jsxDev: false` to esbuild, which makes it emit `react/jsx-runtime`
  * (with real `jsx`/`jsxs`) instead. Third-party plugin authors using a
  * different bundler must do the same — there is intentionally no
  * fallback here.

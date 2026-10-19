@@ -6,7 +6,7 @@
  * happy-dom would bloat the browser bundle.
  *
  * parseHtml / walkAndMap only ever run browser-side (paste UI + the
- * browser-side agent executor). In `bun test` the test setup
+ * browser-side agent executor). In `pnpm test` the test setup
  * (`src/__tests__/setup.ts`) polyfills `globalThis.DOMParser` via happy-dom,
  * so tests run without any changes to this module.
  *

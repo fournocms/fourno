@@ -363,7 +363,7 @@ The expected origin is derived **only** from the configured public origin set at
 
 ## CORS
 
-Production is **same-origin** (the admin SPA, API, and published pages all serve from one Bun process behind Caddy). The fetch handler in `server/index.ts` only emits CORS headers when the request's `Origin` is on `DEV_ORIGIN_ALLOWLIST`:
+Production is **same-origin** (the admin SPA, API, and published pages all serve from one Node process behind Caddy). The fetch handler in `server/index.ts` only emits CORS headers when the request's `Origin` is on `DEV_ORIGIN_ALLOWLIST`:
 
 ```ts
 function corsHeaders(origin: string | null): Record<string, string> {

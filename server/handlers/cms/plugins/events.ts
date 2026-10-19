@@ -16,9 +16,9 @@
  *     the long-lived connection. Followed by a periodic heartbeat every
  *     30s for the same reason.
  *   - Request abort and response-stream cancellation both unsubscribe from
- *     the broadcaster and stop the heartbeat. Bun reports a disconnected
- *     response consumer through `ReadableStream.cancel()` without necessarily
- *     aborting the server Request.
+ *     the broadcaster and stop the heartbeat. A disconnected response
+ *     consumer can surface as `ReadableStream.cancel()` without the server
+ *     Request being aborted.
  *   - The stream never ends voluntarily — clients reconnect via the
  *     standard EventSource auto-reconnect on transport errors.
  */

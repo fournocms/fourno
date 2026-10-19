@@ -83,7 +83,7 @@ export function ModuleSandboxFrame({
 
   // The iframe's import map is filtered from the site's precomputed
   // `runtime.packageImportmap` — the server built it from the actual
-  // `bun install` cache when the user resolved their deps, so the URLs
+  // `npm install` cache when the user resolved their deps, so the URLs
   // point at the host's own `/_instatic/runtime/cache/...` route. Plugin code
   // never names a CDN: `import * as THREE from 'three'` resolves to the
   // same on-disk file the published page uses.

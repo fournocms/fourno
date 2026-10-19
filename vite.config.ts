@@ -29,7 +29,7 @@ function shouldProxyPublicSiteRequest(req: IncomingMessage): boolean {
   const { pathname } = new URL(req.url, CMS_DEV_SERVER_ORIGIN)
   if (isEditorAppPath(pathname)) return false
 
-  // Bun server namespaces — explicitly proxied even though they carry a file
+  // Server namespaces — explicitly proxied even though they carry a file
   // extension. The fallthrough rule below rejects anything with `.<ext>` to
   // avoid swallowing requests for editor static assets, which means we have
   // to opt in any backend route whose URL ends with `.something`.
@@ -232,13 +232,11 @@ export default defineConfig({
     },
     proxy: {
       // The whole `/admin/api/` prefix (CMS + agent) is forwarded to the
-      // Bun backend. Agent endpoints live under `/admin/api/agent` (and
+      // CMS backend. Agent endpoints live under `/admin/api/agent` (and
       // `/admin/api/agent/tool-result`) so the admin session cookie, scoped
       // to `Path=/admin` to keep it off the public site, accompanies the
       // request. `ws: true` forwards the collab socket's upgrade too, so the
-      // dev server is same-origin exactly like production. (Before Bun 1.4.1
-      // the node:http client never emitted 'upgrade' and the socket had to
-      // dial the CMS port directly.)
+      // dev server is same-origin exactly like production.
       '/admin/api': {
         target: CMS_DEV_SERVER_ORIGIN,
         changeOrigin: true,

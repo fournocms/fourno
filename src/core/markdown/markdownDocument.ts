@@ -29,7 +29,7 @@ import { Marked, type Tokens, type Token } from 'marked'
 
 // ---------------------------------------------------------------------------
 // ProseMirror JSON shape (just enough — we don't pull in @tiptap/pm here so
-// this module stays usable from non-DOM contexts like Bun tests)
+// this module stays usable from non-DOM contexts like Vitest tests)
 // ---------------------------------------------------------------------------
 
 interface JSONMark {

@@ -15,8 +15,8 @@
  * Concurrency model — sync QuickJS variant + deferred VM promises:
  *
  *   - The synchronous WASM variant of QuickJS is used (NOT the asyncified one).
- *     Asyncify's stack-unwinding interacts badly with Bun's microtask scheduler
- *     under load (manifests as `p->ref_count == 0` assertions on the second
+ *     Asyncify's stack-unwinding interacted badly with Bun's microtask scheduler
+ *     under load (observed before the move to Node; not re-tested there) (manifests as `p->ref_count == 0` assertions on the second
  *     async eval). The sync variant is rock-stable.
  *   - `__hostCall` is registered as a *synchronous* VM function. When the
  *     plugin invokes it, the host creates a VM-side `Promise` via

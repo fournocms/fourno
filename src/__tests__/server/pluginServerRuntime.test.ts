@@ -1,7 +1,7 @@
 /**
  * Server plugin runtime — integration tests through the cms handler.
  *
- * Plugin server modules run in a Bun Worker (the host never imports them
+ * Plugin server modules run in a worker thread (the host never imports them
  * directly), so these tests build real `.zip` packages and install them
  * via the cms handler, then verify behavior end-to-end:
  *  - public GET routes (`api.cms.routes.public.get`) don't require auth

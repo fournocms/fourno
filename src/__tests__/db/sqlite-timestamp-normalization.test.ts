@@ -11,7 +11,7 @@ import type { DbClient } from '../../../server/db/client'
  * from `timestamptz`.
  *
  * The process is pinned to a non-UTC zone for the duration of this file so
- * the naive parse actually diverges; Bun re-reads `process.env.TZ` at runtime.
+ * the naive parse actually diverges; Node re-reads `process.env.TZ` when it is assigned.
  */
 describe('SQLite adapter — *_at columns read back as ISO 8601 UTC', () => {
   const originalTz = process.env['TZ']

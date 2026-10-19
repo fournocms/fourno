@@ -92,7 +92,7 @@ async function seedAuth(db: DbClient): Promise<string> {
 function makeGetRequest(path: string, cookie: string): Request {
   const req = new Request(`http://localhost${path}`, { method: 'GET' })
   // The `cookie` header is a forbidden header per WHATWG Fetch spec and is
-  // stripped by Bun's Request constructor. Set it after construction instead.
+  // stripped by the Request constructor. Set it after construction instead.
   req.headers.set('cookie', cookie)
   return req
 }

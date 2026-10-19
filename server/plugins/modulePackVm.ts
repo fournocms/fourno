@@ -7,7 +7,7 @@
  * that the publisher invokes per canvas node during page generation.
  *
  * Before this module existed, the host loaded module packs via
- * `await import(dataUrl)` — running the bundle in-host with full Bun/Node
+ * `await import(dataUrl)` — running the bundle in-host with full Node
  * privileges. That was a complete RCE bypass: a malicious plugin could put
  * its payload in `entrypoints.modules` and skip the server-entrypoint
  * sandbox entirely. This file closes that hole by running the module pack
@@ -97,7 +97,7 @@ export interface ModulePackVm {
 //
 // Authored as real TypeScript in `quickjs/bootstrap/src/modulePackRuntime.ts`
 // and bundled to the committed string `MODULE_PACK_BOOTSTRAP_SOURCE` by
-// `scripts/sync-plugin-bootstrap.ts` (regenerate with `bun run bootstrap:sync`).
+// `scripts/sync-plugin-bootstrap.ts` (regenerate with `pnpm bootstrap:sync`).
 // The shared host⇄VM JSON marshaling (`bootstrap/src/boundary.ts`) is inlined
 // into both this and the full-plugin bootstrap — one source-level definition.
 //

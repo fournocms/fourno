@@ -31,9 +31,9 @@ import { makeSite } from '../fixtures'
  * Applied ONLY to the fixture's own `framework` object below — never to a whole
  * validated shell. `parseSiteSettings`/`parseSiteDocument` hand back shared
  * module singletons (`DEFAULT_SITE_SETTINGS`, `DEFAULT_PACKAGE_JSON`) by
- * reference on their fallback paths, and `bun test` runs every file in ONE
- * process, so freezing a validated shell wholesale would freeze those
- * singletons for the entire run and break unrelated suites downstream.
+ * reference on their fallback paths, and every test in this file shares one
+ * module graph, so freezing a validated shell wholesale would freeze those
+ * singletons for the rest of the file and break the tests after it.
  */
 function deepFreeze<T>(value: T): T {
   if (value === null || typeof value !== 'object') return value

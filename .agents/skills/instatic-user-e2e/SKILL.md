@@ -7,7 +7,7 @@ description: Run user-facing Instatic E2E audits with a real browser and disposa
 
 ## Overview
 
-Use this skill to operate Instatic like a real user through the browser, record product-quality findings, and keep durable run logs. This is not a replacement for `bun test`; it covers the gaps that unit, API, architecture, and happy-dom tests cannot see.
+Use this skill to operate Instatic like a real user through the browser, record product-quality findings, and keep durable run logs. This is not a replacement for `pnpm test`; it covers the gaps that unit, API, architecture, and happy-dom tests cannot see.
 
 ## Core Rule
 
@@ -40,7 +40,7 @@ Prefer an isolated SQLite database and upload directory for each run:
 ```sh
 DATABASE_URL=sqlite:./.tmp/e2e-agent.db \
 UPLOADS_DIR=./.tmp/e2e-uploads \
-bun run dev
+pnpm dev
 ```
 
 Before deleting data, verify the target is disposable:

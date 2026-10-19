@@ -51,7 +51,7 @@ export function parseSqlitePath(databaseUrl: string): string {
  * Create a DB client and select the matching migrations array based on the
  * DATABASE_URL scheme:
  *
- *   sqlite:<path>     — SQLite via bun:sqlite (relative or absolute path)
+ *   sqlite:<path>     — SQLite via better-sqlite3 (relative or absolute path)
  *   file:<path>       — same as sqlite:
  *   <path>.db         — same as sqlite: (bare filesystem path ending in .db)
  *   postgres://…      — Postgres via postgres.js

@@ -5,7 +5,7 @@
  * issuers) need SHA-256 + HMAC-SHA256 to produce valid signatures.
  * The host exposes them via a thin `crypto.subtle` shim that follows
  * the WebCrypto subset every plugin author already knows from
- * browsers / Node / Bun.
+ * browsers / Node.
  *
  * These tests lock the contract in. Three invariants:
  *
@@ -19,7 +19,7 @@
  *      through `__hostCall` (not a pure-JS HMAC vendored in the
  *      bootstrap). The whole point is to use the host's native crypto.
  *
- *   3. The host dispatcher uses Bun's native `crypto.subtle` — NOT a
+ *   3. The host dispatcher uses Node's native `crypto.subtle` — NOT a
  *      vendored npm package. A regression that pulled in `crypto-js`
  *      or similar would balloon the host bundle for no gain.
  *
@@ -64,7 +64,7 @@ describe('sandbox crypto bridge', () => {
     expect(source).toMatch(/__hostCall\(['"]crypto\.signHmac['"]/)
   })
 
-  it('host dispatcher uses Bun-native crypto.subtle (no vendored package)', async () => {
+  it('host dispatcher uses Node-native crypto.subtle (no vendored package)', async () => {
     const dispatchSource = await read('server/plugins/host/apiDispatch.ts')
     const cryptoHandlerSource = await read('server/plugins/host/handlers/crypto.ts')
     // The two dispatch table entries must exist in apiDispatch.ts.

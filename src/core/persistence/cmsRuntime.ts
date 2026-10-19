@@ -38,7 +38,7 @@ interface CmsRuntimePreviewRequestOptions {
 interface CmsRuntimeDependencyResolveResult {
   dependencyLock: SiteDependencyLock
   /**
-   * Precomputed importmap from the server's `bun install` cache. Absent
+   * Precomputed importmap from the server's `npm install` cache. Absent
    * when the lock has no resolvable packages or the install step skipped.
    * Callers that get an importmap should persist it on
    * `site.runtime.packageImportmap` so the editor iframe sandbox and the

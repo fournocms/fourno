@@ -18,7 +18,7 @@ The VPS stack uses the same production image as managed platforms. Compose only 
 SQLite is the default for most single-site installs. Postgres is for multiple simultaneous admin writers, horizontal app scale, or operators who already want Postgres.
 
 When using a published image, set `INSTATIC_IMAGE` and omit `compose.build.yml` plus `--build`.
-Before adding AI provider credentials, saving plugin secret settings, or enabling TOTP MFA in production, set `INSTATIC_SECRET_KEY` to the output of `bun run scripts/generate-secret-key.ts`.
+Before adding AI provider credentials, saving plugin secret settings, or enabling TOTP MFA in production, set `INSTATIC_SECRET_KEY` to the output of `pnpm tsx scripts/generate-secret-key.ts`.
 
 ## Install From A Release Bundle
 
@@ -61,7 +61,7 @@ For reversible server secrets such as AI credentials, plugin secret settings, an
 
 ```sh
 cp .env.production.example .env
-bun run scripts/generate-secret-key.ts
+pnpm tsx scripts/generate-secret-key.ts
 ```
 
 Paste the printed key into `.env` as `INSTATIC_SECRET_KEY`.
@@ -203,36 +203,36 @@ docker compose -f compose.prod.yml -f compose.sqlite.yml pull app
 docker compose -f compose.prod.yml -f compose.sqlite.yml up -d
 ```
 
-## Without Docker (Direct Bun Install)
+## Without Docker (Direct Node Install)
 
-This is the one install path that uses your own Bun. Keep it inside `engines.bun` in `package.json` (`>=1.4.0 <1.5.0` for this release): the Docker image and the Desktop server bundle carry that Bun themselves, and it is the only one releases are built and tested on. Bun does not enforce the range, so the server checks it at boot (`server/bunVersion.ts`) and logs `[server] Bun <version> is outside the supported range …` before continuing; `bun run dev` refuses a Bun older than 1.4.1 outright, because its Vite proxy needs that release to forward the editor's WebSocket. `bun upgrade` moves an older install forward.
+This is the one install path that uses your own Node.js and pnpm (`corepack enable` activates the pinned pnpm). Keep Node inside `engines.node` in `package.json` (`>=24.11.0`): the Docker image carries its own Node and is the only one releases are built and tested on. Nothing enforces the range at install time, so the server checks it at boot (`server/nodeVersion.ts`) and logs `[server] Node <version> is outside the supported range …` before continuing.
 
 The CMS runs directly on the host without Docker. From a source checkout:
 
 ```sh
-bun install
-bun run build
+pnpm install
+pnpm build
 DATABASE_URL=sqlite:./data/cms.db \
   STATIC_DIR=./dist \
   UPLOADS_DIR=./uploads \
   INSTATIC_SECRET_KEY=replace-with-output-of-generate-secret-key \
   TRUSTED_PROXY_CIDRS=127.0.0.1/32,::1/128 \
   PORT=3001 \
-  bun run server/index.ts
+  node --import tsx server/index.ts
 ```
 
-Replace `DATABASE_URL` with a Postgres connection string for Postgres mode. `STATIC_DIR` must point at the built admin SPA (`dist/` after `bun run build`).
+Replace `DATABASE_URL` with a Postgres connection string for Postgres mode. `STATIC_DIR` must point at the built admin SPA (`dist/` after `pnpm build`).
 
-Update a direct install by pulling, reinstalling dependencies, rebuilding, and restarting the process. `bun install` is not optional: a release can add a server dependency (0.0.18 added `jsdom` for the richtext sanitizer), and without it the server exits on startup with `Cannot find module`.
+Update a direct install by pulling, reinstalling dependencies, rebuilding, and restarting the process. `pnpm install` is not optional: a release can add a server dependency (0.0.18 added `jsdom` for the richtext sanitizer), and without it the server exits on startup with `Cannot find module`.
 
 ```sh
 git pull
-bun install --frozen-lockfile
-bun run build
-# then restart the bun process under your supervisor
+pnpm install --frozen-lockfile
+pnpm build
+# then restart the node process under your supervisor
 ```
 
-Wrap the command in a process supervisor (systemd, pm2, supervisord) for auto-restart on crash and on server boot. Put an HTTPS-capable reverse proxy (Caddy, Nginx, Cloudflare Tunnel) in front for TLS, and set `PUBLIC_ORIGIN=https://your-domain` so the CSRF origin check matches the public URL even though the proxy hands the Bun process plain HTTP. `TRUSTED_PROXY_CIDRS` is independent of CSRF: set it to the proxy's source CIDR only if you want real client IPs in audit logs and rate-limit keys, and leave it empty if the app is directly exposed.
+Wrap the command in a process supervisor (systemd, pm2, supervisord) for auto-restart on crash and on server boot. Put an HTTPS-capable reverse proxy (Caddy, Nginx, Cloudflare Tunnel) in front for TLS, and set `PUBLIC_ORIGIN=https://your-domain` so the CSRF origin check matches the public URL even though the proxy hands the Node process plain HTTP. `TRUSTED_PROXY_CIDRS` is independent of CSRF: set it to the proxy's source CIDR only if you want real client IPs in audit logs and rate-limit keys, and leave it empty if the app is directly exposed.
 
 ## Data Safety
 

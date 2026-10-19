@@ -3,9 +3,9 @@
  * forwarding, and asset path safety.
  *
  * As of the worker-isolation refactor, plugin server modules
- * (`entrypoints.server`) are loaded and executed in a separate Bun
- * `Worker` (see `pluginWorkerHost.ts` + `pluginWorker.ts`). The host
- * process never imports plugin code — eliminating the `bun --watch`
+ * (`entrypoints.server`) are loaded and executed in a separate
+ * worker thread (see `pluginWorkerHost.ts` + `pluginWorker.ts`). The host
+ * process never imports plugin code — eliminating the `tsx watch`
  * race during upgrade cleanup, isolating plugin crashes from the host,
  * and giving us a foundation to drop privileges (no fs / no env) inside
  * the worker in a future hardening pass.
@@ -187,7 +187,7 @@ export async function unloadPlugin(pluginId: string): Promise<void> {
  * Load a plugin's canvas module pack into a QuickJS-WASM sandbox. The
  * publisher's render hot path goes through `vm.render(moduleId, props,
  * children)` which sync-evals the plugin's render function inside the
- * sandbox — no host-process side effects, no Bun/Node ambient access.
+ * sandbox — no host-process side effects, no Node ambient access.
  *
  * The previous implementation used `await import(dataUrl)` which ran the
  * pack in the host process. That was a complete RCE bypass — a malicious
@@ -384,7 +384,7 @@ export async function activateInstalledServerPlugins(
   setPluginWorkerDbClient(db)
   registerCrashRecoveryHandler(db, uploadsDir)
 
-  // Reset existing in-process state so a re-bind (from `bun --watch`
+  // Reset existing in-process state so a re-bind (from a `tsx watch`
   // reload, dev-mode hot path, or a full restart) starts from a clean
   // slate. Worker is terminated and respawned on next call.
   await resetPluginWorker()

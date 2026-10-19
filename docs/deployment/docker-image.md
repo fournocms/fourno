@@ -2,7 +2,7 @@
 
 This guide covers the production Docker image outside the bundled VPS Compose files.
 
-The image contains the built admin UI, Bun server, public renderer, CMS API routes, migrations, and runtime dependencies. It does not run Vite or install packages at container startup.
+The image contains the built admin UI, Node server, public renderer, CMS API routes, migrations, and runtime dependencies. It does not run Vite or install packages at container startup.
 
 ---
 
@@ -102,12 +102,12 @@ PORT=8080
 DATABASE_URL=sqlite:/app/storage/data/cms.db
 UPLOADS_DIR=/app/storage/uploads
 STATIC_DIR=/app/dist
-INSTATIC_SECRET_KEY=<output of bun run scripts/generate-secret-key.ts>
+INSTATIC_SECRET_KEY=<output of pnpm tsx scripts/generate-secret-key.ts>
 PUBLIC_ORIGIN=https://${{RAILWAY_PUBLIC_DOMAIN}}
 RAILWAY_RUN_UID=0
 ```
 
-`RAILWAY_RUN_UID=0` is required because Railway volumes are mounted as `root` and the published image otherwise runs as the non-root `bun` user. `PUBLIC_ORIGIN=https://${{RAILWAY_PUBLIC_DOMAIN}}` gives Instatic the public origin for its CSRF check now that Railway terminates HTTPS at the edge; the server would auto-detect the same value from `RAILWAY_PUBLIC_DOMAIN`, but setting it explicitly survives custom-domain edits.
+`RAILWAY_RUN_UID=0` is required because Railway volumes are mounted as `root` and the published image otherwise runs as the non-root `node` user. `PUBLIC_ORIGIN=https://${{RAILWAY_PUBLIC_DOMAIN}}` gives Instatic the public origin for its CSRF check now that Railway terminates HTTPS at the edge; the server would auto-detect the same value from `RAILWAY_PUBLIC_DOMAIN`, but setting it explicitly survives custom-domain edits.
 
 Enable Railway Image Auto Updates when you want Railway to move the service forward automatically during a maintenance window. Use `:latest` for "always follow the newest image", or a semver tag such as `:0.0.20` if you want Railway's semver update controls.
 
@@ -141,10 +141,10 @@ Render auto-injects `RENDER_EXTERNAL_URL`, which Instatic uses as the CSRF publi
 | `STATIC_DIR` | Yes in Docker | `/app/dist` |
 | `PORT` | Platform-dependent | HTTP listen port; defaults to `3001` |
 | `HOST` | Optional | Bind address; defaults to `0.0.0.0`. set `127.0.0.1` to keep a local instance off the LAN |
-| `INSTATIC_SECRET_KEY` | Yes for reversible server secrets | Output of `bun run scripts/generate-secret-key.ts` |
+| `INSTATIC_SECRET_KEY` | Yes for reversible server secrets | Output of `pnpm tsx scripts/generate-secret-key.ts` |
 | `PUBLIC_ORIGIN` | Behind managed HTTPS proxies | Comma-separated public origins for the CSRF check, e.g. `https://www.example.com`. Auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` on those platforms |
 | `TRUSTED_PROXY_CIDRS` | Optional | Comma-separated trusted proxy CIDRs for client-IP attribution only (audit logs, rate-limit keys) — **not** used for CSRF. Trust only your real proxy CIDRs; never `0.0.0.0/0` for a public service |
-| `NPM_REGISTRY_URL` | Optional | Registry used by the Dependencies panel, the dependency resolver and runtime `bun install`; defaults to `https://registry.npmjs.org`. Set for a private registry or mirror; downloads/advisories are skipped for non-public registries |
+| `NPM_REGISTRY_URL` | Optional | Registry used by the Dependencies panel, the dependency resolver and runtime `npm install`; defaults to `https://registry.npmjs.org`. Set for a private registry or mirror; downloads/advisories are skipped for non-public registries |
 
 Managed platforms usually inject `PORT`. Do not hard-code a different listen port unless the platform asks for a fixed target port.
 

@@ -14,7 +14,7 @@
  *
  *   2. `.tmp/secret.key` file in the working directory.
  *      Dev / non-production fallback. Auto-created on first boot so a fresh
- *      `bun run dev` works without manual setup. The file is intentionally
+ *      `pnpm dev` works without manual setup. The file is intentionally
  *      under `.tmp/` (already git-ignored).
  *
  * Key rotation: replace the env var or `.tmp/secret.key` file and restart.
@@ -77,7 +77,7 @@ function readMasterKeyBytes(): Uint8Array {
   if (process.env.NODE_ENV === 'production') {
     throw new MasterKeyConfigurationError(
       `[secrets/masterKey] ${ENV_VAR_NAME} is required in production. ` +
-      'Generate one with: bun run scripts/generate-secret-key.ts',
+      'Generate one with: pnpm tsx scripts/generate-secret-key.ts',
     )
   }
 
@@ -113,7 +113,7 @@ function parseAndValidateBase64(value: string, source: string): Uint8Array {
   } catch (err) {
     throw new MasterKeyConfigurationError(
       `[secrets/masterKey] ${source} is not valid base64. ` +
-      'Generate a new key with: bun run scripts/generate-secret-key.ts',
+      'Generate a new key with: pnpm tsx scripts/generate-secret-key.ts',
       { cause: err },
     )
   }
@@ -121,7 +121,7 @@ function parseAndValidateBase64(value: string, source: string): Uint8Array {
     throw new MasterKeyConfigurationError(
       `[secrets/masterKey] ${source} decoded to ${bytes.length} bytes; ` +
       `must be exactly ${REQUIRED_KEY_BYTES}. ` +
-      'Generate a new key with: bun run scripts/generate-secret-key.ts',
+      'Generate a new key with: pnpm tsx scripts/generate-secret-key.ts',
     )
   }
   return bytes

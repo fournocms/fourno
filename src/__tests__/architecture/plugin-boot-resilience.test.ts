@@ -22,7 +22,7 @@
  *      - No single top-level try/catch wraps the whole plugin iteration loop
  *        (which would be the band-aid pattern).
  *
- * These tests run as part of `bun test` under the SQLite adapter.
+ * These tests run as part of `pnpm test` under the SQLite adapter.
  * No real DB, no worker, no filesystem I/O required for the functional layer.
  */
 

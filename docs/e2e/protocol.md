@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This protocol covers real user-facing testing by an agent with full browser control and disposable local data. It complements the existing Bun tests by exercising complete workflows as a person would: reading labels, clicking visible controls, waiting for feedback, noticing friction, and checking the published result.
+This protocol covers real user-facing testing by an agent with full browser control and disposable local data. It complements the existing Vitest tests by exercising complete workflows as a person would: reading labels, clicking visible controls, waiting for feedback, noticing friction, and checking the published result.
 
 The goal is not only "does it pass?" The goal is to find product problems before users do.
 
@@ -33,7 +33,7 @@ Use the local development stack unless the user names another target:
 ```sh
 DATABASE_URL=sqlite:./.tmp/e2e-agent.db \
 UPLOADS_DIR=./.tmp/e2e-uploads \
-bun run dev
+pnpm dev
 ```
 
 Default URLs:
@@ -65,7 +65,7 @@ Before destructive reset, confirm the target is disposable:
    Remove only the run-owned SQLite database and upload directory. Do not reset the git worktree.
 
 4. **Start app**
-   Start `bun run dev` with the run-owned environment, or document the existing server being used.
+   Start `pnpm dev` with the run-owned environment, or document the existing server being used.
 
 5. **Execute as a user**
    Use browser snapshots and screenshots. Interact through visible UI, labels, keyboard, menus, panels, dialogs, and links.
@@ -167,7 +167,7 @@ Promote a scenario into scripted automation only when:
 - The test can use durable user-visible selectors or accessible names.
 
 Promoted scenarios live in `tests/e2e/` as `*.e2e.ts` files and run with
-`bun run test:e2e`. Keep each spec focused on one durable user journey, with
+`pnpm test:e2e`. Keep each spec focused on one durable user journey, with
 explicit saves, fresh/disposable data, and visitor-page checks when publishing
 behavior is in scope.
 

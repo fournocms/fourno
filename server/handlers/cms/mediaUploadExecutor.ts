@@ -2,7 +2,7 @@
  * Host-side upload executor — walks a `MediaStorageUploadPlan` and streams
  * the bytes to each step's URL. The plugin adapter's only job is to
  * produce the plan (signed PUT URLs, headers, ranges). Bytes flow through
- * Bun's native `fetch` here, NEVER through the QuickJS sandbox.
+ * Node's native `fetch` here, NEVER through the QuickJS sandbox.
  *
  * Two transport branches:
  *

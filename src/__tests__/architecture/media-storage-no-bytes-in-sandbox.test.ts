@@ -4,7 +4,7 @@
  *
  * The kernel invariant of the media-plugin design is that bytes (which
  * routinely exceed the VM's 64 MB heap ceiling for any non-trivial video
- * upload) flow through Bun's native `fetch` from the host into the
+ * upload) flow through Node's native `fetch` from the host into the
  * adapter's signed PUT URL — never through QuickJS. The plugin adapter
  * only signs upload plans; the host streams the payload.
  *
@@ -55,7 +55,7 @@ describe('media storage — no bytes in sandbox', () => {
     const executor = await read('server/handlers/cms/mediaUploadExecutor.ts')
     // The executor must upload host-side — NOT route through the QuickJS
     // sandbox bridge. The host call goes through `guardedFetch`, the SSRF-safe
-    // wrapper over Bun's native fetch: the plan URL is plugin-controlled, so it
+    // wrapper over Node's native fetch: the plan URL is plugin-controlled, so it
     // must not be able to reach internal addresses (GHSA-9pq7).
     expect(executor).toMatch(/await guardedFetch\(\s*step\.url/)
     // No hostCall / QuickJS bridge usage in this file.

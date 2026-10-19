@@ -6,7 +6,7 @@
  * The implementation matches the algorithm specified in CSS.escape
  * (https://drafts.csswg.org/cssom/#serialize-an-identifier). Vendored here
  * because the module must work in both the browser bundle and the headless
- * publisher (Bun server) without an environment-specific shim.
+ * publisher (Node server) without an environment-specific shim.
  */
 
 export function escapeCssIdentifier(value: string): string {

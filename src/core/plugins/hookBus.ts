@@ -4,7 +4,7 @@
  * Centralised registry for plugin event listeners (`on`) and filter handlers
  * (`filter`). Lives in `src/core/` because the runtime types are shared with
  * the SDK and tests, but only the server activates plugin server modules so
- * in practice this singleton runs only inside the Bun server process.
+ * in practice this singleton runs only inside the Node server process.
  *
  * Two pipelines:
  *   • `on(event, listener)` — listeners receive a payload, return value is

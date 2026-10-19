@@ -576,7 +576,7 @@ const INERT_UPLOAD_MIMES = new Set([
  *
  *  - `X-Content-Type-Options: nosniff` — prevents the browser from
  *    overriding our declared Content-Type. Caddy already sets this in the
- *    production reverse proxy, but `bun run dev` and self-hosted
+ *    production reverse proxy, but `pnpm dev` and self-hosted
  *    deployments without Caddy don't have it; we set it at the app layer
  *    so it ships in every environment.
  *

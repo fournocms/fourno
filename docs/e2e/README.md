@@ -26,7 +26,7 @@ The project-local `instatic-user-e2e` skill should load for those requests and k
 ## Automated Playwright E2E
 
 The scripted regression suite lives outside this folder in `tests/e2e/`.
-Automated E2E files use the `*.e2e.ts` suffix so `bun test` does not load
+Automated E2E files use the `*.e2e.ts` suffix so `pnpm test` does not load
 Playwright specs as unit tests.
 It complements the agent-run audits above; it does not replace them. Use
 Playwright for stable, critical flows where the expected result is
@@ -36,8 +36,8 @@ in the agent-run protocol.
 Run the automated suite with:
 
 ```sh
-bun run test:e2e:install
-bun run test:e2e
+pnpm test:e2e:install
+pnpm test:e2e
 ```
 
 The Playwright config starts a disposable local stack by default:
@@ -50,8 +50,8 @@ The Playwright config starts a disposable local stack by default:
   zone bugs in SQL-stamped timestamps surface (CONFIG-004)
 
 `scripts/e2e-dev.ts` resets only those `.tmp/e2e-*` paths, then runs the same
-Vite + Bun CMS stack a developer uses — with one deliberate difference: the CMS
-runs **without** `bun --watch`. A regression suite needs a stable server, and
+Vite + Node CMS stack a developer uses — with one deliberate difference: the CMS
+runs **without** `tsx watch`. A regression suite needs a stable server, and
 under watch the publish pipeline writing baked HTML (and the SQLite DB churning)
 can reload the server mid-test and drop in-memory state. Vite is likewise told to
 ignore the runtime-written paths (`.tmp`, `uploads`, `dist` in `vite.config.ts`),
@@ -105,7 +105,7 @@ first retry automatically.
 ### Automated coverage map
 
 These feature-matrix rows now have automated regression coverage. Rows list
-Playwright specs unless a focused Bun test path is included:
+Playwright specs unless a focused Vitest test path is included:
 
 | Row(s) | Spec |
 |---|---|
@@ -168,13 +168,13 @@ durable assertion brittle:
   persistence and public entry-template rendering are automated in
   `content.e2e.ts`.)
 - **MODULE-001 remaining browser/editor permutations** — body/container/outlet
-  render contracts are covered by focused Bun tests in
+  render contracts are covered by focused Vitest tests in
   `src/__tests__/base-modules.test.ts` and
   `src/modules/base/outlet/__tests__/outlet.render.test.ts`; browser insertion,
   full template composition, permission variants, and responsive authored-layout
   review remain agent-run.
 - **MODULE-002 remaining browser/editor permutations** — common text/list/link,
-  button/image/SVG/video render contracts are covered by focused Bun tests in
+  button/image/SVG/video render contracts are covered by focused Vitest tests in
   `src/__tests__/base-modules.test.ts`, `src/__tests__/core/sanitizeSvg.test.ts`,
   and `src/__tests__/htmlImport/svgMapping.test.ts`; browser insertion/edit,
   media-picker combinations, permission variants, and responsive authored-layout
@@ -182,7 +182,7 @@ durable assertion brittle:
 - **MODULE-003 remaining browser/editor permutations** — loop module
   conformance/defaults/tag fallback, publisher iteration/currentEntry and
   parentEntry isolation, empty/missing data, prefetch, infinite runtime
-  injection, and request-dependent detection are covered by focused Bun tests in
+  injection, and request-dependent detection are covered by focused Vitest tests in
   `src/__tests__/base-modules.test.ts`,
   `src/__tests__/publisher/loopRender.test.ts`,
   `src/__tests__/server/loopPrefetch.test.ts`, and
@@ -193,7 +193,7 @@ durable assertion brittle:
   conformance, semantic render contracts, publisher-boundary escaping, formId
   normalization, snapshots, settings analysis, validation, canvas suppression,
   form preview, runtime emission, public endpoint security, and the form
-  settings panel are covered by focused Bun tests in `src/__tests__/forms/`,
+  settings panel are covered by focused Vitest tests in `src/__tests__/forms/`,
   `src/__tests__/canvas/`, `src/__tests__/publisher/`,
   `src/__tests__/server/publicForms.test.ts`, and
   `src/__tests__/panels/formSettingsPanel.test.tsx`; browser insertion, full
@@ -205,7 +205,7 @@ durable assertion brittle:
   content/defaults; missing components; hidden nodes; sanitization; nested refs;
   slot sync; recursion/data-layer gates; editor-store reconciliation;
   persistence healing; canvas slot reactivity/editing; locked slot DnD; and
-  placement architecture are covered by focused Bun tests in
+  placement architecture are covered by focused Vitest tests in
   `src/__tests__/base-modules.test.ts`,
   `src/__tests__/module-engine/moduleConsolidation.test.ts`,
   `src/__tests__/publisher/`, `src/__tests__/core/`,
@@ -219,7 +219,7 @@ durable assertion brittle:
   background resolve flows, client envelope validation, runtime handler
   normalization, module dependency/importmap filtering, site runtime build,
   dependency resolver/cache, package importmap/server, malformed runtime-cache
-  paths, and runtime asset publish injection are covered by focused Bun tests in
+  paths, and runtime asset publish injection are covered by focused Vitest tests in
   `src/__tests__/panels/dependenciesPanel.test.tsx`,
   `src/__tests__/editor-hooks/useAutoResolveDependencies.test.tsx`,
   `src/__tests__/persistence/cmsRuntimeClient.test.ts`,
@@ -244,7 +244,7 @@ durable assertion brittle:
   asset serving, module-JS injection and route validation, runtime package
   importmap/cache/server behavior, full-router ownership of runtime cache
   package URLs, runtime script injection safety, and signed media redirect
-  architecture are covered by focused Bun tests in
+  architecture are covered by focused Vitest tests in
   `src/__tests__/server/publicRendering.test.ts`,
   `src/__tests__/server/publishStaticArtefact.test.ts`,
   `src/__tests__/server/moduleJsRoute.test.ts`,
@@ -263,7 +263,7 @@ durable assertion brittle:
   baking with hole runtime, hole runtime lazy/eager fetching, hole fragment
   stale-version/missing-node/cache behavior, per-query and per-visitor dynamic
   plugin islands, form token stamping in fragments, and full-router ownership
-  of hole runtime/fragment URLs are covered by focused Bun tests in
+  of hole runtime/fragment URLs are covered by focused Vitest tests in
   `src/__tests__/server/holeRouteHandler.test.ts`,
   `src/__tests__/server/holeRuntime.smoke.test.ts`,
   `src/__tests__/server/holePublisher.test.ts`,
@@ -283,7 +283,7 @@ durable assertion brittle:
   conformance/render contracts, snapshots, settings analysis, compatible field
   binding, setup-panel table creation/missing-field/preview behavior, canvas
   native-control suppression including submit buttons, and form-preview parent
-  lookup are covered by focused Bun tests in `src/__tests__/forms/`,
+  lookup are covered by focused Vitest tests in `src/__tests__/forms/`,
   `src/__tests__/canvas/canvasFormControls.test.tsx`,
   `src/__tests__/canvas/canvasFormPreview.test.ts`, and
   `src/__tests__/panels/formSettingsPanel.test.tsx`; full browser
@@ -294,7 +294,7 @@ durable assertion brittle:
   challenge submission, oversized payload handling, rate limits, target-table
   guards, field validation, form runtime challenge prefetch/submit delegation,
   page-token stamping, form module contracts, snapshots, settings analysis, and
-  settings-panel behavior are covered by focused Bun tests in
+  settings-panel behavior are covered by focused Vitest tests in
   `src/__tests__/server/publicForms.test.ts`,
   `src/__tests__/publisher/formRuntime.test.ts`,
   `src/__tests__/publisher/formModuleJs.test.ts`,
@@ -311,7 +311,7 @@ durable assertion brittle:
   Postgres scheme selection, invalid scheme errors, migration parity, JSON
   column naming, repository SQL portability, SQLite smoke behavior, rowCount,
   transaction serialization, advisory-lock fallback, statement cache, dev
-  workflow, and Docker config are covered by focused Bun tests in
+  workflow, and Docker config are covered by focused Vitest tests in
   `src/__tests__/db/`, `src/__tests__/architecture/`,
   `server/db/__tests__/`, `src/__tests__/devWorkflow.test.ts`, and
   `src/__tests__/server/dockerConfig.test.ts`; live Postgres connectivity,
@@ -322,7 +322,7 @@ durable assertion brittle:
   trusted proxies, and public origins; health routing; admin/static/uploads
   serving; upload response hardening; dev launcher/proxy contracts; and
   Docker image/compose healthcheck/persistent-data wiring are covered by
-  focused Bun tests in `src/__tests__/server/serverConfig.test.ts`,
+  focused Vitest tests in `src/__tests__/server/serverConfig.test.ts`,
   `src/__tests__/server/staticAdmin.test.ts`,
   `src/__tests__/server/router.test.ts`, `src/__tests__/devWorkflow.test.ts`,
   and `src/__tests__/server/dockerConfig.test.ts`; actual port-conflict
@@ -332,7 +332,7 @@ durable assertion brittle:
   fallback, public form challenge routing, plugin manifest host/path/coherence
   checks, granted-permission enforcement, SSRF-gated fetch, encrypted plugin
   settings, media adapter boundary validation, and runtime dependency
-  cache/package serving are covered by focused Bun tests in
+  cache/package serving are covered by focused Vitest tests in
   `src/__tests__/server/formChallengeSecret.test.ts`,
   `src/__tests__/server/publicForms.test.ts`,
   `src/__tests__/plugins/pluginManifest.test.ts`,
@@ -352,7 +352,7 @@ durable assertion brittle:
   trusted-proxy forwarded-host/proto spoof rejection at the CMS/AI boundary,
   route-table semantics, handler capability architecture gates,
   HTTP boundary-validation gates, origin helper behavior, AI driver isolation,
-  and AI tool capability filtering are covered by focused Bun tests in
+  and AI tool capability filtering are covered by focused Vitest tests in
   `src/__tests__/server/apiSecurityBoundary.test.ts`,
   `src/__tests__/server/security.test.ts`,
   `src/__tests__/server/routeTable.test.ts`,
@@ -397,7 +397,7 @@ durable assertion brittle:
   `site_read_document` tool-result bridge, CAP-005 request-level AI write-tool filtering, and AI-006 Audit tab rollups from that
   streamed usage are also automated in `ai.e2e.ts`. AI-007 direct
   Anthropic/OpenAI/Ollama/OpenRouter driver mapping and pricing coverage is
-  automated in focused Bun tests; live-provider network behaviour remains
+  automated in focused Vitest tests; live-provider network behaviour remains
   outside the browser suite.
 - **PERF-* and remaining error-recovery sweeps**  — performance and broader
   error recovery remain observational, agent-run.

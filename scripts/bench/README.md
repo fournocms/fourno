@@ -7,9 +7,9 @@ Everything writes to `.tmp/benchmarks/` (gitignored). One run produces a single 
 ## Quick start
 
 ```bash
-bun run bench               # full suite, all benches, default iterations
-bun run bench --quick       # roughly 10× faster, less precise
-bun run bench --help
+pnpm bench               # full suite, all benches, default iterations
+pnpm bench --quick       # roughly 10× faster, less precise
+pnpm bench --help
 ```
 
 The orchestrator writes `.tmp/benchmarks/REPORT.md` and prints a one-line summary per bench. The report has a top-level **Headline numbers** table (every bench contributes ~3 numbers) followed by deep-dive sections.
@@ -17,26 +17,26 @@ The orchestrator writes `.tmp/benchmarks/REPORT.md` and prints a one-line summar
 ## Per-bench shortcuts
 
 ```bash
-bun run bench:bundle        # just dist/ composition
-bun run bench:publisher     # just the page-tree → HTML pipeline
-bun run bench:publish       # full publish pipeline + public serving (DB-backed)
-bun run bench:editor-store  # editor store mutations + class system stress
-bun run bench:http          # HTTP latency + throughput (auto starts a server)
-bun run bench:db            # SQLite performance
-bun run bench:plugin        # QuickJS sandbox boot / hostCall / dispose
-bun run bench:footprint     # repo / node_modules / SLOC stats
-bun run bench:health        # fallow + jscpd + madge snapshot
-bun run bench:browser       # real Chromium via Playwright — opt-in
-bun run bench:browser:install   # one-time Chromium download (~92 MiB)
+pnpm bench:bundle        # just dist/ composition
+pnpm bench:publisher     # just the page-tree → HTML pipeline
+pnpm bench:publish       # full publish pipeline + public serving (DB-backed)
+pnpm bench:editor-store  # editor store mutations + class system stress
+pnpm bench:http          # HTTP latency + throughput (auto starts a server)
+pnpm bench:db            # SQLite performance
+pnpm bench:plugin        # QuickJS sandbox boot / hostCall / dispose
+pnpm bench:footprint     # repo / node_modules / SLOC stats
+pnpm bench:health        # fallow + jscpd + madge snapshot
+pnpm bench:browser       # real Chromium via Playwright — opt-in
+pnpm bench:browser:install   # one-time Chromium download (~92 MiB)
 ```
 
-> The `browser` bench is **opt-in** — it isn't part of the default `bun run bench` because it needs Playwright's Chromium (downloaded once via `bun run bench:browser:install`, ~92 MiB) and adds ~10s to the run. Use the shortcut above, or pass `--only=browser`.
+> The `browser` bench is **opt-in** — it isn't part of the default `pnpm bench` because it needs Playwright's Chromium (downloaded once via `pnpm bench:browser:install`, ~92 MiB) and adds ~10s to the run. Use the shortcut above, or pass `--only=browser`.
 
 Or use `--only=NAME[,NAME]` on the orchestrator:
 
 ```bash
-bun run bench --only=publisher,editor-store
-bun run bench --skip=health,plugin
+pnpm bench --only=publisher,editor-store
+pnpm bench --skip=health,plugin
 ```
 
 ## CLI flags
@@ -54,11 +54,11 @@ bun run bench --skip=health,plugin
 
 ## Prerequisites
 
-- **Bundle bench** requires `dist/` to exist. Run `bun run build` first (or invoke `bun run bench` after a fresh build).
+- **Bundle bench** requires `dist/` to exist. Run `pnpm build` first (or invoke `pnpm bench` after a fresh build).
 - **HTTP bench** spawns a production server on a free port using SQLite at `.tmp/benchmarks/bench-<port>.db`. If `.tmp/dev.db` is present it's cloned as the seed; otherwise the server boots from empty migrations. No external services required.
 - **Plugin bench** boots a fresh QuickJS-WASM context per scenario — no plugin code from disk, just synthetic plugin sources defined in `benches/plugin.ts`.
-- **Health bench** shells out to `fallow`, `jscpd`, and `madge` via `bunx`. Add a `--skip=health` if those tools are slow on a particular machine.
-- **Browser bench** runs under Playwright with its pinned Chromium. The browser binary is NOT in `bun install` — run `bun run bench:browser:install` once (~92 MiB headless Chromium download). Alternatively, pass `--chrome-path=PATH` to a system Chrome / Chromium / Edge / Brave / Arc. If neither is available the bench self-skips with a clear message rather than crashing the run.
+- **Health bench** shells out to `fallow`, `jscpd`, and `madge` via `pnpm dlx`. Add a `--skip=health` if those tools are slow on a particular machine.
+- **Browser bench** runs under Playwright with its pinned Chromium. The browser binary is NOT in `pnpm install` — run `pnpm bench:browser:install` once (~92 MiB headless Chromium download). Alternatively, pass `--chrome-path=PATH` to a system Chrome / Chromium / Edge / Brave / Arc. If neither is available the bench self-skips with a clear message rather than crashing the run.
 
 ## What each bench measures
 
@@ -133,7 +133,7 @@ Aggregates external static-analysis tools:
 Each tool runs in its own subprocess with a generous timeout. If a tool is missing, the row notes "unavailable" rather than crashing the suite.
 
 ### browser (opt-in)
-Boots the production server, spawns Chromium via Playwright (uses Playwright's pinned chromium-headless-shell — install once with `bun run bench:browser:install`), then runs a battery of cold-load and interactive scenarios. Authenticated admin scenarios run only when `INSTATIC_BENCH_ADMIN_EMAIL` and `INSTATIC_BENCH_ADMIN_PASSWORD` are set; without them the bench records the login-screen load and unauthenticated idle frame stability.
+Boots the production server, spawns Chromium via Playwright (uses Playwright's pinned chromium-headless-shell — install once with `pnpm bench:browser:install`), then runs a battery of cold-load and interactive scenarios. Authenticated admin scenarios run only when `INSTATIC_BENCH_ADMIN_EMAIL` and `INSTATIC_BENCH_ADMIN_PASSWORD` are set; without them the bench records the login-screen load and unauthenticated idle frame stability.
 
 **Cold-load metrics** for the three key entry points:
 - `/admin` (login screen, unauthenticated)
@@ -153,7 +153,7 @@ This is what answers the user-facing "is the builder laggy?" question with real 
 
 **Per-scenario tracing.** Pass `--trace=NAME[,NAME]` (or `--trace=ALL`) to wrap the named scenarios in a Playwright trace. The artifact lands at `.tmp/benchmarks/browser-traces/<name>.trace.zip`. Open with:
 ```bash
-bunx playwright show-trace .tmp/benchmarks/browser-traces/spotlight-churn.trace.zip
+pnpm exec playwright show-trace .tmp/benchmarks/browser-traces/spotlight-churn.trace.zip
 ```
 You'll get a frame-by-frame scrubber with DOM snapshots, network waterfall, console output, and screenshots — the same Trace Viewer that Playwright test reports use.
 
@@ -171,7 +171,7 @@ Tokens are counted with Anthropic's `count_tokens` endpoint (model-accurate, no 
 
 The HTML read surface has shipped (`read_document` replaced the five legacy JSON tools). This bench now serves as a **regression guard** — confirming the first size-budgeted read remains cheaper than the legacy JSON surface it replaced. It is **opt-in**: it needs `ANTHROPIC_API_KEY` and a seeded dev DB, and it makes one network call per measured string. Run it with:
 ```bash
-ANTHROPIC_API_KEY=sk-... bun run bench --only=snapshot-tokens
+ANTHROPIC_API_KEY=sk-... pnpm bench --only=snapshot-tokens
 ```
 With no key or no seeded DB it self-skips with an actionable message rather than crashing the suite. Rationale: [`docs/features/agent.md` → Why HTML-native](../../docs/features/agent.md#why-html-native).
 
@@ -248,7 +248,7 @@ export const myBench: BenchModule = {
 
 Run at: 2026-05-20T18:55:32.123Z
 Host: darwin arm64 Apple M2 Pro
-Bun: 1.3.11
+Runtime: Node 24.11.0
 Total wall time: 142.3s
 
 ## Headline numbers

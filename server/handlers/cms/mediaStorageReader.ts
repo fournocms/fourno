@@ -20,7 +20,7 @@
  *       explicit error so the migration tool surfaces "this adapter
  *       can't be migrated FROM yet" rather than silently breaking.
  *
- * Bytes flow through Bun's native `fetch` — they never cross the
+ * Bytes flow through Node's native `fetch` — they never cross the
  * QuickJS sandbox boundary. The adapter only signs URLs on the read
  * side; the host pulls the body itself.
  */

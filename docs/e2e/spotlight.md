@@ -4,7 +4,7 @@ Scenario rows for the ⌘K / Ctrl+K command palette, following the
 `docs/e2e/protocol.md` format. Use `docs/e2e/run-log-template.md` for
 per-run logging.
 
-**Default environment:** same as the core lifecycle — `bun run dev` with
+**Default environment:** same as the core lifecycle — `pnpm dev` with
 `DATABASE_URL=sqlite:./.tmp/e2e-agent.db`.
 
 All scenarios in this file assume the user is **logged in** as the site owner

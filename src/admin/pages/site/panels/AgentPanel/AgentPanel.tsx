@@ -6,7 +6,7 @@
  *
  * Runtime model:
  * - Agent calls stream through `/admin/api/ai/chat/site`.
- * - The Bun server selects the configured provider credential and model.
+ * - The Node server selects the configured provider credential and model.
  * - Drivers call provider REST/SSE endpoints directly; no provider SDK runs.
  *
  * Accessibility (WCAG 2.1 AA):
@@ -75,7 +75,7 @@ interface AgentPanelProps extends DockablePanelProps {
  *
  * Always-mounted by EditorLayout — visibility is controlled via CSS display:none
  * (`.floatPanelClosed`) to preserve Zustand conversation state across open/close cycles.
- * Agent routes via Vite proxy `/admin/api/agent` → local Bun server → Claude SDK.
+ * Agent routes via Vite proxy `/admin/api/agent` → local Node server → Claude SDK.
  */
 export function AgentPanel({
   variant = 'floating',

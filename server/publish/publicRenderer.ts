@@ -18,7 +18,7 @@ import type { DbClient } from '../db/client'
 import type { PublishedPageSnapshot } from '../repositories/publish'
 
 /**
- * URL prefix where the Bun server exposes the per-site CSS bundle. Mirrors
+ * URL prefix where the Node server exposes the per-site CSS bundle. Mirrors
  * `/_instatic/assets/` for runtime scripts. The matching route is registered in
  * `server/router.ts` and serves files with `Cache-Control: immutable`.
  */

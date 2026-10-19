@@ -133,7 +133,7 @@ interface PublishPageOptions {
    * Emitted in `<head>` and the hash is added to the page's CSP
    * `script-src` so the inline tag passes a strict policy. Built on the
    * server side from the site's locked runtime dependencies + the populated
-   * `bun install` cache — plugins use bare imports like
+   * `npm install` cache — plugins use bare imports like
    * `import * as THREE from 'three'` and the browser resolves them to
    * `/_instatic/runtime/cache/<hash>/...` paths served from the host.
    */

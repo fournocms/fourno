@@ -4,7 +4,7 @@
 
 **Own your site. Love building it.**
 
-A self-hosted CMS where the visual editor, content engine, and publisher all live in one Bun server — and the pages it ships are clean enough to read in view-source.
+A self-hosted CMS where the visual editor, content engine, and publisher all live in one Node server — and the pages it ships are clean enough to read in view-source.
 
 <p>
   <a href="https://trendshift.io/repositories/66792?utm_source=repository-badge&utm_medium=badge&utm_campaign=badge-repository-66792" target="_blank" rel="noopener noreferrer">
@@ -15,7 +15,7 @@ A self-hosted CMS where the visual editor, content engine, and publisher all liv
 [![Release](https://img.shields.io/github/v/release/corebunch/instatic?color=black&labelColor=black)](https://github.com/corebunch/instatic/releases)
 [![GitHub stars](https://img.shields.io/github/stars/corebunch/instatic?style=flat&label=stars&labelColor=555&color=ffd43b)](https://github.com/corebunch/instatic/stargazers)
 [![License: MIT](https://img.shields.io/badge/license-MIT-black?labelColor=black&color=blue)](LICENSE)
-[![Runtime: Bun](https://img.shields.io/badge/runtime-Bun-black?labelColor=black&color=f9f1e1)](https://bun.sh)
+[![Runtime: Node.js](https://img.shields.io/badge/runtime-Node.js-black?labelColor=black&color=5fa04e)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-everywhere-black?labelColor=black&color=3178c6)](https://www.typescriptlang.org/)
 
 [One-Click Deploy](#deploy-in-one-click) · [Quick Start](#quick-start) · [Docs](docs/README.md) · [Plugins](docs/features/plugin-system.md) · [Roadmap](#early-on-purpose)
@@ -32,7 +32,7 @@ A self-hosted CMS where the visual editor, content engine, and publisher all liv
 
 <br>
 
-A modern website usually means assembling a stack: a headless CMS, a framework, a host, a form service, an analytics vendor, an image CDN — each with its own bill, dashboard, and 2 a.m. outage. Instatic is the opposite bet. One Bun server holds the whole thing — the canvas editor, the content engine, media, auth, forms, plugins, and the publisher — and you run it wherever you like, backed by SQLite or Postgres.
+A modern website usually means assembling a stack: a headless CMS, a framework, a host, a form service, an analytics vendor, an image CDN — each with its own bill, dashboard, and 2 a.m. outage. Instatic is the opposite bet. One Node server holds the whole thing — the canvas editor, the content engine, media, auth, forms, plugins, and the publisher — and you run it wherever you like, backed by SQLite or Postgres.
 
 What comes out the other end is the part most builders quietly compromise on: plain semantic HTML and compact CSS, with none of the editor's machinery left behind in the page. No framework runtime, no builder attributes, no div soup. The site loads like a static file because, most of the time, it is one.
 
@@ -165,18 +165,18 @@ What comes out the other end is plain HTML and compact CSS, all the way down. No
 
 ## Quick start
 
-You need [Bun](https://bun.sh) 1.4.1 or newer (`bun upgrade` if yours is older; `bun run dev` refuses an older one because its Vite proxy needs that release to forward the editor's WebSocket). Nothing else. The default dev setup runs on SQLite, so there are no extra services to stand up.
+You need [Node.js](https://nodejs.org) 24.11 or newer and [pnpm](https://pnpm.io) (`corepack enable` activates the version pinned in `package.json`). Nothing else. The default dev setup runs on SQLite, so there are no extra services to stand up.
 
 ```sh
 git clone https://github.com/corebunch/instatic.git
 cd instatic
-bun install
-bun run dev
+pnpm install
+pnpm dev
 ```
 
 Open `http://localhost:5173`. The first visit walks you through creating your site and your owner account.
 
-Want to see it the way it actually ships? `bun run start` builds the admin and serves it from the Bun server at `http://localhost:3001/admin`.
+Want to see it the way it actually ships? `pnpm start` builds the admin and serves it from the Node server at `http://localhost:3001/admin`.
 
 > **Backups, in one sentence:** back up the database (a Postgres dump or the SQLite file) and the uploads folder, and you've backed up the whole site — [details](docs/deployment/backup-restore.md).
 
@@ -209,14 +209,14 @@ APIs and workflows can still shift before 1.0. If that makes you nervous, wait f
 
 ## For developers
 
-One Bun server. A React admin built with Vite. A publisher that emits pages you'd be happy to have written yourself.
+One Node server. A React admin built with Vite. A publisher that emits pages you'd be happy to have written yourself.
 
 | | |
 |---|---|
-| **Runtime** | Bun, for both server and tooling |
+| **Runtime** | Node.js, pnpm, Vitest |
 | **Language** | TypeScript everywhere |
 | **Admin app** | React 19 (React Compiler on), Vite, Zustand + Mutative, CodeMirror, dnd-kit |
-| **Server** | `Bun.serve` with a hand-written router |
+| **Server** | Hand-written router on `srvx` + `ws` |
 | **Database** | SQLite or Postgres — one `DbClient` interface, picked by `DATABASE_URL` |
 | **Validation** | TypeBox at every untyped boundary; schemas are the source of truth |
 | **Plugins** | QuickJS-WASM backend sandbox, owner-granted permissions, explicit `editor.code` for admin-window code |
@@ -226,9 +226,9 @@ One Bun server. A React admin built with Vite. A publisher that emits pages you'
 The codebase is opinionated, and the opinions are enforced in code. Architectural rules live in `src/__tests__/architecture/` as actual tests, so the structure that keeps the output clean can't quietly rot.
 
 ```sh
-bun run build   # tsc -b && vite build
-bun test
-bun run lint
+pnpm build   # tsc -b && vite build
+pnpm test
+pnpm lint
 ```
 
 Dig in: [docs index](docs/README.md) · [architecture](docs/architecture.md) · [editor](docs/editor.md) · [server](docs/server.md) · [publisher](docs/features/publisher.md) · [plugin system](docs/features/plugin-system.md)

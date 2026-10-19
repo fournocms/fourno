@@ -207,7 +207,7 @@ function renderStandardNode(
  * a meaningful fallback (skeleton, "Loading…" text, etc.).
  *
  * Sanitisation: `sanitizeRichtext` is called on the placeholder string.
- * The Bun server configures an explicit DOMPurify runtime at boot, so safe
+ * The Node server configures an explicit DOMPurify runtime at boot, so safe
  * semantic fallback markup is preserved while scripts, event handlers, and
  * unsafe URLs are stripped before they reach the page artefact.
  */

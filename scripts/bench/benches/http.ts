@@ -1,7 +1,7 @@
 /**
  * HTTP latency + throughput benchmark.
  *
- * Spawns a production-mode Bun server on a free port (or uses the
+ * Spawns a production-mode Node server on a free port (or uses the
  * caller-provided `--base-url`), then hammers a fixed set of endpoints
  * with both sequential and concurrent load.
  *

@@ -38,9 +38,9 @@
  *
  * Dev workflow note
  * -----------------
- * `dist/assets/` only exists after `bun run build`. When dist is absent
+ * `dist/assets/` only exists after `pnpm build`. When dist is absent
  * the gate self-skips with a console warning rather than failing — the
- * canonical way to run this gate is `bun run test:bundle`, which builds
+ * canonical way to run this gate is `pnpm test:bundle`, which builds
  * first. In CI, the build step is mandatory before tests, so the gate
  * is always active there.
  *
@@ -69,7 +69,7 @@ interface ChunkBudget {
 // Budgets
 // ---------------------------------------------------------------------------
 //
-// Sizes captured from `bun run build` (rolldown, production mode).
+// Sizes captured from `pnpm build` (rolldown, production mode).
 // Each cap allows ~7-10% headroom over current — enough to absorb a small
 // refactor without spurious failures, tight enough to catch a real
 // regression. Update caps DOWN when a chunk is intentionally shrunk.
@@ -264,13 +264,13 @@ function formatKB(bytes: number): string {
 
 describe('Bundle size budgets', () => {
   if (!existsSync(DIST_ASSETS)) {
-    it.skip('skipped: dist/assets/ not present — run `bun run build` first (or use `bun run test:bundle`)', () => {})
+    it.skip('skipped: dist/assets/ not present — run `pnpm build` first (or use `pnpm test:bundle`)', () => {})
     // Surface the skip visibly so it's obvious in CI / local runs why this
     // gate didn't enforce anything. Matches the Phase G pre-registered gate
     // pattern (console.log when an architecture gate is dormant).
     console.warn(
       '[bundle-size-budgets] dist/assets/ missing — bundle gates skipped. ' +
-      'Run `bun run build` first, or use `bun run test:bundle` to build+test.',
+      'Run `pnpm build` first, or use `pnpm test:bundle` to build+test.',
     )
     return
   }
@@ -305,7 +305,7 @@ describe('Bundle size budgets', () => {
     if (!reactVendor) {
       throw new Error(
         '[bundle-size-budgets] Expected react-vendor*.js in dist/assets/. ' +
-        'Run `bun run build` first.',
+        'Run `pnpm build` first.',
       )
     }
     const source = readFileSync(reactVendor.path, 'utf8')

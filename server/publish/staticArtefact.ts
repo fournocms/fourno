@@ -346,7 +346,7 @@ async function removeCurrentEntry(path: string): Promise<void> {
  * then read `<slot>/<relPath>`.
  *
  * **Races and retry:** the pointer resolve and the file read are two IO
- * operations, and the writer's rename/wipe runs in parallel on the Bun IO
+ * operations, and the writer's rename/wipe runs in parallel on the libuv
  * thread pool, so transient misses are possible:
  *
  *   - The reader resolves the pointer to the OLD slot just before a swap.

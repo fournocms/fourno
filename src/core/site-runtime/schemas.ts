@@ -136,7 +136,7 @@ export type SiteStyleRuntimeConfig = Static<typeof SiteStyleRuntimeConfigSchema>
 /**
  * Precomputed bare-specifier → URL map for the site's locked runtime
  * dependencies. Built once on the server by `buildRuntimePackageImportmap`
- * after `bun install` populates the cache, then attached to the site
+ * after `npm install` populates the cache, then attached to the site
  * runtime state so the editor's iframe sandbox and the published page
  * use identical URLs. URLs point at the host's
  * `/_instatic/runtime/cache/<lockHash>/<name>/<entry>` route.

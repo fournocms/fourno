@@ -1,15 +1,15 @@
-#!/usr/bin/env bun
+#!/usr/bin/env tsx
 /**
  * Instatic benchmark suite — CLI orchestrator.
  *
  * Usage:
- *   bun run bench                    # full suite, write .tmp/benchmarks/REPORT.md
- *   bun run bench --only=publisher   # comma-separated subset
- *   bun run bench --skip=plugin      # comma-separated exclusions
- *   bun run bench --quick            # smaller iteration counts (~10x faster)
- *   bun run bench --output=path.md   # override report destination
- *   bun run bench --base-url=URL     # use a running server instead of spawning one
- *   bun run bench --help
+ *   pnpm bench                    # full suite, write .tmp/benchmarks/REPORT.md
+ *   pnpm bench --only=publisher   # comma-separated subset
+ *   pnpm bench --skip=plugin      # comma-separated exclusions
+ *   pnpm bench --quick            # smaller iteration counts (~10x faster)
+ *   pnpm bench --output=path.md   # override report destination
+ *   pnpm bench --base-url=URL     # use a running server instead of spawning one
+ *   pnpm bench --help
  *
  * Each bench lives in `scripts/bench/benches/<name>.ts` and exports a
  * `BenchModule`. Adding a new bench is a one-line registration in
@@ -45,7 +45,7 @@ const REPO_ROOT = resolve(import.meta.dirname, '../..')
 // Chromium and optional INSTATIC_BENCH_ADMIN_EMAIL / INSTATIC_BENCH_ADMIN_PASSWORD
 // credentials for authenticated scenarios; `snapshot-tokens` needs ANTHROPIC_API_KEY
 // + a seeded .tmp/dev.db and makes network calls to count_tokens. Run them
-// explicitly, e.g. `bun run bench --only=snapshot-tokens`.
+// explicitly, e.g. `pnpm bench --only=snapshot-tokens`.
 const DEFAULT_BENCHES: readonly BenchModule[] = [
   bundleBench,
   publisherBench,
@@ -107,7 +107,7 @@ function printHelp(): void {
 Instatic benchmark suite.
 
 Usage:
-  bun run bench [flags]
+  pnpm bench [flags]
 
 Flags:
   --only=NAME[,NAME]   Run only the listed benches. (Use this to opt into the

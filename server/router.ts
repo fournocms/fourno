@@ -308,7 +308,7 @@ function contentTypeForAssetPath(pathname: string): string | null {
 
 /**
  * Per-site runtime dependency cache — served from the hashed
- * `bun install` workspace under `/_instatic/runtime/cache/<hash>/<...path>`.
+ * `npm install` workspace under `/_instatic/runtime/cache/<hash>/<...path>`.
  * The publisher emits a `<script type="importmap">` mapping bare
  * specifiers like `three` to URLs in this namespace, so plugin module
  * scripts and frontend bundles share a single locally-installed copy
@@ -507,7 +507,7 @@ function adminUiNotBuiltResponse(pathname: string): Response {
 <h1>Admin UI not served on this port</h1>
 <p>This is the CMS API server (port 3001). In development, the admin UI is served by the Vite dev server.</p>
 <p>Open <a href="${targetUrl}">${targetUrl}</a>.</p>
-<p>If Vite isn't running yet, start it with <code>bun run dev</code> from the project root.</p>
+<p>If Vite isn't running yet, start it with <code>pnpm dev</code> from the project root.</p>
 </body>
 </html>`
   return new Response(html, {

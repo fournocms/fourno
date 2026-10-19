@@ -6,7 +6,7 @@
  * name and one or more `data:` lines (joined with `\n`). A `data: [DONE]`
  * sentinel (OpenAI-style) terminates the stream.
  *
- * `parseSseStream` reads the raw `Response.body` (a Bun `ReadableStream`),
+ * `parseSseStream` reads the raw `Response.body` (a `ReadableStream`),
  * reassembles frames across arbitrary network-chunk boundaries — including a
  * single JSON `data:` payload split across two TCP reads — and yields one
  * `{ event, data }` per complete frame. Callers `JSON.parse` + TypeBox-validate

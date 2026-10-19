@@ -156,7 +156,7 @@ function makeImportRequest(
   bundle: unknown,
 ): Request {
   // The `cookie` header is a forbidden header per WHATWG Fetch spec and is
-  // stripped by Bun's Request constructor in test mode. Set it after construction.
+  // stripped by the Request constructor in test mode. Set it after construction.
   const req = new Request(
     `http://localhost/admin/api/cms/import?strategy=${strategy}`,
     {

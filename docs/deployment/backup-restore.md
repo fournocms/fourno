@@ -90,11 +90,11 @@ The `compose.sqlite.yml` override stores the SQLite database in the `data` named
 
 ### Ad-hoc snapshot (transactional, safe while the app is running)
 
-Use Bun (already in the app container) and SQLite's online backup API to capture a consistent snapshot without stopping the CMS:
+Use Node (already in the app container) with `better-sqlite3` and SQLite's `VACUUM INTO` to capture a consistent snapshot without stopping the CMS:
 
 ```sh
 docker compose -f compose.prod.yml -f compose.sqlite.yml exec app \
-  bun -e "import { Database } from 'bun:sqlite'; const src = new Database('/app/data/cms.db', { readonly: true }); src.exec(\"VACUUM INTO '/app/data/snapshot.db'\");"
+  node -e "const Database = require('better-sqlite3'); const src = new Database('/app/data/cms.db', { readonly: true }); src.exec(\"VACUUM INTO '/app/data/snapshot.db'\");"
 
 docker compose -f compose.prod.yml -f compose.sqlite.yml cp \
   app:/app/data/snapshot.db "./backups/instatic-$(date +%F).db"

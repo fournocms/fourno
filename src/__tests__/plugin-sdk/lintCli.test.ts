@@ -44,7 +44,7 @@ async function withTempPlugin(setup: (dir: string) => Promise<void>) {
 /**
  * Helper: write a minimal `instatic-plugin.config.ts` so the lint reaches the
  * checks under test. The SDK import resolves via the host's tsconfig paths
- * because the lint process is run by `bun test` inside the monorepo.
+ * because the lint process is run by `pnpm test` inside the monorepo.
  */
 function writeConfig(dir: string, overrides: Record<string, unknown> = {}): Promise<void> {
   const config = {

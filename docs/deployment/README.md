@@ -2,7 +2,7 @@
 
 This index maps supported deployment targets to the files, variables, and persistence rules they need.
 
-Instatic is one Bun server packaged by the root `Dockerfile`. The server reads runtime configuration from `server/config.ts`: `PORT`, `DATABASE_URL`, `UPLOADS_DIR`, `STATIC_DIR`, `PUBLIC_ORIGIN`, and `TRUSTED_PROXY_CIDRS`. Reversible server secrets, including AI provider credentials, plugin secret settings, and MFA TOTP seeds, are encrypted with `INSTATIC_SECRET_KEY` when configured. Database migrations run automatically on boot in `server/index.ts`.
+Instatic is one Node server packaged by the root `Dockerfile`. The server reads runtime configuration from `server/config.ts`: `PORT`, `DATABASE_URL`, `UPLOADS_DIR`, `STATIC_DIR`, `PUBLIC_ORIGIN`, and `TRUSTED_PROXY_CIDRS`. Reversible server secrets, including AI provider credentials, plugin secret settings, and MFA TOTP seeds, are encrypted with `INSTATIC_SECRET_KEY` when configured. Database migrations run automatically on boot in `server/index.ts`.
 
 ---
 
@@ -25,7 +25,7 @@ Back up both the database and uploaded media. See [backup-restore.md](backup-res
 Every deployment target configures the same process:
 
 ```txt
-PORT          HTTP port the Bun server listens on
+PORT          HTTP port the Node server listens on
 DATABASE_URL  sqlite:/path/to/cms.db, file:/path/to/cms.db, postgres://..., or postgresql://...
 UPLOADS_DIR   directory for media, plugin packs, fonts, and published disk artefacts
 STATIC_DIR    built admin SPA directory; /app/dist in the Docker image
@@ -35,7 +35,7 @@ TRUSTED_PROXY_CIDRS  optional; trusts proxy socket peers for forwarded client-IP
 NPM_REGISTRY_URL     optional; registry for the Dependencies panel, the dependency resolver and runtime installs (default https://registry.npmjs.org); set it for a private registry or corporate mirror
 ```
 
-Generate `INSTATIC_SECRET_KEY` with `bun run scripts/generate-secret-key.ts` before adding Anthropic, OpenAI, or OpenRouter credentials or enabling TOTP MFA in production. Without it, the admin can load but saving reversible secrets fails because there is no stable encryption key.
+Generate `INSTATIC_SECRET_KEY` with `pnpm tsx scripts/generate-secret-key.ts` before adding Anthropic, OpenAI, or OpenRouter credentials or enabling TOTP MFA in production. Without it, the admin can load but saving reversible secrets fails because there is no stable encryption key.
 
 The Docker image sets:
 

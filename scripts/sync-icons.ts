@@ -34,7 +34,7 @@
  *
  * Internal devs run this when they add or remove an icon. CI runs the
  * matching architecture gate `vendor-icons-fresh.test.ts`, which fails loudly
- * with "run `bun run icons:sync`" if the vendored set drifts.
+ * with "run `pnpm icons:sync`" if the vendored set drifts.
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, copyFileSync } from 'node:fs'
@@ -75,7 +75,7 @@ const ICON_NAME_RE = /^[a-z0-9][a-z0-9-]*$/
 interface SyncOptions {
   /**
    * When true, do not modify anything; just report what would change.
-   * Used by `bun run icons:check` in CI.
+   * Used by `pnpm icons:check` in CI.
    */
   check: boolean
 }
@@ -129,7 +129,7 @@ function copyFromUpstream(names: Set<string>, options: SyncOptions): void {
         `  ${UPSTREAM}\n\n` +
         `Clone the private repo as a sibling of this project, or set\n` +
         `PIXEL_ART_ICONS_SRC to point at your checkout, then re-run\n` +
-        `\`bun run icons:sync\`.`,
+        `\`pnpm icons:sync\`.`,
     )
   }
   if (!existsSync(UPSTREAM_TYPES_FILE)) {
@@ -276,7 +276,7 @@ function buildDist(options: SyncOptions): void {
   const tsc = join(ROOT, 'node_modules', '.bin', 'tsc')
   if (!existsSync(tsc)) {
     throw new Error(
-      `[sync-icons] tsc not found at ${tsc}. Run \`bun install\` first.`,
+      `[sync-icons] tsc not found at ${tsc}. Run \`pnpm install\` first.`,
     )
   }
 
@@ -358,7 +358,7 @@ function runCheck(): number {
     )
   }
   console.error(
-    `\n  Run \`bun run icons:sync\` to refresh vendor/pixel-art-icons/.\n`,
+    `\n  Run \`pnpm icons:sync\` to refresh vendor/pixel-art-icons/.\n`,
   )
   return 1
 }

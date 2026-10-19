@@ -34,7 +34,7 @@
  * live-collab provider — edits stream continuously; there is no manual save.
  *
  * Agent Panel: Phase D AI assistant — self-contained floating panel (Guideline #410).
- * Authenticates via ambient Claude Code credentials through the local Bun server.
+ * Authenticates via ambient Claude Code credentials through the local Node server.
  * No env vars, no API keys, no endpoint configuration required (Constraint #385).
  */
 import { Toolbar } from '@admin/pages/site/toolbar/Toolbar'

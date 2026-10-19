@@ -1,7 +1,7 @@
 /**
  * Development-only database + uploads reset.
  *
- * `bun run db:drop` wipes local state so you can start from a clean slate:
+ * `pnpm db:drop` wipes local state so you can start from a clean slate:
  *
  *   - SQLite (default): deletes the database file and its `-wal` / `-shm` /
  *     `-journal` sidecar files (e.g. ./.tmp/dev.db*).
@@ -13,7 +13,7 @@
  * (DATABASE_URL, UPLOADS_DIR) via readServerConfig, so this always targets
  * whatever database the local dev server is actually using.
  *
- * The next `bun run dev` re-runs migrations and recreates the database from
+ * The next `pnpm dev` re-runs migrations and recreates the database from
  * scratch.
  *
  * This is destructive and intentionally local-only — never run it against a

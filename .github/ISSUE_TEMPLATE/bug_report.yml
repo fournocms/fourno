@@ -50,7 +50,7 @@ body:
     attributes:
       label: Deployment mode
       options:
-        - Local dev with Bun
+        - Local dev (Node + pnpm)
         - Docker Compose with SQLite
         - Docker Compose with Postgres
         - Railway

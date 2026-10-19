@@ -1,7 +1,7 @@
 /**
  * Bundle composition benchmark.
  *
- * Reads `dist/` (assumes `bun run build` ran) and computes:
+ * Reads `dist/` (assumes `pnpm build` ran) and computes:
  *   - Total raw + gzipped + brotli'd JS / CSS
  *   - The eager first-paint payload (everything tagged as
  *     modulepreload/script/link in dist/index.html)
@@ -73,7 +73,7 @@ export const bundleBench: BenchModule = {
 
   async run(): Promise<BenchResult> {
     if (!existsSync(DIST_ASSETS)) {
-      log.warn('dist/assets/ not found — run `bun run build` first.')
+      log.warn('dist/assets/ not found — run `pnpm build` first.')
       return {
         name: this.name,
         title: this.title,
@@ -81,7 +81,7 @@ export const bundleBench: BenchModule = {
         sections: [
           {
             title: 'Not run',
-            rows: [{ label: 'dist/', metrics: { reason: 'dist/assets missing — run `bun run build` first.' } }],
+            rows: [{ label: 'dist/', metrics: { reason: 'dist/assets missing — run `pnpm build` first.' } }],
           },
         ],
       }

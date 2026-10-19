@@ -28,7 +28,7 @@ When publishing work:
 
 ## What this project is
 
-A self-hosted, open-source CMS with a built-in visual editor and a first-class plugin system. One Bun server backed by either Postgres or SQLite (selected by `DATABASE_URL`). The output is intentionally plain, semantic HTML with hand-clean CSS — no framework runtimes injected into published pages.
+A self-hosted, open-source CMS with a built-in visual editor and a first-class plugin system. One Node server backed by either Postgres or SQLite (selected by `DATABASE_URL`). The output is intentionally plain, semantic HTML with hand-clean CSS — no framework runtimes injected into published pages.
 
 The product is **self-hosted only**. The codebase should not carry assumptions about multi-tenant SaaS operation.
 
@@ -36,28 +36,28 @@ Read [`docs/architecture.md`](docs/architecture.md) for the system overview, [`d
 
 ### Stack at a glance
 
-- **Runtime:** Bun (server + tooling). Use Bun, not Node.
+- **Runtime:** Node.js (>=24.11) with pnpm as package manager and Vitest as test runner. TypeScript runs through `tsx` (`node --import tsx server/index.ts`).
 - **Language:** TypeScript everywhere.
 - **Frontend:** React 19 with the **React Compiler enabled** (Babel preset in `vite.config.ts`) + Vite, Zustand + Mutative for state (via `zustand-mutative`; `immer` is banned), CodeMirror for code-editing UI, `@dnd-kit/core` for drag-and-drop. The compiler auto-memoizes — do not hand-write `useMemo`/`useCallback`/`memo`. See "React Compiler and memoization". Store mutations use draft-mutation style (`set((s) => { s.x = … })`); a recipe that returns a partial must wrap it in `rawReturn(...)` or Mutative emits a perf warning.
-- **Server:** `Bun.serve` with a hand-written router (`server/router.ts`). CMS modules at `server/{repositories,handlers/cms,auth,plugins,publish}/`. Deep dive: [`docs/server.md`](docs/server.md).
-- **Database:** Postgres (`Bun.sql`) OR SQLite (`bun:sqlite`), selected by `DATABASE_URL`. One `DbClient` interface, two adapters, two migration files with identical IDs. Rules: [`docs/reference/database-dialects.md`](docs/reference/database-dialects.md).
+- **Server:** a hand-written router (`server/router.ts`) behind a thin HTTP adapter (`server/runtime/httpServer.ts`: `srvx` for Web `Request`/`Response`, `ws` for WebSockets, topic pub/sub on top). Server code stays on web-standard APIs; Node specifics live in `server/runtime/*`. CMS modules at `server/{repositories,handlers/cms,auth,plugins,publish}/`. Deep dive: [`docs/server.md`](docs/server.md).
+- **Database:** Postgres (`postgres`, porsager) OR SQLite (`better-sqlite3`), selected by `DATABASE_URL`. One `DbClient` interface, two adapters, two migration files with identical IDs. Rules: [`docs/reference/database-dialects.md`](docs/reference/database-dialects.md).
 - **Content model:** All content lives in `data_tables` + `data_rows`. The four system tables (`posts`, `pages`, `components`, `layouts`) are seeded and locked from rename/delete. There are no separate `pages` or `page_versions` tables.
 - **Real-time co-editing:** Yjs CRDT engine. One Y doc per row (`page:<id>`, `component:<id>`, `layout:<id>`) + one site-shell doc, multiplexed over `/admin/api/cms/site-socket`. The editor store stays the render source of truth: local mutations apply directly AND translate to Y ops (`@core/collab`); remote/undo changes project back. The server relay (`server/collab/`) persists continuously (blob + derived row JSON) — there is NO client-side save pipeline, no autosave, no Cmd+S. Undo is per-editor per-doc `Y.UndoManager`. Feature doc: [`docs/features/site-shell.md`](docs/features/site-shell.md) → "Real-time co-editing".
 - **Validation:** TypeBox at every untyped boundary. Schemas are source of truth (`type Foo = Static<typeof FooSchema>`, never a parallel `interface`). `zod` is banned repo-wide (the AI drivers pass TypeBox schemas through as JSON Schema, so no typebox→zod adapter is needed). Helpers + patterns: [`docs/reference/typebox-patterns.md`](docs/reference/typebox-patterns.md).
 - **Sanitization:** DOMPurify at the publisher boundary (`src/core/sanitize.ts`).
-- **Plugins:** Zip packages with a `plugin.json` manifest, lifecycle hooks. Server entrypoints and canvas module packs run inside a **QuickJS-WASM sandbox** — no Node/Bun ambient access, network gated by `network.outbound` permission + `networkAllowedHosts`. The VM bootstrap (SDK factory + `__run*` dispatchers) is authored as typed TS in `server/plugins/quickjs/bootstrap/src/` and bundled to committed string artifacts in `bootstrap/generated/` — after editing the source run `bun run bootstrap:sync` (gated by `plugin-bootstrap-fresh.test.ts`). Permission enforcement everywhere (VM, host, editor) validates against `grantedPermissions`, never the declared `permissions` array. Feature doc: [`docs/features/plugin-system.md`](docs/features/plugin-system.md).
+- **Plugins:** Zip packages with a `plugin.json` manifest, lifecycle hooks. Server entrypoints and canvas module packs run inside a **QuickJS-WASM sandbox** — no Node/Bun ambient access, network gated by `network.outbound` permission + `networkAllowedHosts`. The VM bootstrap (SDK factory + `__run*` dispatchers) is authored as typed TS in `server/plugins/quickjs/bootstrap/src/` and bundled to committed string artifacts in `bootstrap/generated/` — after editing the source run `pnpm bootstrap:sync` (gated by `plugin-bootstrap-fresh.test.ts`). Permission enforcement everywhere (VM, host, editor) validates against `grantedPermissions`, never the declared `permissions` array. Feature doc: [`docs/features/plugin-system.md`](docs/features/plugin-system.md).
 - **Routing:** In-house router at `src/admin/lib/routing/`. Replaces `react-router-dom`. Use it for all internal admin navigation, including links rendered from the site editor. `react-router-dom` is banned, raw `<a href="/admin...">` hard navigations are banned in admin UI, and `src/core/` + `src/modules/` must not import the admin router. Gated by `admin-router-usage.test.ts`.
-- **Icons:** `pixel-art-icons/icons/<name>` — deep-imported, tree-shakeable. Vendored at `vendor/pixel-art-icons/`. No `lucide-react`, no inline SVG strings — gated by `no-third-party-icons.test.ts`, `direct-icon-imports.test.ts`. Add a new icon by importing it and running `bun run icons:sync`.
+- **Icons:** `pixel-art-icons/icons/<name>` — deep-imported, tree-shakeable. Vendored at `vendor/pixel-art-icons/`. No `lucide-react`, no inline SVG strings — gated by `no-third-party-icons.test.ts`, `direct-icon-imports.test.ts`. Add a new icon by importing it and running `pnpm icons:sync`.
 - **AI providers:** No provider SDKs. Each driver in `server/ai/drivers/` talks directly to its provider's REST API over HTTP/SSE, sharing one multi-turn tool loop (`drivers/http/toolLoop.ts`). `@anthropic-ai/sdk`, `@anthropic-ai/claude-agent-sdk`, `@openai/agents`, and `@openrouter/agent` are banned repo-wide. The official split `@modelcontextprotocol/server` / `@modelcontextprotocol/client` v2 packages are **scoped, not banned**: allowed only under `server/ai/mcp/` (Instatic's MCP *server* implements a real wire protocol), still banned in the drivers and the browser. Gated by `ai-driver-isolation.test.ts`.
 - **MCP server:** Instatic exposes its CMS tools to external MCP clients (Claude Code, Codex, remote agents) at `/_instatic/mcp`, authenticated by per-connector bearer tokens. Thin adapter over the existing tool engine: headless reads and explicit `site_publish` run in-process; browser tools route by scope to the connector owner's **open Site or Content workspace** through the `(userId, scope)` live bridge (`server/ai/mcp/editorBridge.ts` + `useMcpWorkspaceBridge`). The live workspace is the single source of truth for edits (no headless DB-mutating page-tree tool, which would desync), and writes remain drafts until the explicitly capability-gated publish call. Feature doc: [`docs/features/mcp-connectors.md`](docs/features/mcp-connectors.md).
 - **Tree primitive:** Every tree-of-nodes — pages, Visual Components, slot fills — uses one shape: `NodeTree<TNode>` in `src/core/page-tree/treeSchema.ts`. Mutations are tree-agnostic. Reference: [`docs/reference/page-tree.md`](docs/reference/page-tree.md).
 - **Publishing:** Three-layer pipeline. **Layer A** bakes fully-static pages to `uploads/published/current/<route>.html` at publish time via a two-slot pointer-file swap (`server/publish/staticArtefact.ts`; `current` is a plain file naming the active slot — symlink-free so it works for unprivileged Windows users). **Layer B** is an in-memory LRU keyed by `(urlPath, queryString, publishVersion)` for dynamic routes (`server/publish/renderCache.ts`); `bumpPublishVersion()` evicts wholesale on every publish. **Layer C** emits `<instatic-hole>` placeholders for nodes auto-detected as request-dependent; a ~668 B `IntersectionObserver` runtime lazy-fetches each fragment from `/_instatic/hole/<nodeId>`. Auto-detection lives in `src/core/publisher/dynamicDetection.ts` — one walker, four rules. Single entry: `server/publish/publicRouter.ts:renderPublicResolution`. Full design: [`docs/features/publisher.md`](docs/features/publisher.md).
-- **Tests:** `bun test`. Architectural rules in `src/__tests__/architecture/*` — when *your* change drifts a structural rule, fix the rule's gate test in the same change.
+- **Tests:** `pnpm test`. Architectural rules in `src/__tests__/architecture/*` — when *your* change drifts a structural rule, fix the rule's gate test in the same change.
 
 ### Repo layout
 
 ```
-server/         Bun server: router, handlers, repositories, auth, plugins, publish, db
+server/         Node server: router, handlers, repositories, auth, plugins, publish, db
 src/admin/      Admin app (React) — shell, workspaces, plugin host UI
 src/admin/pages/site/   Visual editor (canvas, panels, toolbar, editor store)
 src/core/       Engine: page tree, publisher, plugin SDK + runtime, persistence
@@ -169,11 +169,11 @@ The **React Compiler is enabled** for the whole app (`babel({ presets: [reactCom
 
 There are exactly three exceptions where memoization stays — keep it, and add a one-line comment saying why:
 
-1. **The value/function is referenced in a `useEffect` (or other hook) dependency array.** The static `react-hooks/exhaustive-deps` lint rule can't see the compiler's runtime memoization, so it still demands a stable identity there. Wrapping a *function* used as a dep in `useCallback` (and the transitive closure it depends on) is required to keep `bun run lint` clean. If a removable plain value feeds a dep array, that's fine — only functions trip the rule.
+1. **The value/function is referenced in a `useEffect` (or other hook) dependency array.** The static `react-hooks/exhaustive-deps` lint rule can't see the compiler's runtime memoization, so it still demands a stable identity there. Wrapping a *function* used as a dep in `useCallback` (and the transitive closure it depends on) is required to keep `pnpm lint` clean. If a removable plain value feeds a dep array, that's fine — only functions trip the rule.
 2. **A `React.memo` re-render bailout on a hot, list-rendered component** (e.g. a recursive per-node canvas renderer). `React.memo` skips re-rendering on equal props — a *different* mechanism from the compiler's within-component memoization — so dropping it on an O(N) critical path is not behavior-preserving without runtime perf validation. Rare; justify in a comment.
 3. **The compiler genuinely cannot compile a function** (escape hatch). Add the `"use no memo"` directive at the top of that function body, or the existing `eslint-disable react-compiler/react-compiler` pattern, and keep the manual memoization it needs.
 
-**Gate:** `eslint-plugin-react-compiler` (runs in `bun run lint` / CI) is the enforcement gate — it flags both compiler bailouts and `react-compiler/react-compiler` violations. `react-doctor` (`bun run doctor`) also surfaces `react-doctor/react-compiler-no-manual-memoization`, but as a **warning** only (React Compiler rules are downgraded to warn in `react-doctor.config.json`; `bun run doctor` fails only on error-tier Security/Correctness diagnostics). A new component that ships `useMemo`/`useCallback`/`memo` outside the three exceptions above is drift — remove the memoization. Full detail: [`docs/reference/react-compiler.md`](docs/reference/react-compiler.md).
+**Gate:** `eslint-plugin-react-compiler` (runs in `pnpm lint` / CI) is the enforcement gate — it flags both compiler bailouts and `react-compiler/react-compiler` violations. `react-doctor` (`pnpm doctor`) also surfaces `react-doctor/react-compiler-no-manual-memoization`, but as a **warning** only (React Compiler rules are downgraded to warn in `react-doctor.config.json`; `pnpm doctor` fails only on error-tier Security/Correctness diagnostics). A new component that ships `useMemo`/`useCallback`/`memo` outside the three exceptions above is drift — remove the memoization. Full detail: [`docs/reference/react-compiler.md`](docs/reference/react-compiler.md).
 
 ---
 
@@ -286,37 +286,37 @@ Note: `@core/framework-schema` is a dependency of both `@core/page-tree` (for `F
 - **Names must be honest.** A function called `renderPage` renders a page.
 - **One reason per module.** Files in `server/{repositories,handlers/cms,auth,plugins,publish}/*` and `src/core/*` are organized by responsibility — keep them that way.
 - **No dead code.** Unused exports, parameters, types, files: delete them. `fallow` (`npx fallow dead-code`) is the canonical tool; `knip`, `madge`, and `jscpd` remain available for second-opinion checks.
-- **Health checks with coverage.** `bun run fallow:health` runs `bun test --coverage` and feeds the result to `fallow health --coverage`. Run before deciding whether a hotspot needs more tests vs. more refactoring.
+- **Health checks with coverage.** `pnpm fallow:health` runs `pnpm test:coverage` and feeds the result to `fallow health --coverage`. Run before deciding whether a hotspot needs more tests vs. more refactoring.
 - **No `any` to escape a type problem.** Fix the type.
 - **No commented-out code.** Git remembers.
 - **Validate at the boundary, trust inside.** Don't `as Foo` your way past it.
 - **Schemas are source of truth.** `type Foo = Static<typeof FooSchema>` — never a parallel `interface Foo` next to `FooSchema`.
 - **Architecture tests are first-class.** When you change a structural rule (folder layout, allowed imports, banned APIs, design tokens), update the matching test in `src/__tests__/architecture/`.
 - **Documentation tracks code.** When you change code that a doc describes, update the doc in the same change. Doc rules: [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
-- **At the end of the task, your own changes must pass `bun test`, `bun run build`, and `bun run lint`.** Verification is an end-of-task gate, not a per-edit ritual.
+- **At the end of the task, your own changes must pass `pnpm test`, `pnpm build`, and `pnpm lint`.** Verification is an end-of-task gate, not a per-edit ritual.
 
 ## Tooling rules
 
-- Always use `bun` (not `npm` / `pnpm` / `yarn`) for installs, scripts, and tests.
-- Lockfile is `bun.lock`. Do not introduce `package-lock.json` or `yarn.lock`.
-- Server scripts run with `bun --watch server/index.ts`. Frontend dev runs with `vite`.
-- Run the full stack locally with `bun run dev` (defaults to SQLite at `.tmp/dev.db` — no external dependencies; runs `bun install --frozen-lockfile` first, so a pull never leaves a stale `node_modules`) or `docker compose up --build` (everything in containers with Postgres). Set `DATABASE_URL=postgres://...` before `bun run dev` to use Postgres instead.
-- **`bun run build` runs `tsc -b && vite build`** — both type-checking and bundling. A change that runs in dev but fails `tsc` is not done.
+- Always use `pnpm` (not `npm` / `yarn` / `bun`) for installs, scripts, and tests. Node is the runtime; the supported version range is `engines.node` in `package.json`.
+- Lockfile is `pnpm-lock.yaml`. Do not introduce `package-lock.json`, `yarn.lock` or `bun.lock`. pnpm settings (blocked install scripts, 7-day `minimumReleaseAge`) live in `pnpm-workspace.yaml`.
+- Server scripts run with `tsx watch server/index.ts`. Frontend dev runs with `vite`.
+- Run the full stack locally with `pnpm dev` (defaults to SQLite at `.tmp/dev.db` — no external dependencies; pnpm re-installs before any script when `node_modules` is stale, via `verifyDepsBeforeRun`, so a pull never leaves a stale install) or `docker compose up --build` (everything in containers with Postgres). Set `DATABASE_URL=postgres://...` before `pnpm dev` to use Postgres instead.
+- **`pnpm build` runs `tsc -b && vite build`** — both type-checking and bundling. A change that runs in dev but fails `tsc` is not done.
 
 ## Verification
 
 ```sh
-bun install
-bun run build         # tsc -b && vite build
-bun test
-bun run lint
+pnpm install
+pnpm build         # tsc -b && vite build
+pnpm test
+pnpm lint
 ```
 
 ### When to run
 
-Run verification **once, at the end of the task**, before declaring work complete. You do not need to run `bun test` / `bun run build` / `bun run lint` after every edit — that wastes time. Make your changes, then verify.
+Run verification **once, at the end of the task**, before declaring work complete. You do not need to run `pnpm test` / `pnpm build` / `pnpm lint` after every edit — that wastes time. Make your changes, then verify.
 
-Use `bun run build` and `bun test` for any non-trivial change. Add `bun run lint` if you touched `.ts`/`.tsx` files.
+Use `pnpm build` and `pnpm test` for any non-trivial change. Add `pnpm lint` if you touched `.ts`/`.tsx` files.
 
 ### Parallel sessions and pre-existing failures
 

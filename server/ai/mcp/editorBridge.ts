@@ -166,8 +166,8 @@ export function createEditorBridgeStream(
       else signal.addEventListener('abort', cleanup, { once: true })
     },
     cancel() {
-      // Bun cancels the response body when the browser tab/context closes, but
-      // that transport cancellation does not abort the server Request signal.
+      // The runtime cancels the response body when the browser tab/context closes, but
+      // that transport cancellation need not abort the server Request signal.
       // Tear down the heartbeat + registry entry from either lifecycle signal.
       closeStream?.()
       closeStream = null

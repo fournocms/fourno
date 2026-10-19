@@ -29,7 +29,7 @@
  * One allowlisted directory, for the same reason:
  *
  *   - `src/core/plugin-sdk/cli/` — the `instatic-plugin` CLI. An executable
- *     entry point that always runs under Bun, never reaches a browser bundle,
+ *     entry point that always runs under Node, never reaches a browser bundle,
  *     and is deliberately kept out of the SDK barrel. Its pack-compile
  *     environment side-effect-imports `@modules/base` to populate the module
  *     registry, exactly as `server/` does — the tool at the top of the stack

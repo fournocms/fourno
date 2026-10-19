@@ -111,7 +111,7 @@ function getDOMPurify(): DOMPurifyRuntime | null {
 
 /**
  * Regex HTML strip used ONLY when no DOMPurify runtime is available (one-off
- * scripts; browser + Bun server both configure DOMPurify).
+ * scripts; browser + Node server both configure DOMPurify).
  *
  * Three stages, each looped to a fixpoint with a single literal regex — the
  * exact do-while-until-stable form CodeQL recognises as a complete sanitizer
@@ -210,7 +210,7 @@ export function sanitizeRichtext(
   if (!str.trim()) return ''
 
   // DOMPurify requires a live DOM-backed runtime. The browser has one
-  // naturally; the Bun server installs an explicit runtime in
+  // naturally; the Node server installs an explicit runtime in
   // `server/richtextSanitizer.ts`. One-off scripts that do neither get the
   // conservative plain-text fallback.
   const purifier = getDOMPurify()
@@ -271,7 +271,7 @@ const SVG_CONFIG: Config = {
 /**
  * Sanitise an inline-SVG markup string for safe inclusion in published HTML
  * and the editor canvas. Returns `''` when no DOMPurify runtime is available
- * (one-off scripts) — the browser and the Bun publish server both configure
+ * (one-off scripts) — the browser and the Node publish server both configure
  * one, so production paths always sanitise rather than drop.
  *
  * Call at every write path that stores an SVG prop (editor onChange, importer)

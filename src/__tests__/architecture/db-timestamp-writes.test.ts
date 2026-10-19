@@ -8,7 +8,7 @@
  *      SQLite `current_timestamp` writes `YYYY-MM-DD HH:MM:SS`, which V8 parses
  *      as local time, sorts before the ISO `T` form, and compares wrongly
  *      against a bound ISO cutoff — and only on SQLite installs outside UTC,
- *      so a UTC `bun test` never notices.
+ *      so a UTC `pnpm test` never notices.
  *   2. A DDL `default current_timestamp` (the three tables that predate the
  *      ISO `strftime` default, plus `schema_migrations`) may only sit on a
  *      column ending in `_at`: that suffix is what the SQLite adapter's

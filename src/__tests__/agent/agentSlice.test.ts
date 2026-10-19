@@ -1031,7 +1031,7 @@ describe('conversation reset key-set', () => {
     useEditorStore.setState({
       isAgentStreaming: false,
       agentMessages: [{ id: 'm1', role: 'user', blocks: [{ kind: 'text', text: 'hi' }], timestamp: 1 }],
-      agentError: 'AI server is not running. Start it with: bun run dev',
+      agentError: 'AI server is not running. Start it with: pnpm dev',
       agentConversationId: 'conv-dirty',
       agentActiveCredentialId: 'cred-1',
       agentActiveModelId: 'model-1',

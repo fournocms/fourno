@@ -1,22 +1,22 @@
 # Server
 
-Deep dive on the server-side of Instatic — the Bun process, the router, the handlers, the auth model, the DB adapter, and how a request becomes a response.
+Deep dive on the server-side of Instatic — the Node process, the router, the handlers, the auth model, the DB adapter, and how a request becomes a response.
 
-The server is a single `Bun.serve` process that boots the DB, runs migrations, activates installed plugins, then accepts HTTP requests and dispatches them through an ordered route table. There are no separate service processes or message queues. The runtime entrypoint is `server/index.ts`; CPU-heavy image variants and plugin server code run in `Bun.Worker`s owned by this process.
+The server is a single Node process (`srvx` for HTTP, `ws` for WebSockets, behind the adapter in `server/runtime/httpServer.ts`) that boots the DB, runs migrations, activates installed plugins, then accepts HTTP requests and dispatches them through an ordered route table. There are no separate service processes or message queues. The runtime entrypoint is `server/index.ts`; CPU-heavy image variants and plugin server code run in `worker_threads` workers owned by this process.
 
 ---
 
 ## TL;DR
 
-- **Entrypoint:** `server/index.ts` (boots DB → migrations → role sync → plugin activation → `Bun.serve`). Its first act is `unsupportedBunWarning(Bun.version)` from `server/bunVersion.ts`: when the runtime is outside `SUPPORTED_BUN_RANGE` (a constant mirroring `engines.bun`, gated by `bunVersion.test.ts`) it logs one `[server]` warning and boots anyway. The dev launchers use the same module's `devStackBunError` and refuse a Bun older than 1.4.1.
+- **Entrypoint:** `server/index.ts` (boots DB → migrations → role sync → plugin activation → `startHttpServer`). Its first import is `server/runtime/cssModuleStub.ts` (the module registry pulls in editor components that import `*.module.css`, which Node cannot load); its first act is `unsupportedNodeWarning(process.versions.node)` from `server/nodeVersion.ts`: when the runtime is outside `SUPPORTED_NODE_RANGE` (a constant mirroring `engines.node`, gated by `nodeVersion.test.ts`) it logs one `[server]` warning and boots anyway.
 - **Router:** `server/router.ts` — ordered route table, first-match wins. Each route is a `tryServeX(req, runtime, url, pathname)` function returning `Response | null`.
 - **CMS API:** every `/admin/api/cms/*` request goes through `server/handlers/cms/index.ts`, which runs a CSRF origin check and dispatches to per-resource handler groups.
 - **Auth:** session cookie (`SESSION_COOKIE_NAME`) → `findUserBySessionHash` → `requireCapability(req, db, 'site.read')`. Every state-changing handler starts with one of these guards.
-- **DB:** one `DbClient` interface (`server/db/client.ts`) — tagged-template callable returning `{ rows, rowCount }`. Two adapters: `postgres.ts` (via `Bun.sql`) and `sqlite.ts` (via `bun:sqlite`). Selected by `DATABASE_URL`.
+- **DB:** one `DbClient` interface (`server/db/client.ts`) — tagged-template callable returning `{ rows, rowCount }`. Two adapters: `postgres.ts` (via `postgres`, porsager) and `sqlite.ts` (via `better-sqlite3`). Selected by `DATABASE_URL`.
 - **Repositories** (`server/repositories/`) hold all SQL. Handlers never write SQL directly.
 - **Registry** (`server/registry/`) is the only code that talks to the npm registry, npm's downloads API and OSV: a TTL-cached client behind `handlers/cms/registry.ts` (browse) and `publish/runtime/dependencyResolver.ts` (install). `NPM_REGISTRY_URL` selects the registry for both. See [`features/dependencies.md`](features/dependencies.md).
 - **Write policy** (`server/writePolicy/`) — pure per-capability diff validators (`validateSiteWriteDiff`, `validatePageWriteDiff`) shared by BOTH write transports: the HTTP save handler (`server/handlers/cms/siteDocument.ts`) and the collab relay's CRDT update guard (`server/collab/updateGuard.ts`). No DB, no HTTP — plain data in, verdict out.
-- **Plugins:** `server/plugins/runtime.ts` activates installed plugins at boot. Server entrypoints run in per-plugin Bun workers that host QuickJS-WASM (`server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts`, `server/plugins/quickjs/vm.ts`); module packs use `server/plugins/modulePackVm.ts` for server-side evaluation.
+- **Plugins:** `server/plugins/runtime.ts` activates installed plugins at boot. Server entrypoints run in per-plugin worker threads that host QuickJS-WASM (`server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts`, `server/plugins/quickjs/vm.ts`); module packs use `server/plugins/modulePackVm.ts` for server-side evaluation.
 - **Published pages and content rows** are served by `tryServePublicRoute`, which delegates resolution + render to `server/publish/publicRouter.ts`. A warm Layer B cache entry is served before any DB work; on a miss the live render reads the published `SiteDocument` from `site_snapshots` (stored once per publish, referenced by `data_row_versions.site_snapshot_id`, memoised per publish version). Uploads + admin SPA assets are served from disk by `tryServeUpload` and `tryServeStaticAsset`.
 
 ---
@@ -27,7 +27,7 @@ The server is a single `Bun.serve` process that boots the DB, runs migrations, a
 server/index.ts
     │
     ├─→ readServerConfig()                   ← env vars: PORT, DATABASE_URL, UPLOADS_DIR, STATIC_DIR, PUBLIC_ORIGIN, TRUSTED_PROXY_CIDRS, NPM_REGISTRY_URL
-    ├─→ configureNpmRegistryUrl(...)         ← server/registry/config.ts: one registry for browsing, resolving and bun install
+    ├─→ configureNpmRegistryUrl(...)         ← server/registry/config.ts: one registry for browsing, resolving and npm install
     │
     ├─→ createDbClient(DATABASE_URL)         ← server/db/index.ts
     │     │
@@ -45,13 +45,13 @@ server/index.ts
     │                                           debounced persistence, reset protocol
     ├─→ createCollabSocketLayer(relay)       ← server/collab/socket.ts: multiplexed
     │                                           y-protocols wire + awareness
-    ├─→ Bun.serve({ fetch: req => handleServerRequest(req, runtime),
-    │               websocket: collabSocket.handlers })
+    ├─→ startHttpServer({ fetch: (req, ctx) => handleServerRequest(req, runtime),
+    │                     realtime: collabSocket.handlers })
     │     (the co-editing socket `/admin/api/cms/site-socket` upgrades at this
     │      boundary — see server/collab/socket.ts; everything else goes
     │      through the router)
     │
-    └─→ collabSocket.setPublisher(server)    ← wire the collab fan-out to Bun pub/sub
+    └─→ collabSocket.setPublisher(server)    ← wire the collab fan-out to the adapter's topic pub/sub
 ```
 
 Boot is sequential and fail-fast. If migrations fail, the process exits. If a plugin's `activate` throws, the host logs `[plugin:<id>]` and continues — one bad plugin doesn't bring the server down.
@@ -71,7 +71,7 @@ It walks an ordered `routes` array of `RouteHandler` functions. Each handler ret
 **`HEAD` is normalised to `GET` before dispatch.** RFC 9110 §9.3.2 defines `HEAD` as identical to `GET` except that the server must not send content, so `handleServerRequest` rewrites the method once and hands the same request to the table. That means:
 
 - Route handlers gate on `GET` only — never write `req.method !== 'GET' && req.method !== 'HEAD'`. The dispatcher already guarantees a `HEAD` arrives as a `GET`.
-- Dropping the body is `Bun.serve`'s job. A `HEAD` response ships the headers a `GET` would have produced, `content-length` included, with no content — handlers stay body-agnostic.
+- Dropping the body is the HTTP adapter's job. A `HEAD` response ships the headers a `GET` would have produced, `content-length` included, with no content — handlers stay body-agnostic.
 - A method a route genuinely doesn't support still gets its `405`; only `HEAD` is folded into `GET`.
 
 Before this normalisation existed, `HEAD` matched no `GET`-gated route and fell through to the terminal JSON `404`, so uptime monitors and link checkers — which probe with `HEAD` by convention — reported healthy published pages as missing ([#306](https://github.com/CoreBunch/Instatic/issues/306)).
@@ -92,7 +92,7 @@ const routes: readonly RouteHandler[] = [
   tryServeModuleJsAsset,           // /_instatic/module-js/*  → handlers/cms/moduleJs.ts
   tryServePublicForm,              // /_instatic/form/*       → forms/handler.ts
   tryServeRuntimeAsset,            // /_instatic/assets/*     → published runtime assets
-  tryServeRuntimePackageNamespace, // /_instatic/runtime/cache/<hash>/<...> → bun install workspace
+  tryServeRuntimePackageNamespace, // /_instatic/runtime/cache/<hash>/<...> → npm install workspace
   tryServeSiteCssNamespace,        // /_instatic/css/*        → hashed CSS bundles
   tryServeMediaRedirect,           // /_instatic/media/<adapterId>/<path> → 302 to signed read URL
   tryServeStaticAsset,             // /assets/* → dist/ (admin app)
@@ -130,13 +130,13 @@ This prevents an unknown path under a known namespace from accidentally matching
 
 ### Cross-cutting middleware
 
-`Bun.serve.fetch` in `server/index.ts` wraps every request with:
+The fetch handler in `server/index.ts` wraps every request with:
 
 1. **CORS preflight** — `OPTIONS` returns 204 immediately with `corsHeaders(origin)`. ACAO is only set when the request's `Origin` is in `DEV_ORIGIN_ALLOWLIST` (production is same-origin behind Caddy, so no ACAO is needed).
 2. **Socket IP stamping** — `stampSocketIp(req, ...)` writes the actual socket peer address onto the request so downstream `clientIp(req)` can ignore spoofed forwarding headers on direct requests. `X-Forwarded-For` is used only when the socket peer matches `TRUSTED_PROXY_CIDRS`; the chain is walked from right to left and the nearest untrusted IP becomes the client IP.
 3. **Top-level error catch** — any error that escapes `handleServerRequest` is logged with `console.error('[server] Unhandled request error:', err)` and responded to with a generic `500 Internal server error`. The raw error message is **never** echoed to the client (it can leak SQL fragments, absolute paths, etc.).
 
-`idleTimeout: 0` is set explicitly: the agent endpoint streams NDJSON over Claude's thinking gaps, which can easily exceed Bun's 10s default.
+`requestTimeout: 0` is set explicitly on the Node server: the agent endpoint streams NDJSON over Claude's thinking gaps, and admin uploads can run for minutes, both well past Node's default request timeout. Header reads stay bounded by `headersTimeout`, and WebSockets get a 30 s ping so a vanished client releases its relay docs.
 
 ---
 
@@ -455,8 +455,8 @@ Same code, both engines.
 
 ### The two adapters
 
-- **`server/db/postgres.ts`** wraps `Bun.sql` (native Bun Postgres client). `rowCount` is read from `result.count` (Bun's CommandComplete affected-row count) rather than `result.length`, which is always 0 for non-RETURNING writes.
-- **`server/db/sqlite.ts`** wraps `bun:sqlite`, with five custom behaviors:
+- **`server/db/postgres.ts`** wraps `postgres` (porsager / postgres.js). `rowCount` is read from `result.count` (the CommandComplete affected-row count) rather than `result.length`, which is always 0 for non-RETURNING writes.
+- **`server/db/sqlite.ts`** wraps `better-sqlite3`, with five custom behaviors (plus a prepared-statement cache keyed by SQL text):
   1. `toBindable(value)` converts JS values (objects, dates, booleans, `Uint8Array`) to SQLite-bindable types.
   2. On read, any column ending in `_json` whose value is a non-empty string is auto-`JSON.parse`d.
   3. On read, any column ending in `_at` holding SQLite's `YYYY-MM-DD HH:MM:SS` stamp is rewritten to ISO 8601 UTC. Repositories bind `nowIso()` rather than stamping with `current_timestamp`, so only three legacy DDL defaults can still write that shape; V8 would otherwise parse it as local time.
@@ -554,7 +554,7 @@ Server-side publishing helpers live in `server/publish/`:
 | `frontendInjections.ts`           | Plugin-contributed frontend scripts injected into published HTML.   |
 | `mediaPresentation.ts`            | `<picture>` / `<img srcset>` materialization at publish time.       |
 | `mediaPrefetch.ts`, `loopPrefetch.ts` | Pre-warm caches needed by published pages.                      |
-| `runtime/packageServer.ts`        | Serve per-site `bun install` workspace under `/_instatic/runtime/cache/`. |
+| `runtime/packageServer.ts`        | Serve per-site `npm install` workspace under `/_instatic/runtime/cache/`. |
 
 Plus the hole endpoint at `server/handlers/cms/hole.ts` — registered in the router BEFORE `tryServePublicRoute` so `/_instatic/hole/*` requests never fall through to slug resolution.
 
@@ -614,7 +614,7 @@ Three static handlers, in order:
 
 3. **If new SQL is needed,** add the function to the matching `server/repositories/<resource>.ts`. Do not write SQL inside the handler.
 
-4. **If new persisted shape is involved,** add the migration to both `migrations-pg.ts` and `migrations-sqlite.ts` with the same ID. JSON columns end in `_json`. Run `bun test src/__tests__/architecture/migration-parity.test.ts` and `db-json-column-naming.test.ts` to confirm.
+4. **If new persisted shape is involved,** add the migration to both `migrations-pg.ts` and `migrations-sqlite.ts` with the same ID. JSON columns end in `_json`. Run `pnpm test src/__tests__/architecture/migration-parity.test.ts` and `db-json-column-naming.test.ts` to confirm.
 
 5. **If client-side calls the endpoint,** add a TypeBox response schema (in `src/core/persistence/responseSchemas.ts` for CMS endpoints, or alongside the caller) and fetch via the canonical `apiRequest(path, { schema })` from `@core/http`. Persistence-layer functions that inject their own `fetch` validate via `readEnvelope`.
 

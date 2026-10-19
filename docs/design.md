@@ -449,7 +449,7 @@ Rules:
 - No `lucide-react`, `heroicons`, `phosphor-icons`, or other catalogs. Gated by `no-third-party-icons.test.ts`.
 - No inline SVG strings in components. Gated by `direct-icon-imports.test.ts`.
 - Icons in the panel rail or equivalent identity surfaces are colored via `--rail-icon-color` (which is derived from `--rail-icon-tint`). Don't hardcode `color` on the icon itself.
-- Adding a new icon: import it normally, then run `bun run icons:sync`. The vendored set is gated for freshness by `vendor-icons-fresh.test.ts`.
+- Adding a new icon: import it normally, then run `pnpm icons:sync`. The vendored set is gated for freshness by `vendor-icons-fresh.test.ts`.
 
 The full set (~4,053 icons) lives in the sibling repo `../pixel-art-icons`; the CMS vendors only the icons it actually imports.
 

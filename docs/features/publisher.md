@@ -58,7 +58,7 @@ server/publish/
 ├── mediaPrefetch.ts, loopPrefetch.ts — pre-warm caches needed by the renderer
 ├── republish.ts                    — bulk re-publish on site-level changes
 ├── publishScheduler.ts             — scheduled publish jobs
-├── runtime/                        — per-site bun install workspace serving
+├── runtime/                        — per-site npm install workspace serving
 └── loopRuntime.ts                  — loop runtime asset
 ```
 
@@ -380,7 +380,7 @@ Because `serializeCsp` sorts, the same plugins + adapters always emit a **byte-i
 
 ## Server-side wrappers
 
-`src/core/publisher/` is pure (no Bun, no Node, no fs). The server wraps it.
+`src/core/publisher/` is pure (no Node, no fs). The server wraps it.
 
 | File                                            | Role                                                                |
 |-------------------------------------------------|---------------------------------------------------------------------|
@@ -404,7 +404,7 @@ Because `serializeCsp` sorts, the same plugins + adapters always emit a **byte-i
 | `server/publish/mediaPrefetch.ts`               | Collect every image/media-typed prop and every media-library background-image URL from the full render tree — including VC definition trees — via `walkRenderTree`, then batch-fetch matching `media_assets` rows into a `Map<publicPath, MediaAsset>` before render. Uses `MEDIA_ASSET_COLUMNS` and `mapMediaAssetRow` from `server/repositories/mediaAssetMapping.ts` (shared with the admin repository) so the published page and the admin panel always see one identical asset shape. |
 | `server/publish/loopPrefetch.ts`                | Collect every `base.loop` node from the full render tree — including VC definition trees — via `walkRenderTree`, fetch each source's items, and return a `Map<nodeId, ResolvedLoopData>` before render so the walker is purely synchronous. Also exports `canonicalRenderQuery(searchParams)` — strips all non-loop-pagination params from a URL's query, returning only `loop_<nodeId>_page` keys in sorted order (or `''` when none remain). Used by `publicRouter.ts` to normalise the Layer B cache key and Layer A fast-path eligibility. |
 | `server/publish/renderTreeWalk.ts`              | `walkRenderTree(nodes, rootNodeId, site, onNode)` — visits every node that contributes to a rendered page: all page-tree nodes reachable from `rootNodeId`, plus all nodes inside each referenced VC's definition tree (recursively, cycle-guarded by a `Set<vcId>`). Used by both `mediaPrefetch.ts` and `loopPrefetch.ts` so their traversal logic can't drift apart. |
-| `server/publish/runtime/packageServer.ts`       | Serve per-site `bun install` workspace under `/_instatic/runtime/cache/`. |
+| `server/publish/runtime/packageServer.ts`       | Serve per-site `npm install` workspace under `/_instatic/runtime/cache/`. |
 | `server/publish/loopRuntime.ts`                 | The loop runtime asset (small JS shim used by certain loop variants).|
 | `server/handlers/cms/hole.ts`                   | `GET /_instatic/hole-runtime.js` (serves `HOLE_RUNTIME_JS`) and `GET /_instatic/hole/<nodeId>?v=<publishVersion>&u=<page-url>` (renders a node subtree at request time for Layer C islands). |
 | `server/handlers/cms/moduleJs.ts`               | `GET /_instatic/module-js/<moduleId>.js?v=<publishVersion>` — serves a module's render-emitted JS from the memoised site map; validates the untrusted moduleId segment; 404 unknown; `text/javascript`; `cache-control: public, max-age=3600`. |
@@ -445,7 +445,7 @@ publishDraftSite (server/publish/publishSite.ts)
     ├─→ load draft site shell + all page-table rows + all VC rows
     ├─→ build runtime scripts + runtime package importmap
     ├─→ build EVERYTHING expensive first, outside any transaction — dependency
-    │     cache (`bun install`), importmap, per-page esbuild runtime builds.
+    │     cache (`npm install`), importmap, per-page esbuild runtime builds.
     │     The SQLite adapter serializes all transactions through one chain, so
     │     this work inside the transaction would stall every concurrent write.
     ├─→ short transaction: write the SiteDocument ONCE into site_snapshots

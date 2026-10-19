@@ -7,7 +7,7 @@
  * AbortController, timers, crypto.subtle, fetch) are pure-JS string shims; the
  * API + runners layer is authored as real TypeScript under `src/` and bundled
  * to the committed artifact `generated/pluginBootstrap.ts` by
- * `scripts/sync-plugin-bootstrap.ts` (regenerate with `bun run bootstrap:sync`).
+ * `scripts/sync-plugin-bootstrap.ts` (regenerate with `pnpm bootstrap:sync`).
  *
  * Execution order matters: polyfills must be defined before the API layer
  * references them (URL, TextEncoder, AbortController, crypto.subtle, fetch),

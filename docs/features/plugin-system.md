@@ -2,18 +2,18 @@
 
 End-to-end description of the plugin system: what plugins are, how they ship, how they run sandboxed, what they can do, and how to author them.
 
-A plugin is a zip package containing a `plugin.json` manifest and one or more bundled JavaScript entrypoints. The SDK CLI usually authors that zip from `instatic-plugin.config.ts`, then the CMS host loads installed plugins at boot. Each server entrypoint runs in its own Bun `Worker`, and that worker hosts a **QuickJS-WASM sandbox** — no Node, no Bun, no host file system, no environment variables, no network unless explicitly granted. Plugins reach the CMS through SDK surfaces scoped to where they run: `api.plugin.*`, `api.cms.*`, `api.editor.*`, and `api.dashboard.*`.
+A plugin is a zip package containing a `plugin.json` manifest and one or more bundled JavaScript entrypoints. The SDK CLI usually authors that zip from `instatic-plugin.config.ts`, then the CMS host loads installed plugins at boot. Each server entrypoint runs in its own worker thread, and that worker hosts a **QuickJS-WASM sandbox** — no Node, no Bun, no host file system, no environment variables, no network unless explicitly granted. Plugins reach the CMS through SDK surfaces scoped to where they run: `api.plugin.*`, `api.cms.*`, `api.editor.*`, and `api.dashboard.*`.
 
 ---
 
 ## TL;DR
 
 - **Package shape:** the CLI reads `instatic-plugin.config.ts` and emits a zip containing `plugin.json` plus entrypoint bundles (`server/index.js`, `editor/index.js`, admin app bundles, `modules/index.js`, `frontend/*.js`, optional `pack/site.json`).
-- **Runtime:** each server plugin has a Bun `Worker` (`server/plugins/pluginWorker.ts`) that owns one QuickJS VM (`server/plugins/quickjs/vm.ts`). Canvas module packs run in a separate QuickJS VM on the server (`server/plugins/modulePackVm.ts`) and as ESM in the browser editor. No host APIs leak into QuickJS.
+- **Runtime:** each server plugin has a worker thread (`server/plugins/pluginWorker.ts`) that owns one QuickJS VM (`server/plugins/quickjs/vm.ts`). Canvas module packs run in a separate QuickJS VM on the server (`server/plugins/modulePackVm.ts`) and as ESM in the browser editor. No host APIs leak into QuickJS.
 - **SDK:** every API call goes through `api` — `api.plugin.*` for metadata + logging, `api.cms.*` for routes, storage, hooks, loops, settings, schedule, content, and media; `api.editor.*` for editor extensions; `api.dashboard.*` for dashboard widgets.
 - **Lifecycle:** `install` → `activate` → (optionally `deactivate` / `migrate`) → `uninstall`. Each hook is async-capable and isolated; if one throws, the host rolls back and parks the plugin in `error`.
 - **Permissions:** declared in `instatic-plugin.config.ts` / `plugin.json`, approved by the site owner at install time, enforced by the SDK at runtime. Outbound network also requires a `networkAllowedHosts` allowlist.
-- **CLI:** `bun instatic-plugin init|lint|build|dev` covers scaffolding, manifest/source validation, bundle build, zip creation, and hot-sync to a running CMS.
+- **CLI:** `pnpm instatic-plugin init|lint|build|dev` covers scaffolding, manifest/source validation, bundle build, zip creation, and hot-sync to a running CMS.
 - **Source of truth for permissions:** `src/core/plugin-sdk/capabilities.ts`. Source of truth for manifest shape: `src/core/plugins/manifest.ts`.
 
 ---
@@ -32,7 +32,7 @@ A plugin is a zip package containing a `plugin.json` manifest and one or more bu
 | QuickJS VM factory (server entrypoint)| `server/plugins/quickjs/vm.ts`       |
 | Sandbox host (module pack VMs) | `server/plugins/modulePackVm.ts`          |
 | VM bootstrap source (typed)    | `server/plugins/quickjs/bootstrap/src/`   |
-| VM bootstrap generated artifacts | `server/plugins/quickjs/bootstrap/generated/` (run `bun run bootstrap:sync`) |
+| VM bootstrap generated artifacts | `server/plugins/quickjs/bootstrap/generated/` (run `pnpm bootstrap:sync`) |
 | Host RPC dispatcher            | `server/plugins/host/apiDispatch.ts`, `server/plugins/host/rpc.ts` |
 | Gated outbound fetch + SSRF guards | `server/plugins/host/network.ts`       |
 | Byte-safe body wire format     | `server/plugins/protocol/bodyEncoding.ts` |
@@ -76,11 +76,11 @@ pack/site.json           <- Visual Components / pages / classes / layouts pack (
 assets/                  <- static assets shipped in the zip (optional)
 ```
 
-`bun instatic-plugin build` produces this runtime layout from `instatic-plugin.config.ts`. Bundle formats are intentionally different per surface:
+`pnpm instatic-plugin build` produces this runtime layout from `instatic-plugin.config.ts`. Bundle formats are intentionally different per surface:
 
 | Bundle | Format | Loaded by |
 |---|---|---|
-| `server/index.js` | IIFE facade assigning `globalThis.__plugin_exports` | Bun worker → QuickJS VM |
+| `server/index.js` | IIFE facade assigning `globalThis.__plugin_exports` | Worker thread → QuickJS VM |
 | `modules/index.js` | ESM default export | Browser editor via dynamic import; server QuickJS after `server/plugins/modulePackVm.ts` rewrites the default export to `globalThis.__module_pack` |
 | `editor/index.js` | ESM | Unsandboxed admin window via dynamic import |
 | Admin app bundles | ESM | Unsandboxed admin window via `adminPages[].content.kind === "app"` |
@@ -196,7 +196,7 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
 | Pack `classes[].id`         | Namespaced under the plugin ID                             | `acme.workflow/hero-root` |
 | Pack `layouts[].id`         | Namespaced under the plugin ID                             | `acme.workflow/hero-section` |
 
-`parsePluginManifest` validates all of these and produces a clear error message. `bun instatic-plugin lint` runs the same checks before upload. Coherence checks also enforce permission-dependent shape:
+`parsePluginManifest` validates all of these and produces a clear error message. `pnpm instatic-plugin lint` runs the same checks before upload. Coherence checks also enforce permission-dependent shape:
 
 - `entrypoints.editor` and app-kind admin pages require `editor.code`.
 - `entrypoints.modules` requires `modules.register`.
@@ -382,7 +382,7 @@ is a build artifact, not the authoring surface.
   …) are declared in `globals.d.ts`.
 - **Bundled** to committed IIFE-string artifacts under
   `server/plugins/quickjs/bootstrap/generated/` by `scripts/sync-plugin-bootstrap.ts`
-  (via `Bun.build`). The shared `boundary.ts` is inlined into both — one
+  (via esbuild). The shared `boundary.ts` is inlined into both — one
   source-level definition, no divergent inline copies.
 - **Consumed** by `bootstrap/index.ts` (concatenated after the polyfill shims for
   the full-plugin VM) and `modulePackVm.ts` (module-pack VM).
@@ -390,8 +390,8 @@ is a build artifact, not the authoring surface.
 **Regenerate after editing anything under `bootstrap/src/`:**
 
 ```sh
-bun run bootstrap:sync     # rewrite the generated artifacts
-bun run bootstrap:check    # CI-style drift check (no writes)
+pnpm bootstrap:sync     # rewrite the generated artifacts
+pnpm bootstrap:check    # CI-style drift check (no writes)
 ```
 
 The architecture gate `src/__tests__/architecture/plugin-bootstrap-fresh.test.ts`
@@ -810,7 +810,7 @@ const result = await api.cms.media.upsert({
 // Store result.asset.id in the content's media field.
 ```
 
-Remote sources additionally require `network.outbound`. The URL must use HTTPS and every redirect host must match `networkAllowedHosts`. The Bun host downloads through the shared DNS-pinned SSRF guard and caps the response at 50 MB.
+Remote sources additionally require `network.outbound`. The URL must use HTTPS and every redirect host must match `networkAllowedHosts`. The Node host downloads through the shared DNS-pinned SSRF guard and caps the response at 50 MB.
 
 Plugins can also promote a bundled file into managed media without network authority:
 
@@ -999,14 +999,14 @@ Full descriptions and labels live in `src/core/plugin-sdk/capabilities.ts` — t
 
 ## CLI workflow
 
-`bun instatic-plugin <command>` runs the SDK CLI at `src/core/plugin-sdk/cli/` (`bun run instatic-plugin <command>` works too inside this repo). The CLI's primary input is `instatic-plugin.config.ts`.
+`pnpm instatic-plugin <command>` runs the SDK CLI at `src/core/plugin-sdk/cli/` (`pnpm instatic-plugin <command>` works too inside this repo). The CLI's primary input is `instatic-plugin.config.ts`.
 
 ```sh
-bun instatic-plugin init acme.hero    # scaffold a module plugin
-bun instatic-plugin init acme.seo --kind content-editor
-bun instatic-plugin lint              # validate config + manifest + sources + bundles
-bun instatic-plugin build             # produce dist/ + .plugin.zip
-bun instatic-plugin dev               # watch + sync into a running CMS
+pnpm instatic-plugin init acme.hero    # scaffold a module plugin
+pnpm instatic-plugin init acme.seo --kind content-editor
+pnpm instatic-plugin lint              # validate config + manifest + sources + bundles
+pnpm instatic-plugin build             # produce dist/ + .plugin.zip
+pnpm instatic-plugin dev               # watch + sync into a running CMS
 ```
 
 The default scaffold kind is `module` (one canvas module). `--kind content-editor` scaffolds a server plugin that subscribes to content events and uses `api.cms.content.*`.
@@ -1056,9 +1056,9 @@ The build script auto-wires entrypoints from source folders: `server/index.{ts,j
 When running inside the instatic monorepo, the CLI auto-detects the host's `uploads/` by walking up the tree. From a separate plugin repo:
 
 ```sh
-INSTATIC_UPLOADS_DIR=../instatic/uploads bun instatic-plugin dev
+INSTATIC_UPLOADS_DIR=../instatic/uploads pnpm instatic-plugin dev
 # or
-bun instatic-plugin dev --uploads ../instatic/uploads
+pnpm instatic-plugin dev --uploads ../instatic/uploads
 ```
 
 First install still goes through the admin UI (`/admin/plugins` → Upload Plugin) so the owner approves permissions. Every `instatic-plugin dev` rebuild after that flows in without another upload.
@@ -1071,7 +1071,7 @@ First install still goes through the admin UI (`/admin/plugins` → Upload Plugi
 
 1. **Scaffold:**
    ```sh
-   bun instatic-plugin init my-plugin
+   pnpm instatic-plugin init my-plugin
    cd my-plugin
    ```
 2. **Edit `instatic-plugin.config.ts`.** Pick a namespaced ID (`vendor.product`), declare only the permissions you use, and add resources, settings, admin pages, modules, frontend assets, content access, or packs there.
@@ -1079,14 +1079,14 @@ First install still goes through the admin UI (`/admin/plugins` → Upload Plugi
 4. **Use SDK builders.** Import from `@instatic/plugin-sdk` for `definePlugin`, `permissions`, `defineModule`, `definePack`, controls, and types. The CLI emits `plugin.json` and runtime bundles into `dist/`.
 5. **Lint:**
    ```sh
-   bun instatic-plugin lint
+   pnpm instatic-plugin lint
    ```
 6. **Build:**
    ```sh
-   bun instatic-plugin build
+   pnpm instatic-plugin build
    ```
 7. **Install via admin UI** (`/admin/plugins` → Upload Plugin), approve permissions.
-8. **Iterate** with `bun instatic-plugin dev`.
+8. **Iterate** with `pnpm instatic-plugin dev`.
 
 ### Cookbook: a server route + storage collection
 
@@ -1172,7 +1172,7 @@ export default definePlugin({
   - `src/core/plugins/events.ts` — `PluginEventSchema`, `PluginEvent` type, `PLUGIN_EVENT_KINDS`
   - `src/core/plugins/` — host-side runtime
   - `server/plugins/runtime.ts` — boot-time plugin activation
-  - `server/plugins/pluginWorker.ts` — Bun worker bridge that hosts QuickJS per plugin
+  - `server/plugins/pluginWorker.ts` — Worker-thread bridge that hosts QuickJS per plugin
   - `server/plugins/host/workerPool.ts` — per-plugin worker lifecycle and RPC timeouts
   - `server/plugins/host/apiDispatch.ts` — centralized host-side RPC permission enforcement
   - `server/plugins/protocol/apiCallSchema.ts` — RPC target schemas
@@ -1188,7 +1188,7 @@ export default definePlugin({
   - `server/plugins/protocol/targets.ts` — `TARGET_PERMISSIONS` map (SSOT for RPC target→permission pairs; consumed by both the host dispatcher and VM bootstrap)
   - `server/plugins/quickjs/vm.ts` — server entrypoint sandbox (QuickJS VM factory)
   - `server/plugins/quickjs/bootstrap/src/` — bootstrap TypeScript source (authored, typed, lintable)
-  - `server/plugins/quickjs/bootstrap/generated/` — committed bootstrap artifacts (regenerate with `bun run bootstrap:sync`)
+  - `server/plugins/quickjs/bootstrap/generated/` — committed bootstrap artifacts (regenerate with `pnpm bootstrap:sync`)
   - `scripts/sync-plugin-bootstrap.ts` — bundler that writes the generated artifacts
   - `server/plugins/modulePackVm.ts` — module pack VM constructor
   - `src/core/plugins/modulePackLoader.ts` — module pack lifecycle coordinator (activate, deactivate, reset, VM tracking)
@@ -1212,7 +1212,7 @@ export default definePlugin({
   - `src/__tests__/architecture/plugin-secrets-never-leak.test.ts`
   - `src/__tests__/architecture/no-plugin-tab-shells.test.ts`
   - `src/__tests__/architecture/sandbox-crypto-bridge.test.ts`
-  - `src/__tests__/architecture/plugin-bootstrap-fresh.test.ts` — generated bootstrap artifacts match source; fails if `bun run bootstrap:sync` is needed
+  - `src/__tests__/architecture/plugin-bootstrap-fresh.test.ts` — generated bootstrap artifacts match source; fails if `pnpm bootstrap:sync` is needed
   - `src/__tests__/architecture/module-js-asset-route.test.ts`
   - `src/__tests__/architecture/media-storage-no-bytes-in-sandbox.test.ts`
   - `src/__tests__/architecture/media-storage-panel.test.ts`

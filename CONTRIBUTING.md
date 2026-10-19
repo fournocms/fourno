@@ -11,23 +11,23 @@ Thanks for helping improve Instatic. The project is pre-1.0, self-hosted, and in
 
 ## Local Development
 
-Use Bun for all project commands:
+Use pnpm for all project commands (Node.js 24.11 or newer; `corepack enable` gives you the pinned pnpm):
 
 ```sh
-bun install
-bun run dev
+pnpm install
+pnpm dev
 ```
 
 The default local database is SQLite at `.tmp/dev.db`. Postgres mode is selected by setting `DATABASE_URL`.
 
-`bun run dev` runs `bun install --frozen-lockfile` before starting the servers, so after a `git pull` it is the only command you need.
+`pnpm dev` re-installs first whenever `node_modules` is out of date with the lockfile, so after a `git pull` it is the only command you need.
 
 Useful checks:
 
 ```sh
-bun run build
-bun test
-bun run lint
+pnpm build
+pnpm test
+pnpm lint
 ```
 
 For Docker changes:

@@ -42,6 +42,28 @@ export function normalizePostgresRow<Row>(row: Row): Row {
 }
 
 /**
+ * Plain objects and arrays are bound as JSON, whatever the target column.
+ *
+ * postgres.js picks a parameter's serializer from the column type the server
+ * reports: `json`/`jsonb` columns get `JSON.stringify`, but a `text` column
+ * (several `*_json` columns are text on purpose) gets `'' + value`, which
+ * stores an array of blocks as `[object Object]`. The SQLite adapter already
+ * stringifies every plain object it is handed; `sql.json` gives Postgres the
+ * same rule, and the server casts the JSON value to `text` on assignment.
+ * Dates, buffers and postgres.js fragments are left alone.
+ */
+function bindJsonValues(sql: PostgresSql, values: readonly unknown[]): unknown[] {
+  return values.map((value) => (isPlainJsonValue(value) ? sql.json(value as postgres.JSONValue) : value))
+}
+
+function isPlainJsonValue(value: unknown): boolean {
+  if (Array.isArray(value)) return true
+  if (typeof value !== 'object' || value === null) return false
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === Object.prototype || prototype === null
+}
+
+/**
  * Affected-or-returned row count for a postgres.js result.
  *
  * postgres.js exposes the command's row count on the result array's `.count` property:
@@ -74,7 +96,7 @@ function wrapSql(sql: PostgresSql, pool: postgres.Sql | null): DbClient {
   ): Promise<DbResult<Row>> => {
     // postgres.js types rows as `object`; the DbClient contract leaves the
     // row shape to the caller's generic, exactly as the SQLite adapter does.
-    const rows = (await sql(strings, ...(values as postgres.ParameterOrFragment<never>[]))) as unknown as Row[]
+    const rows = (await sql(strings, ...(bindJsonValues(sql, values) as postgres.ParameterOrFragment<never>[]))) as unknown as Row[]
     return { rows: rows.map(normalizePostgresRow), rowCount: resultRowCount(rows) }
   }) as DbClient
 
@@ -83,7 +105,7 @@ function wrapSql(sql: PostgresSql, pool: postgres.Sql | null): DbClient {
     params?: unknown[],
   ): Promise<DbResult<Row>> => {
     const result = params !== undefined
-      ? await sql.unsafe(rawSql, params as postgres.ParameterOrJSON<never>[])
+      ? await sql.unsafe(rawSql, bindJsonValues(sql, params) as postgres.ParameterOrJSON<never>[])
       : await sql.unsafe(rawSql)
     const rows = result as unknown as Row[]
     return { rows: rows.map(normalizePostgresRow), rowCount: resultRowCount(rows) }

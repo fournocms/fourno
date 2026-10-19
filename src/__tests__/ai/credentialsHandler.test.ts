@@ -60,13 +60,26 @@ describe('AI credential handler', () => {
 
   it('creates the credential when auto-default seeding fails', async () => {
     const cookie = await harness.setupOwner()
-    await harness.db.unsafe(`
+    await harness.db.unsafe(
+      harness.db.dialect === 'postgres'
+        ? `
+      create function fail_ai_default_insert() returns trigger as $$
+      begin
+        raise exception 'default write failed';
+      end;
+      $$ language plpgsql;
+      create trigger fail_ai_default_insert
+      before insert on ai_defaults
+      for each row execute function fail_ai_default_insert();
+    `
+        : `
       create trigger fail_ai_default_insert
       before insert on ai_defaults
       begin
         select raise(abort, 'default write failed');
       end;
-    `)
+    `,
+    )
 
     console.warn = () => {}
     const res = await harness.ai('/admin/api/ai/credentials', {
@@ -93,7 +106,7 @@ describe('AI credential handler', () => {
       from ai_provider_credentials
       where provider_id = 'openai'
     `
-    expect(rows[0]?.count).toBe(1)
+    expect(Number(rows[0]?.count)).toBe(1)
   })
 
   it('does not auto-default an offline Ollama credential from fallback models', async () => {
@@ -131,7 +144,7 @@ describe('AI credential handler', () => {
       select count(*) as count
       from ai_defaults
     `
-    expect(rows[0]?.count).toBe(0)
+    expect(Number(rows[0]?.count)).toBe(0)
     expect(warnings.join('\n')).toContain('auto-default skipped')
   })
 

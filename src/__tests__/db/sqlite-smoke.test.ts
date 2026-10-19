@@ -1,7 +1,9 @@
 import { describe, test, expect } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 
-describe('SQLite adapter smoke test', () => {
+// SQLite-specific by design (0/1 booleans, integer counts); the Postgres adapter
+// is covered by `server/db/__tests__` and the dialect-neutral suites.
+describe.skipIf(process.env['DB'] === 'postgres')('SQLite adapter smoke test', () => {
   test('site → data_row draft round-trip with JSON columns', async () => {
     const { db, cleanup } = await createTestDb()
     try {

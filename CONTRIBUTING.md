@@ -1,6 +1,6 @@
-# Contributing To Instatic
+# Contributing To Fourno
 
-Thanks for helping improve Instatic. The project is pre-1.0, self-hosted, and intentionally moving quickly, so contributions should favor clean architecture over compatibility shims.
+Thanks for helping improve Fourno. The project is pre-1.0, self-hosted, and intentionally moving quickly, so contributions should favor clean architecture over compatibility shims.
 
 ## Start Here
 
@@ -33,12 +33,13 @@ pnpm lint
 For Docker changes:
 
 ```sh
-docker build -t instatic:local .
+docker build -t fourno:local .
 docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.build.yml config
 ```
 
 ## Pull Requests
 
+- Sign off every commit (`git commit -s`) to certify the [Developer Certificate of Origin](https://developercertificate.org/). Commit messages and PR titles are English and follow Conventional Commits.
 - Keep PRs focused on one problem.
 - Include tests for behavior changes.
 - Update docs in the same PR when behavior, configuration, public APIs, or deployment instructions change.
@@ -48,7 +49,7 @@ docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.build.yml co
 
 ## Project Conventions
 
-Instatic is pre-release. Do not add deprecation shims or backwards-compatibility wrappers for old internal APIs. If a shape is wrong, update the source of truth and all callers in the same change.
+Fourno is pre-release. Do not add deprecation shims or backwards-compatibility wrappers for old internal APIs. If a shape is wrong, update the source of truth and all callers in the same change.
 
 Important rules live in:
 

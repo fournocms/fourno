@@ -104,7 +104,7 @@ function renderArtifactFile(constName: string, bundled: string): string {
     ` * GENERATED FILE — DO NOT EDIT.\n` +
     ` *\n` +
     ` * Bundled from server/plugins/quickjs/bootstrap/src/ by\n` +
-    ` * scripts/sync-plugin-bootstrap.ts. Regenerate with \`bun run bootstrap:sync\`.\n` +
+    ` * scripts/sync-plugin-bootstrap.ts. Regenerate with \`pnpm bootstrap:sync\`.\n` +
     ` * The freshness gate (plugin-bootstrap-fresh.test.ts) fails if this drifts.\n` +
     ` */\n\n` +
     `export const ${constName} = ${JSON.stringify(bundled)}\n`
@@ -149,7 +149,7 @@ async function main(): Promise<number> {
       console.error(
         `[bootstrap:check] generated bootstrap is stale:\n` +
           stale.map((f) => `    - generated/${f}`).join('\n') +
-          `\n\n  Run \`bun run bootstrap:sync\` to regenerate.\n`,
+          `\n\n  Run \`pnpm bootstrap:sync\` to regenerate.\n`,
       )
       return 1
     }

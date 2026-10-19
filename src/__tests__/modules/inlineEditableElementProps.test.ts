@@ -13,7 +13,7 @@
  * The canvas seeds the content imperatively instead, via
  * `seedInlineEditableContent`.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { createRef } from 'react'
 import {
   inlineEditableElementProps,

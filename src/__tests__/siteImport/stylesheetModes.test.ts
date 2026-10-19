@@ -14,7 +14,7 @@
  *     repeated class fragments to ambient rules after renames.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import { buildImportPlan, applyConflictResolutions } from '@core/siteImport'
 import type { FileMap, ImportPlan } from '@core/siteImport'

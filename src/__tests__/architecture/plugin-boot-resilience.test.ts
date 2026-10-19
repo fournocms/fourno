@@ -26,13 +26,13 @@
  * No real DB, no worker, no filesystem I/O required for the functional layer.
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { listInstalledPlugins, setPluginLifecycleStatus } from '../../../server/repositories/plugins'
 import type { DbClient, DbResult } from '../../../server/db'
 
-const ROOT = join(import.meta.dir, '..', '..', '..')
+const ROOT = join(import.meta.dirname, '..', '..', '..')
 
 // ---------------------------------------------------------------------------
 // Minimal fake DB — only the queries used by repository functions under test.

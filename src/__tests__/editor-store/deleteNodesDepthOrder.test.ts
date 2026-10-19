@@ -8,7 +8,7 @@
  * deleted before parents, and a batch containing a parent plus its
  * descendants lands in ONE undo entry with no throw.
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { depthInTree } from '@site/store/slices/site/helpers'
 import { makeNode, makePage, makeSite, makeVC, makeVCNode, makeVCTree } from '../fixtures'

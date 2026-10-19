@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { FileTextSolidIcon } from 'pixel-art-icons/icons/file-text-solid'
 import { createDefaultSiteExplorerOrganization } from '@core/page-tree'
 import { buildStructuralExplorerTreeSection } from '@site/panels/SiteExplorerPanel/siteExplorerModel'

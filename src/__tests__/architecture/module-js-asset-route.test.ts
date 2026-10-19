@@ -6,7 +6,7 @@
  * swallowed by the public-slug lookup and 404 as a page miss instead of
  * being answered by the module-JS asset handler.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join, dirname } from 'node:path'

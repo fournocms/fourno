@@ -4,7 +4,8 @@
  * update application under REMOTE_ORIGIN, synced gating on step2, and the
  * reset flow. The real wire runs in collabRelayIntegration.test.ts.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
+import { setTimeout as sleep } from 'node:timers/promises'
 import * as Y from 'yjs'
 import * as encoding from 'lib0/encoding'
 import * as decoding from 'lib0/decoding'
@@ -194,13 +195,13 @@ describe('collab provider', () => {
     expect(provider.canSend()).toBe(true)
 
     // A ping goes out on the interval...
-    await Bun.sleep(35)
+    await sleep(35)
     const pings = socket.sent.filter((f) => decodeCollabFrame(f).frameType === FRAME_PING)
     expect(pings.length).toBeGreaterThan(0)
 
     // ...and with no inbound traffic at all, the provider stops claiming to be
     // connected rather than waiting for a close that may never come.
-    await Bun.sleep(80)
+    await sleep(80)
     expect(provider.status()).toBe('offline')
     expect(provider.canSend()).toBe(false)
     expect(seen).toContain('offline')
@@ -223,7 +224,7 @@ describe('collab provider', () => {
       }
     }, 10)
 
-    await Bun.sleep(150)
+    await sleep(150)
     clearInterval(answering)
     expect(provider.status()).toBe('connected')
     expect(provider.canSend()).toBe(true)
@@ -280,7 +281,7 @@ describe('collab provider', () => {
     binding.doc.getMap('meta').set('title', 'After destroy')
     socket.open()
     socket.emit(encodeCollabFrame('page:p1', 'gen-1', FRAME_RESET, new Uint8Array()))
-    await Bun.sleep(30)
+    await sleep(30)
 
     expect(socket.onopen).toBeNull()
     expect(socket.onmessage).toBeNull()

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { DataGridToolbar } from '@admin/pages/data/components/DataGrid/DataGridToolbar'
 import type { DataTable } from '@core/data/schemas'

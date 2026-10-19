@@ -15,7 +15,7 @@
  * These gates document and protect that fix.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import type { ComponentType } from 'react'
 import { useEditorStore } from '@site/store/store'
 import { registry } from '@core/module-engine'

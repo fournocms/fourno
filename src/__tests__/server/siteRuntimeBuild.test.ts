@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteDocument } from '@core/page-tree'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { buildRuntimePreviewDocument } from '../../../server/publish/runtime/previewRuntime'

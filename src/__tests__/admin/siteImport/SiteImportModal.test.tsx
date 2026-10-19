@@ -14,7 +14,7 @@
  * Store is reset in beforeEach; DOM is cleaned in afterEach.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React, { type ReactNode } from 'react'
 import { render, screen, cleanup, fireEvent, act, waitFor, within } from '@testing-library/react'
 import { strToU8, zipSync } from 'fflate'

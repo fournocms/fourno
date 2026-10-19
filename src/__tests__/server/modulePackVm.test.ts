@@ -6,7 +6,7 @@
  * inside QuickJS. Both export forms below have been seen in real plugin
  * bundles (module-pack plugins such as `acme.forms`) and must work.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createModulePackVm } from '../../../server/plugins/modulePackVm'
 import {
   DEFAULT_EVAL_TIMEOUT_MS,

@@ -18,7 +18,7 @@
  * Both are reproduced below with the real seed → project → validate → freeze
  * cycle the editor performs on every remote update.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
 import '@modules/base'
 import { projectSiteDoc, seedSiteDoc, shellMap } from '@core/collab'

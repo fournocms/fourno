@@ -2,7 +2,7 @@
  * collab_documents repository — CRDT state blob round-trips through both the
  * upsert path and the delete path on a real migrated database.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   deleteCollabDocuments,
   getCollabDocumentState,

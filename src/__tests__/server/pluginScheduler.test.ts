@@ -19,7 +19,8 @@
  * exercised via the existing `cmsPlugins` integration suite. Here we
  * stub `runScheduleInWorker` so the focus stays on the engine logic.
  */
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it, vi } from 'vitest'
+import { setTimeout as sleep } from 'node:timers/promises'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -170,8 +171,8 @@ describe('plugin scheduler — DB', () => {
       })
       // Mock the worker dispatch so we don't need a live VM. Two
       // concurrent run-now calls — only ONE should win the claim.
-      const dispatch = mock(async () => ({ status: 'ok' as const, durationMs: 1 }))
-      mock.module('../../../server/plugins/host/rpc', () => ({
+      const dispatch = vi.fn(async () => ({ status: 'ok' as const, durationMs: 1 }))
+      vi.mock('../../../server/plugins/host/rpc', () => ({
         runScheduleInWorker: dispatch,
       }))
       const [first, second] = await Promise.all([
@@ -204,8 +205,8 @@ describe('plugin scheduler — DB', () => {
         update plugin_schedules set next_run_at = ${future}
         where plugin_id = ${'test.sched'} and schedule_id = ${'test.sched.far-future'}
       `
-      const dispatch = mock(async () => ({ status: 'ok' as const, durationMs: 1 }))
-      mock.module('../../../server/plugins/host/rpc', () => ({
+      const dispatch = vi.fn(async () => ({ status: 'ok' as const, durationMs: 1 }))
+      vi.mock('../../../server/plugins/host/rpc', () => ({
         runScheduleInWorker: dispatch,
       }))
       await tickPluginScheduler(db)
@@ -351,10 +352,10 @@ describe('plugin scheduler — DB', () => {
       // v1 registered both schedules on a previous boot.
       await registerPluginSchedule(db, reg('keep'))
       await registerPluginSchedule(db, reg('drop'))
-      await Bun.sleep(5)
+      await sleep(5)
       // v2 activation pass: only 'keep' is re-registered.
       const activationStartedAt = new Date().toISOString()
-      await Bun.sleep(5)
+      await sleep(5)
       await registerPluginSchedule(db, reg('keep'))
       await disableSchedulesNotReclaimedSince(db, 'test.sched', activationStartedAt)
       const kept = await getSchedule(db, 'test.sched', 'test.sched.keep')

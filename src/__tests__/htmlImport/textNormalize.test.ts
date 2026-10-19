@@ -4,7 +4,7 @@
  * would, so editor text fields don't show stray leading spaces / line breaks.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import { importHtml } from '@core/htmlImport'
 import { normalizeImportedText } from '@core/htmlImport'

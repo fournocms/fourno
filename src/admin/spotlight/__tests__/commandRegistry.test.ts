@@ -11,7 +11,7 @@
  * unauthorised commands never appear in the first place.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { filterCommands } from '../commandRegistry'
 import type { Command, CommandContext } from '../types'
 import type { CmsCurrentUser } from '@core/persistence'

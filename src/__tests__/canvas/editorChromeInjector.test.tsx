@@ -8,7 +8,7 @@
  * content with editor token values instead of the site's configured ones.
  * Editor chrome must ride chrome-namespaced variables instead.
  */
-import { describe, expect, it, afterEach } from 'bun:test'
+import { describe, expect, it, afterEach } from 'vitest'
 import { render, cleanup } from '@testing-library/react'
 import { EditorChromeInjector } from '@site/canvas/EditorChromeInjector'
 

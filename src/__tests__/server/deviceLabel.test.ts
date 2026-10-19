@@ -5,7 +5,7 @@
  * The label is cosmetic, not a security signal — the goal is "good enough for
  * the Sessions tab", not perfect UA classification.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { deriveDeviceLabel } from '../../../server/auth/deviceLabel'
 
 describe('deriveDeviceLabel', () => {

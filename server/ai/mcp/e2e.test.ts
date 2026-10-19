@@ -10,7 +10,7 @@
  * jsdom preload. Bad-token rejection is covered by `auth.test.ts` and
  * `transports/http.test.ts`.
  */
-import { describe, expect, it, beforeEach } from 'bun:test'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { createSqliteClient } from '../../db/sqlite'
 import { sqliteMigrations } from '../../db/migrations-sqlite'
 import { runMigrations } from '../../db/runMigrations'

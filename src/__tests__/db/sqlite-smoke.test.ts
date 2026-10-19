@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 
 describe('SQLite adapter smoke test', () => {
@@ -153,7 +153,7 @@ describe('SQLite adapter smoke test', () => {
       expect(rows).toHaveLength(1)
 
       const out = rows[0]!.content_bytes
-      // bun:sqlite returns BLOBs as Uint8Array (or Buffer, which extends Uint8Array).
+      // better-sqlite3 returns BLOBs as Buffer, which extends Uint8Array.
       expect(out).toBeInstanceOf(Uint8Array)
       expect(Array.from(out)).toEqual(Array.from(payload))
     } finally {

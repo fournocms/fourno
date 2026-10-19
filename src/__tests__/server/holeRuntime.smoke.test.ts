@@ -1,7 +1,7 @@
 /**
  * Smoke tests for the hole runtime JavaScript source.
  *
- * The test environment preloads `happy-dom` (via `bunfig.toml` → `setup.ts`),
+ * The test environment preloads `happy-dom` (via `vitest.config.ts` → `setup.ts`),
  * which provides `IntersectionObserver`, `document`, and `fetch` globals.
  *
  * These tests verify:
@@ -15,7 +15,8 @@
  * not fire them based on real viewport layout.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
+import { transformSync } from 'esbuild'
 import {
   HOLE_RUNTIME_JS,
   runInstaticHoleRuntime,
@@ -24,7 +25,7 @@ import {
 describe('HOLE_RUNTIME_JS — static source content', () => {
   it('parses and keeps the non-behavioral runtime constants wired', () => {
     expect(() => {
-      new Bun.Transpiler({ loader: 'js' }).transformSync(HOLE_RUNTIME_JS)
+      transformSync(HOLE_RUNTIME_JS, { loader: 'js' })
     }).not.toThrow()
     expect(HOLE_RUNTIME_JS).toContain('IntersectionObserver')
     expect(HOLE_RUNTIME_JS).toContain('200px')

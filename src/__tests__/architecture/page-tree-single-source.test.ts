@@ -1,8 +1,8 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 
 const FORM_TREE_CONSUMERS = [
   'src/core/forms/snapshot.ts',

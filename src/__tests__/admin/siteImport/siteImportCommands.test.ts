@@ -10,7 +10,7 @@
  * `src/admin/spotlight/commands/importHtml.ts` — both follow the same pattern.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { getSiteImportCommands } from '@admin/spotlight/commands/siteImport'
 import { useAdminUi } from '@admin/state/adminUi'
 

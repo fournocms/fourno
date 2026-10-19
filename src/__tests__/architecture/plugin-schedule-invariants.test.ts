@@ -7,7 +7,7 @@
  * that keep the boundary real: if any of them fail, plugin schedule
  * handlers could escape the sandbox or bypass permission gates.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join, dirname } from 'node:path'

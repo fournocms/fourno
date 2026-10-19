@@ -33,7 +33,7 @@
  * applied, owner user + stepped-up session seeded via the real setup/login
  * endpoints, requests dispatched through `handleCmsRequest`.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteShell } from '@core/page-tree'
 import {
   createCapabilityTestHarness,

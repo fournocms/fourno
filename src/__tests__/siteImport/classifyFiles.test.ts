@@ -2,7 +2,7 @@
  * Unit tests for classifyFiles — file role assignment.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { classifyFiles } from '@core/siteImport'
 import type { FileMap, FileRole } from '@core/siteImport'
 

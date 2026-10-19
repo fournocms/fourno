@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeModule, makePage, makeRegistry, makeSite } from '../publisher/helpers'
 import { publishPage } from '@core/publisher'
 import { resolveDynamicProps } from '@core/templates/dynamicBindings'

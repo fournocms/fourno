@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createCapabilityTestHarness, type CapabilityTestHarness } from '../helpers/capabilityHarness'
 import { contextMcpTools } from '../../../server/ai/mcp/tools/contextTool'
 import { createEditorBridgeStream } from '../../../server/ai/mcp/editorBridge'

@@ -38,11 +38,11 @@
  * widening this list.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 
 const SCAN_ROOTS = ['src/admin', 'src/core', 'src/modules', 'src/ui', 'server']
 

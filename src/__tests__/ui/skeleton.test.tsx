@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import { Skeleton, SkeletonRows, SkeletonTree } from '@ui/components/Skeleton'

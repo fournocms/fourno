@@ -6,7 +6,7 @@
  * actions: capture an undo step (via the collab binding's per-doc
  * Y.UndoManagers) and allow undo to restore the previous SiteDocument.
  */
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { collabClearHistory } from '@site/store/slices/site/collabBinding'
 import { makeNode, makePage, makeSite, makeVC, makeVCNode } from '../fixtures'

@@ -9,7 +9,7 @@
  *   - Self-references are excluded from the impact list
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { previewVCDeletion } from '../deletionImpact'
 import { makeSite, makePage, makeNode, makeVC, makeVCNode } from '../../../__tests__/fixtures'
 

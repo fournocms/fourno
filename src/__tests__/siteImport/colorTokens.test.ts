@@ -2,7 +2,7 @@
  * Unit tests for colorTokens — root-scope colour custom-property extraction.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { extractRootColorTokens, isCssColorValue } from '@core/siteImport'
 import type { NewStyleRule } from '@core/siteImport'
 

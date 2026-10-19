@@ -7,7 +7,7 @@
  * in the shared registry instead of repairing schemas in individual drivers.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { contentTools } from '../../../server/ai/tools/content'
 import { siteTools } from '../../../server/ai/tools/site'
 

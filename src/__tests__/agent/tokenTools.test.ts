@@ -9,7 +9,7 @@
  * here with a mocked `fetch`.
  */
 
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { executeAgentTool } from '@site/agent'
 import type { AiToolOutput } from '@core/ai'

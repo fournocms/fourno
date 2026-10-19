@@ -6,7 +6,7 @@
  * covered by `src/__tests__/server/pluginSecrets.test.ts` and
  * `cmsPlugins.test.ts`.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   pluginSettingsDefaults,
   validatePluginSettingsDefinitions,

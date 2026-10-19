@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { renderNode, publishPage, type RenderConfig } from '@core/publisher'
 import type { ModuleDefinition } from '@core/module-engine'
 import { makeModule, makeRegistry, makePage, makeSite, makeAccumulators } from './helpers'

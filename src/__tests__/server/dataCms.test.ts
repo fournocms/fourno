@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { DbResult } from '../../../server/db'
 import { pgMigrations } from '../../../server/db/migrations-pg'
 import {

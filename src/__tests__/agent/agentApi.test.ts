@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { INTERRUPTED_TOOL_RESULT_ERROR } from '@core/ai'
 import type { ConversationDetail } from '@admin/ai/api'
 import { rehydrateMessages, type AgentMessage, type AgentToolCall } from '@site/agent'

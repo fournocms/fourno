@@ -14,7 +14,7 @@
  *   (f) Every base module's propsSchema is fast-path eligible.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { Type, Value, type TSchema } from '@core/utils/typeboxHelpers'
 import type { AnyModuleDefinition } from '@core/module-engine'
 import { validateNodeProps, registry } from '@core/module-engine'

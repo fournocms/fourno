@@ -2,7 +2,7 @@
  * A blocked publish disables its button, so the status text beside it is the
  * only thing left to hover. It has to carry the explanation.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { PublishActionGroup } from '@site/toolbar/PublishActionGroup'

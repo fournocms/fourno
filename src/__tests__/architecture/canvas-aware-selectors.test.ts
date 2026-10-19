@@ -25,11 +25,11 @@
  * @see store.ts — `selectActiveCanvasPage`, `selectSelectedNode`
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 const EDITOR_ROOT = join(SRC_ROOT, 'editor')
 
 // ---------------------------------------------------------------------------

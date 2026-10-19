@@ -33,11 +33,11 @@
  * @see src/ui/components/Button/Button.tsx    — Button with tooltip= prop
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 const SCAN_ROOTS = [join(SRC_ROOT, 'admin'), join(SRC_ROOT, 'editor')]
 
 // ─── Allowlist ─────────────────────────────────────────────────────────────────

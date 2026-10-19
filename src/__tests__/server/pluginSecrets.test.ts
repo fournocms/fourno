@@ -9,7 +9,7 @@
  *     without crashing the runtime read
  *   - uninstall cascades the rows (FK `on delete cascade`)
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { PluginManifest, PluginSettingDefinition } from '@core/plugin-sdk'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
 import {

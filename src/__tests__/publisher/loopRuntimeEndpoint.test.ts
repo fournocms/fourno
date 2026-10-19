@@ -12,7 +12,7 @@
  * change that sets a different endpoint (subpath mount, CDN prefix) does not
  * silently keep hitting `/_instatic/loop/`.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { LOOP_RUNTIME_JS } from '../../../server/publish/loopRuntime'
 
 const ORIGINAL_FETCH = globalThis.fetch

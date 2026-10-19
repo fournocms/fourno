@@ -5,7 +5,7 @@
  * character-level. `applyTextDiff` is the minimal-splice bridge between
  * contentEditable string snapshots and Y.Text operations.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
 import '@modules/base'
 import { applyTextDiff, projectPageDoc, seedPageDoc, treeMap } from '@core/collab'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   BRANCH_ID_PATTERN,
   MAIN_BRANCH_ID,

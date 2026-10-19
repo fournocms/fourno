@@ -11,7 +11,7 @@
  * referencing, and it refuses to touch anything it cannot account for.
  */
 
-import { describe, expect, test, beforeEach, afterEach } from 'bun:test'
+import { describe, expect, test, beforeEach, afterEach } from 'vitest'
 import { mkdir, mkdtemp, rm, writeFile, readdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

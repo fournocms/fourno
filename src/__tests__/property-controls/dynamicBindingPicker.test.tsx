@@ -11,7 +11,7 @@
  * tokens; in bind mode the parent closes the popover after a single pick.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { DynamicBindingControl } from '@site/property-controls/DynamicBindingControl'

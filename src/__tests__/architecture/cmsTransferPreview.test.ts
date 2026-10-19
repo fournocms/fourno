@@ -17,7 +17,7 @@
  * @see docs/plans/2026-05-19-site-transfer-ux.md
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'

@@ -15,7 +15,7 @@
  * easily: if the oldest page carries no scripts, a scoped script reaches
  * nothing.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import type { PublishedPageSnapshot } from '../../../server/repositories/publish'
 import { snapshotForEntryRoute } from '../../../server/publish/entryTemplateSnapshot'

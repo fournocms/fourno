@@ -5,7 +5,7 @@
  * failing whichever tool call straddled the boundary mid-batch (surfaced by
  * an external MCP agent driving long serialized class-assignment runs).
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   createEditorBridgeStream,
   getEditorBridgeForUser,

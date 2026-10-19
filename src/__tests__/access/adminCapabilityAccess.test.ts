@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { CoreCapability } from '@core/capabilities'
 import type { DataRow } from '@core/data/schemas'
 import type { CmsCurrentUser } from '@core/persistence'

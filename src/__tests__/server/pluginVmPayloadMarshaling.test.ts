@@ -10,7 +10,7 @@
  * lone surrogates — round-trips byte-identically through the VM.
  */
 
-import { describe, expect, it, afterAll } from 'bun:test'
+import { describe, expect, it, afterAll } from 'vitest'
 import { createPluginVm, type PluginVm } from '../../../server/plugins/quickjs/vm'
 
 /**

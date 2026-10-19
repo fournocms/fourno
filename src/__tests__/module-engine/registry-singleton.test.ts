@@ -9,7 +9,7 @@
  * conflicts with the global registry populated by base module imports.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { registry } from '@core/module-engine'
 import type { AnyModuleDefinition } from '@core/module-engine'
 

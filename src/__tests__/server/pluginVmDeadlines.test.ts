@@ -17,7 +17,7 @@
  * `new Error(message)`, discarding the QuickJS stack (whose frames carry the
  * useful `plugin:<id>` filename). `PluginVmError` now preserves it.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createPluginVm, type PluginVmEnv } from '../../../server/plugins/quickjs/vm'
 import { PluginVmError, vmStackOf } from '../../../server/plugins/quickjs/eval'
 

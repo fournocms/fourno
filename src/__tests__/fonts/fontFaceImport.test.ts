@@ -5,7 +5,7 @@
  * Covers the Super Import path that previously dropped every `@font-face`
  * (see docs/plans/2026-05-30-custom-fonts.md).
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { cssToStyleRules } from '@core/siteImport/cssToStyleRules'
 import { buildAssetPlan, type CssFileResult } from '@core/siteImport/assetPlan'
 import type { FileMap } from '@core/siteImport'

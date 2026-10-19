@@ -4,7 +4,7 @@
  * a smoke render of the canvas presence overlay against fake awareness
  * states.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { render, screen, cleanup, act } from '@testing-library/react'
 import * as Y from 'yjs'
 import * as awarenessProtocol from 'y-protocols/awareness'

@@ -7,7 +7,7 @@
  * subset or never see slices the family actually advertises).
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   computePrimarySubset,
   parseCss2Faces,

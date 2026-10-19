@@ -5,7 +5,7 @@
  * mark the document dirty, or bump `site.updatedAt`. This keeps autosave,
  * save indicators, and Cmd-Z aligned with real document changes.
  */
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { makeNode, makePage, makeSite, makeVC, makeVCNode } from '../fixtures'
 

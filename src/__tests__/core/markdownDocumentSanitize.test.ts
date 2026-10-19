@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { MARKDOWN_DOCUMENT_CONFIG, sanitizeRichtext, type SanitizerConfig } from '@core/sanitize'
 import { renderReadmeHtml } from '@site/panels/DependenciesPanel/readmeHtml'
 

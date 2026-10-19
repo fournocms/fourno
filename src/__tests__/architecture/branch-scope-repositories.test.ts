@@ -14,11 +14,11 @@
  *   3. The physical-id scheme (`<branch>:<logical>`) is minted in exactly one
  *      place, `src/core/branches/ids.ts`; nobody else joins ids with a colon.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, relative } from 'node:path'
 
-const ROOT = join(import.meta.dir, '../../..')
+const ROOT = join(import.meta.dirname, '../../..')
 
 const SCOPED_REPOSITORY_FILES = [
   'server/repositories/site.ts',

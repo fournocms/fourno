@@ -12,7 +12,7 @@
  * both the injection and the sanitisation boundary.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { publishPage } from '../../core/publisher/render'
 import { makePage, makeSite, makeRegistry, makeModule } from '../publisher/helpers'
 

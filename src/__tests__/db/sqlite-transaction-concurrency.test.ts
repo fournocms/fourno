@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))

@@ -7,7 +7,7 @@
  * reads like "nothing to show".
  */
 
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, render } from '@testing-library/react'
 import { CanvasLiveSurface } from '@site/canvas/CanvasLiveSurface'

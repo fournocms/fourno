@@ -11,7 +11,7 @@
  *      via the O(1) `parentId` cache, never an O(N) whole-map scan.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import type { Page, PageNode } from '@core/page-tree'
 import {
   createNode,

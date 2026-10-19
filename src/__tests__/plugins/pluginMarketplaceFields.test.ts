@@ -6,7 +6,7 @@
  * paths, oversize keyword lists), and round-trips through the parser
  * cleanly.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { parsePluginManifest } from '@core/plugins/manifest'
 
 const baseManifest = {

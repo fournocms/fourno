@@ -13,7 +13,8 @@
  * These tests prove both paths are closed after the fix.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -94,7 +95,7 @@ describe('importStagedArchiveMediaEntries — media byte security validation', (
     })
 
     const finalPath = join(uploadsDir, asset.storagePath)
-    const content = await Bun.file(finalPath).text()
+    const content = readFileSync(finalPath, 'utf8')
     // Script must be stripped
     expect(content.toLowerCase()).not.toContain('<script')
     expect(content.toLowerCase()).not.toContain('alert(1)')

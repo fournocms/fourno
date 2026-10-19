@@ -5,7 +5,7 @@
  * tab / `mediaKind: 'svg'` picker narrows to `image/svg+xml` only.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   isSvgMime,
   bucketForMime,

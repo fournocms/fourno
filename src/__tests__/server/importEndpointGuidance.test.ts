@@ -9,7 +9,7 @@
  * SiteBundleSchema", which reads as a bug in the bundle rather than a wrong
  * door. The handler now recognises the ZIP magic bytes and names the mistake.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

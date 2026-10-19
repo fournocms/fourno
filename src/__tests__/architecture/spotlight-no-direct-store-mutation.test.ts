@@ -10,11 +10,11 @@
  * It must not become a second model layer by directly mutating Mutative state.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 const COMMANDS_DIR = join(SRC_ROOT, 'admin/spotlight/commands')
 
 function collectTsFiles(dir: string): string[] {

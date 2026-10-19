@@ -16,7 +16,7 @@
  *      hydrated row (no silently half-hydrated asset).
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 import {
   createMediaAsset,

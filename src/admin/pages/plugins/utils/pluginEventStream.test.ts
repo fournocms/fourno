@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { PluginEvent } from '@core/plugins/events'
 import { subscribePluginEvents } from './pluginEventStream'
 
@@ -73,7 +73,7 @@ describe('pluginEventStream', () => {
   })
 
   it('drops an unknown-shape event without dispatching, and warns', () => {
-    const warn = mock(() => {})
+    const warn = vi.fn(() => {})
     const originalWarn = console.warn
     console.warn = warn
 
@@ -95,7 +95,7 @@ describe('pluginEventStream', () => {
   })
 
   it('drops a frame whose discriminant does not match any variant', () => {
-    const warn = mock(() => {})
+    const warn = vi.fn(() => {})
     const originalWarn = console.warn
     console.warn = warn
 

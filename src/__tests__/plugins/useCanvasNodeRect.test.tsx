@@ -10,7 +10,7 @@
  * `getBoundingClientRect` / `offsetWidth` with known geometry.
  */
 
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach } from 'vitest'
 import { renderHook, cleanup } from '@testing-library/react'
 import { useCanvasNodeRect } from '@admin/plugin-host-hooks'
 

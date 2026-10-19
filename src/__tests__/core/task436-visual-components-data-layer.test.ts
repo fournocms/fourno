@@ -39,7 +39,7 @@
  * @see Task #436 — VC Data Layer
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { validateSite, validateVisualComponents } from '@core/persistence/validate'
 import type { SiteDocument } from '@core/page-tree'

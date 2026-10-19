@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { pageFromRow, pageToCells } from '../pageFromRow'
 import type { DataRow } from '@core/data/schemas'
 

@@ -6,7 +6,7 @@
  * their dedicated inputs; everything else renders generically through
  * `CellEditorRenderer`.
  */
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { buildPostTypeDefaultFields } from '@core/data/fields'
 import type { DataRow, DataTable } from '@core/data/schemas'
@@ -75,7 +75,7 @@ function fakeEntry(): DataRow {
 
 async function renderPanel(overrides: Partial<Parameters<typeof ContentSettingsPanel>[0]> = {}) {
   const collection = fakeCollection()
-  const onCustomCellChange = mock(() => {})
+  const onCustomCellChange = vi.fn(() => {})
   render(
     <ContentSettingsPanel
       selectedEntry={fakeEntry()}
@@ -106,16 +106,16 @@ async function renderPanel(overrides: Partial<Parameters<typeof ContentSettingsP
       canMoveEntry
       canPublishEntry
       canChangeAuthor={false}
-      onCollectionChange={mock(() => {})}
-      onAuthorChange={mock(() => {})}
-      onSlugChange={mock(() => {})}
-      onSeoTitleChange={mock(() => {})}
-      onSeoDescriptionChange={mock(() => {})}
+      onCollectionChange={vi.fn(() => {})}
+      onAuthorChange={vi.fn(() => {})}
+      onSlugChange={vi.fn(() => {})}
+      onSeoTitleChange={vi.fn(() => {})}
+      onSeoDescriptionChange={vi.fn(() => {})}
       onCustomCellChange={onCustomCellChange}
-      onStatusChange={mock(() => {})}
-      onChooseFeaturedMedia={mock(() => {})}
-      onClearFeaturedMedia={mock(() => {})}
-      onEditFeaturedMedia={mock(() => {})}
+      onStatusChange={vi.fn(() => {})}
+      onChooseFeaturedMedia={vi.fn(() => {})}
+      onClearFeaturedMedia={vi.fn(() => {})}
+      onEditFeaturedMedia={vi.fn(() => {})}
       {...overrides}
     />,
   )

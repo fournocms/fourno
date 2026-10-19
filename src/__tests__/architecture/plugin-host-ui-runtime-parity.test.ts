@@ -21,11 +21,11 @@
  * the shim must also be updated, OR this test fails loudly.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const ROOT = join(import.meta.dir, '../../..')
+const ROOT = join(import.meta.dirname, '../../..')
 const read = (rel: string) => readFileSync(join(ROOT, rel), 'utf-8')
 
 // ---------------------------------------------------------------------------

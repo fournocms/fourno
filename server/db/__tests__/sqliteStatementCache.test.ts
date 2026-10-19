@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createSqliteClient } from '../sqlite'
 
 /**
- * The adapter executes through `db.query()`, bun:sqlite's cached-statement
- * variant of `prepare()` — statements are reused per exact SQL string. These
+ * The adapter caches better-sqlite3 prepared statements per exact SQL
+ * string. These
  * tests pin the behavioral edges of that reuse: parameters must be rebound on
  * every call (never replayed), and cached statements must survive schema
  * changes made after they were first compiled.

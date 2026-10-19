@@ -3,7 +3,7 @@
  * `font-mono`; the Core preset adds the ones a site lacks; existing sites read
  * through the settings fallback never gain them.
  */
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   FONT_ROLES,
   buildFontRoleTokens,

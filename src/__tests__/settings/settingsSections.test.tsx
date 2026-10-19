@@ -10,7 +10,7 @@
  * Uses @testing-library/react + happy-dom (GlobalWindow preloaded via setup.ts).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import { PreferencesSection } from '@admin/modals/Settings/sections/PreferencesSection'
 import { PublishingSection } from '@admin/modals/Settings/sections/PublishingSection'

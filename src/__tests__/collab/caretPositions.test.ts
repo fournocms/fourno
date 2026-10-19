@@ -2,7 +2,7 @@
  * Caret codec — base64 relative positions round-trip through a Y.Text and
  * stay CORRECT under concurrent edits (the reason plain indices don't work).
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
 import { treeMap } from '@core/collab'
 import {

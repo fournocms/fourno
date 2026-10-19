@@ -12,7 +12,7 @@
  * @see Contribution #619 Phase 3 §2
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ComponentParamsOverview } from '@site/panels/PropertiesPanel/ComponentParamsOverview'

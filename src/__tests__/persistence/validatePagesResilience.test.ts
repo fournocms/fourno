@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { validatePages, SiteValidationError } from '@core/persistence/validate'
 import { makePage, makeNode, makeSite } from '../fixtures'
 

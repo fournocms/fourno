@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { configurePublicOrigins, resetPublicOrigins } from '../../../auth/security'
 import {
   mcpIssuer,

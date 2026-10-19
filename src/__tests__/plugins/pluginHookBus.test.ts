@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { canonicalPluginEventName, hookBus } from '@core/plugins/hookBus'
 
 afterEach(() => {
@@ -49,7 +49,7 @@ describe('hookBus', () => {
   })
 
   it('falls back to the previous HTML if a filter returns null', async () => {
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       hookBus.filter('plugin.bad', 'publish.html', () => null)
       hookBus.filter('plugin.good', 'publish.html', (value) => `${value}-good`)

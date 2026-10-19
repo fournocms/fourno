@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import { handlePublicFormRequest } from '../../../server/forms/handler'
 import { handleServerRequest } from '../../../server/router'

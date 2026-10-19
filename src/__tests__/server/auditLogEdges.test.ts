@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createAuditEvent, listAuditEvents } from '../../../server/repositories/audit'
 import {
   createCapabilityTestHarness,

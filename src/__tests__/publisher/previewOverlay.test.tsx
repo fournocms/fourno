@@ -11,7 +11,7 @@
  * Groups 1–2 use @testing-library/react DOM integration (same as settingsModal.test.tsx).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import { readFileSync } from 'fs'

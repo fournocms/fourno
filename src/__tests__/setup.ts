@@ -1,8 +1,8 @@
 /**
- * Global test setup — runs before every test file via bunfig.toml preload.
+ * Global test setup — runs before every test file (vitest.config.ts `setupFiles`).
  *
  * Sets up a happy-dom environment so that @testing-library/react and
- * other DOM-dependent code can run in bun test without a real browser.
+ * other DOM-dependent code can run under Vitest without a real browser.
  *
  * Uses GlobalWindow (not Window) so that JS built-ins (SyntaxError, TypeError,
  * etc.) are available on the window object — required by @testing-library/dom's
@@ -108,10 +108,12 @@ const GLOBALS_TO_COPY = [
   'ShadowRoot',
 ] as const
 
+// defineProperty, not assignment: Node exposes some of these (`navigator`,
+// `crypto`, `performance`) as getter-only accessors on globalThis.
 for (const key of GLOBALS_TO_COPY) {
   const val = (happyWindow as Record<string, unknown>)[key]
   if (val !== undefined) {
-    ;(globalThis as Record<string, unknown>)[key] = val
+    Object.defineProperty(globalThis, key, { value: val, configurable: true, writable: true, enumerable: true })
   }
 }
 
@@ -162,8 +164,8 @@ for (const key of GLOBALS_TO_COPY) {
 //
 // A happy-dom node is deeply circular (`ownerDocument` → every element →
 // `affectsCache` arrays of thousands → back to the document). When ANY
-// assertion fails or a component throws with a node in scope, bun's error
-// reporter recurses the whole tree and prints MILLIONS of lines for a single
+// assertion fails or a component throws with a node in scope, the test
+// runner's error reporter recurses the whole tree and prints MILLIONS of lines for a single
 // failing test — drowning the run and making the real failure unfindable.
 //
 // Registering a custom inspector on the happy-dom `Node` prototype collapses
@@ -285,14 +287,14 @@ if (typeof (globalThis as { EventSource?: unknown }).EventSource === 'undefined'
 // Global React Testing Library cleanup after every test.
 //
 // @testing-library/react auto-registers an `afterEach(cleanup)` ONLY when
-// `afterEach` is a global (the Jest/Vitest convention). Under `bun test`
-// `afterEach` is import-only, so auto-cleanup never installs: any test that
+// `afterEach` is a global (Vitest's `globals: true`). This suite imports
+// `afterEach` explicitly, so auto-cleanup never installs: any test that
 // renders a component and doesn't manually `cleanup()` leaves it mounted, and
-// it lingers into the NEXT test file. When a later file's own `cleanup()`
+// it lingers into the next test. When a later file's own `cleanup()`
 // finally unmounts that stale tree, an effect or in-flight request that
 // resolved after the originating test surfaces inside that unrelated test's
 // `act()` as an `AggregateError` — a cross-file flake whose victim depends on
-// file ordering. Registering cleanup here (from the preload, so it applies to
+// file ordering. Registering cleanup here (from the setup file, so it applies to
 // every file) restores the intended per-test isolation. `cleanup()` is a no-op
 // when nothing is mounted, so non-React tests are unaffected.
 //
@@ -300,7 +302,7 @@ if (typeof (globalThis as { EventSource?: unknown }).EventSource === 'undefined'
 // installed — a static top-level import would be hoisted and pull in React
 // before `document` exists.
 {
-  const { afterEach } = await import('bun:test')
+  const { afterEach } = await import('vitest')
   const { cleanup } = await import('@testing-library/react')
   const { __resetToastBusForTests } = await import('@ui/components/Toast/toastBus')
   afterEach(() => {
@@ -325,7 +327,7 @@ if (typeof (globalThis as { EventSource?: unknown }).EventSource === 'undefined'
 // on top of the previous file's leftovers. Importing the module here is also
 // what fixes the snapshot at a point where nothing has run yet.
 {
-  const { beforeEach } = await import('bun:test')
+  const { beforeEach } = await import('vitest')
   const { resetAppStores } = await import('./fixtures/storeIsolation')
   beforeEach(() => {
     resetAppStores()

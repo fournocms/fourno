@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   agentImageFilename,
   copyAgentImageToClipboard,
@@ -60,8 +60,8 @@ describe('agent image actions', () => {
     const contextDescriptor = Object.getOwnPropertyDescriptor(canvasPrototype, 'getContext')
     const toBlobDescriptor = Object.getOwnPropertyDescriptor(canvasPrototype, 'toBlob')
     const itemPayloads: Array<Record<string, Blob | Promise<Blob>>> = []
-    const write = mock(async (_items: ClipboardItem[]) => {})
-    const closeBitmap = mock(() => {})
+    const write = vi.fn(async (_items: ClipboardItem[]) => {})
+    const closeBitmap = vi.fn(() => {})
     class TestClipboardItem {
       constructor(payload: Record<string, Blob | Promise<Blob>>) {
         itemPayloads.push(payload)
@@ -89,7 +89,7 @@ describe('agent image actions', () => {
         callback(new Blob([new Uint8Array([4, 5, 6])], { type: 'image/png' }))
       },
     })
-    globalThis.fetch = mock(async () => new Response(new Uint8Array([1, 2, 3]), {
+    globalThis.fetch = vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {
       headers: { 'content-type': 'image/jpeg' },
     })) as typeof fetch
 
@@ -115,7 +115,7 @@ describe('agent image actions', () => {
     const revokeDescriptor = Object.getOwnPropertyDescriptor(URL, 'revokeObjectURL')
     const clickDescriptor = Object.getOwnPropertyDescriptor(HTMLAnchorElement.prototype, 'click')
     const timeoutDescriptor = Object.getOwnPropertyDescriptor(window, 'setTimeout')
-    const revoke = mock((_url: string) => {})
+    const revoke = vi.fn((_url: string) => {})
     let downloadName = ''
     Object.defineProperty(URL, 'createObjectURL', {
       configurable: true,
@@ -138,7 +138,7 @@ describe('agent image actions', () => {
         return 1
       },
     })
-    globalThis.fetch = mock(async () => new Response(new Uint8Array([1, 2, 3]), {
+    globalThis.fetch = vi.fn(async () => new Response(new Uint8Array([1, 2, 3]), {
       headers: { 'content-type': 'image/webp' },
     })) as typeof fetch
 
@@ -161,7 +161,7 @@ describe('agent image actions', () => {
     })
     let sourceReads = 0
     let uploads = 0
-    globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url === '/image-1') {
         sourceReads += 1

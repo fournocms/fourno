@@ -5,11 +5,11 @@
  * writes must go through the shared site mutation helpers so undo history,
  * dirty state, and timestamps behave exactly like page/tree mutations.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const ROOT = join(import.meta.dir, '../../../')
+const ROOT = join(import.meta.dirname, '../../../')
 const VC_SLICE_PATH = join(ROOT, 'src/admin/pages/site/store/slices/visualComponentsSlice.ts')
 
 describe('Visual Components mutation contract', () => {

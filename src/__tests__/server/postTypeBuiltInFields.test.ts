@@ -14,7 +14,7 @@
  * slug as '' — turning live entry routes into redirects with no error
  * anywhere.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

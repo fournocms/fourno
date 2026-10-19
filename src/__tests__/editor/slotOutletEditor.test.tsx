@@ -9,7 +9,7 @@
  * Task 5 — Step 6 (slot-outlet edit-mode gate).
  */
 
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { useEditorStore } from '@site/store/store'

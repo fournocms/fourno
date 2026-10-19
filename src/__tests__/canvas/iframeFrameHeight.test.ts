@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { resolveCanvasFrameHeight } from '@site/canvas/iframeFrameHeight'
 
 describe('resolveCanvasFrameHeight', () => {

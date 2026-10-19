@@ -32,11 +32,11 @@
  * @see src/ui/components/Tabs/Tabs.tsx — the compound component to use
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const SRC_ROOT = join(PROJECT_ROOT, 'src')
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { layoutNameError, parseSavedLayout, type SavedLayout } from '@core/layouts'
 
 function rawLayout(overrides: Record<string, unknown> = {}): Record<string, unknown> {

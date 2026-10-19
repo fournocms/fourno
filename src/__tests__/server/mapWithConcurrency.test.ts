@@ -5,7 +5,7 @@
  * order preservation, the concurrency cap, empty input, and first-error reject.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mapWithConcurrency } from '../../../server/util/mapWithConcurrency'
 
 describe('mapWithConcurrency — bounded parallelism', () => {

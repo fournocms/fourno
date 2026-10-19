@@ -11,7 +11,7 @@
  * Source of truth (verbatim formula):
  *   core-framework/packages/core/src/components/modules/typography/functions/getTypeScale.ts
  */
-import { test, expect } from 'bun:test'
+import { test, expect } from 'vitest'
 import { computeFluidScale } from '@core/framework'
 
 test('computeFluidScale matches Core Framework getTypeScale — no min/max swap', () => {

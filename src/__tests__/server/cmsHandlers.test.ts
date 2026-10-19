@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import type { DbClient, DbResult } from '../../../server/db'
 import { SESSION_COOKIE_NAME } from '../../../server/auth/tokens'

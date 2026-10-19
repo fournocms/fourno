@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from 'bun:test'
+import { describe, expect, it, beforeAll } from 'vitest'
 import type { SiteAgentSnapshot } from '@site/agent/siteAgentSnapshot'
 import type { AiTool, ToolContext } from '../../../server/ai/runtime/types'
 import { MAIN_SCOPE } from '../../../server/branches/scope'

@@ -9,7 +9,7 @@
  * lifecycle is verified once, independent of either concrete dialog.
  */
 
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { useEffect, type ReactNode } from 'react'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import {

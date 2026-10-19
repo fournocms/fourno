@@ -7,7 +7,7 @@
  * new identity exactly when the tree changes).
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import type { PageNode } from '@core/page-tree'
 import { nearestFormNode } from '@site/canvas/canvasFormPreview'
 

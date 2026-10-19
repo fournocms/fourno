@@ -15,7 +15,7 @@
  * Uses @testing-library/react for interactive tests (GroupSection collapse).
  */
 
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach } from 'vitest'
 import React from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { FormModule } from '../../modules/base/forms'
 import { FORM_RUNTIME_JS } from '../../modules/base/forms/formRuntimeJs'
 

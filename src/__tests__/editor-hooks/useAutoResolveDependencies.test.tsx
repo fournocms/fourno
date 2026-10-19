@@ -2,7 +2,7 @@
  * Tests for the auto-resolve hook that keeps `siteRuntime.dependencyLock`
  * in lockstep with `packageJson.dependencies`.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { useAutoResolveDependencies } from '@site/hooks/useAutoResolveDependencies'
 import { useEditorStore } from '@site/store/store'

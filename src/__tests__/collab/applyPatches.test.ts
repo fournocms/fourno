@@ -11,7 +11,7 @@
  * Tests drive REAL patches: `create(site, recipe, { enablePatches })` with
  * actual @core/page-tree mutations, exactly like the store's mutation engine.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { create, type Patches } from 'mutative'
 import * as Y from 'yjs'
 import '@modules/base'

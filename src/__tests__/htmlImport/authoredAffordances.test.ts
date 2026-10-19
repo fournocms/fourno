@@ -7,7 +7,7 @@
  * and the behaviour that depended on it silently stopped working.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 // Self-registers all base modules with the global registry singleton.
 import '@modules/base'
 import { registry } from '@core/module-engine'

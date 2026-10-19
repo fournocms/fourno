@@ -28,7 +28,7 @@
  * leaking between tests.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 import { render, screen, cleanup, fireEvent, act, within } from '@testing-library/react'
 import { readFileSync } from 'fs'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createSqliteClient } from '../sqlite'
 import type { DbClient } from '../client'
 import { releaseLeader, tryAcquireLeader, withSchedulerLeaderLock } from '../advisoryLock'

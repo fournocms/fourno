@@ -10,7 +10,7 @@
  * Constraint #299 — richtext props are sanitized via DOMPurify before storage.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { executeAgentTool } from '@site/agent'
 import type { AiToolOutput } from '@core/ai'

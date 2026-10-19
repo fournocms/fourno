@@ -18,7 +18,7 @@
  * + protocol decode.
  */
 
-import { beforeEach, afterEach, describe, expect, it } from 'bun:test'
+import { beforeEach, afterEach, describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import type { DbClient, DbResult } from '../../../server/db'
 import { handleHoleRequest } from '../../../server/handlers/cms/hole'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readNdjsonStream } from '@admin/ai/ndjsonStream'
 import { Type } from '@core/utils/typeboxHelpers'
 

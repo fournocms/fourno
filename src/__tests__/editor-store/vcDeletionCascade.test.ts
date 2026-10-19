@@ -8,7 +8,7 @@
  *  3. The deletion is undoable (pushHistory was called → Cmd-Z restores everything).
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { makeSite, makePage, makeNode, makeVC, makeVCNode } from '../fixtures'
 

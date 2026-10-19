@@ -29,11 +29,11 @@
  * @see Constraint #348 — All icons must use the in-house pixel-art set
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, existsSync, statSync } from 'fs'
 import { join, extname } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const EDITOR_DIR   = join(PROJECT_ROOT, 'src/admin/pages/site')
 // Resolve the pixel-art-icons package via node_modules. The published shape
 // exposes built artifacts under dist/icons/<name>.js (+ .d.ts), so that's what

@@ -5,7 +5,7 @@
  * test per field assignment.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import type { SettingsSection } from '@site/store/slices/settingsSlice'
 

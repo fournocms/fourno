@@ -12,7 +12,7 @@
  * @see Contribution #619 Phase 2 §A
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ParamRow } from '@site/panels/PropertiesPanel/ParamRow'

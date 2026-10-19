@@ -5,7 +5,7 @@
  * to upload 30 files and managed 22 finished 22 of 30, not 22 of 22.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   makeStaticRunDoneProgress,
   makeStaticRunProgress,

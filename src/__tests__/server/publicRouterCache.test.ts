@@ -11,7 +11,7 @@
  * Uses `getStats()` from renderCache to observe hit/miss counts without
  * requiring module-level spying on the renderer.
  */
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import type { PublishedPageSnapshot } from '../../../server/repositories/publish'
 import { renderPublicResolution } from '../../../server/publish/publicRouter'

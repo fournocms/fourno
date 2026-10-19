@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { UNTITLED_ROW_TITLE, readDisplayTitle } from '@core/data/cells'
 import type { DataField } from '@core/data/schemas'
 

@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll } from 'vitest'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import type { DbClient } from '../../../server/db/client'
 

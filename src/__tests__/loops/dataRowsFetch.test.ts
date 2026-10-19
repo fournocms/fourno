@@ -17,7 +17,7 @@
  * independent of how the SQL text is assembled.
  */
 
-import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
+import { describe, expect, it, beforeAll, afterAll } from 'vitest'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
 import { createUser } from '../../../server/repositories/users'
 import { fetchPublishedDataRowItems } from '@core/loops/sources/dataRows'

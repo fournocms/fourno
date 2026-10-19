@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach } from 'bun:test'
+import { describe, test, expect, afterEach } from 'vitest'
 import { Type } from '@core/utils/typeboxHelpers'
 import { ollamaDriver } from '../../../server/ai/drivers/ollama'
 import { resolveModelCapabilities } from '../../../server/ai/drivers/modelCapabilities'

@@ -9,7 +9,7 @@
  *   - the terminal `<pre>` collapsed onto a single line.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import { importHtml } from '@core/htmlImport'
 import { TextModule } from '@modules/base/text'

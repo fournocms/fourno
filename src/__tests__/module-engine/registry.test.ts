@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { SquareSolidIcon } from 'pixel-art-icons/icons/square-solid'
 
 // We import the class directly for test isolation (not the global singleton)

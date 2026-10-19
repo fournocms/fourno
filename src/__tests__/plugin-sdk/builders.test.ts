@@ -2,7 +2,7 @@
  * Tests for the @instatic/plugin-sdk builders. Each builder is
  * exercised end-to-end: input → output → host runtime shape.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   control,
   createNamespace,

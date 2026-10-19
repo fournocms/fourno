@@ -16,7 +16,7 @@
  *      independent of sibling count (it does NOT scan Object.values).
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import type { NodeTree, PageNode, BaseNode } from '@core/page-tree'
 import {
   createNode,

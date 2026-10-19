@@ -15,7 +15,7 @@
  *   6. Refusal to copy / cut the page root.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import {
   CLIPBOARD_STORAGE_KEY,

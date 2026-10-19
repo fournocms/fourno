@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { findDynamicNodeIds } from '../../core/publisher/dynamicDetection'
 import { makePage, makeSite, makeRegistry, makeModule } from '../publisher/helpers'
 

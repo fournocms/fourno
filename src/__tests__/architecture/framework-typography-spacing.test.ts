@@ -14,11 +14,11 @@
  * never silently drops a constraint.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { join } from 'path'
 
-const ROOT = join(import.meta.dir, '../..')
+const ROOT = join(import.meta.dirname, '../..')
 
 function readSource(relative: string): string {
   const path = join(ROOT, relative)

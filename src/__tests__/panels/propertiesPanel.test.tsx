@@ -16,7 +16,7 @@
  * bunfig.toml before this file runs.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import { PropertiesPanel } from '@site/panels/PropertiesPanel/PropertiesPanel'

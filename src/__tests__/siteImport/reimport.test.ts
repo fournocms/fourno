@@ -6,7 +6,7 @@
  * whether an incoming rule is "that rule arriving again" or a new one.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import '@modules/base'
 import { useEditorStore } from '@site/store/store'
 import { applyConflictResolutions, buildImportPlan, commitImportPlan } from '@core/siteImport'

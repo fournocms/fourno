@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { ISO_TIMESTAMP_COLUMNS_030, sqliteMigrations } from '../../../server/db/migrations-sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'

@@ -12,13 +12,13 @@
  * artifacts match byte-for-byte, exactly as `vendor-icons-fresh.test.ts` gates
  * the vendored icon set. Run `bun run bootstrap:sync` to refresh.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { buildBootstrapArtifacts } from '../../../scripts/sync-plugin-bootstrap'
 
 const GENERATED_DIR = resolve(
-  import.meta.dir,
+  import.meta.dirname,
   '../../../server/plugins/quickjs/bootstrap/generated',
 )
 

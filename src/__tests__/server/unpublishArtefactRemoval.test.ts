@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import * as os from 'node:os'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'

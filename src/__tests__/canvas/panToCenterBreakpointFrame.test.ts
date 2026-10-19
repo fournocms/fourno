@@ -9,7 +9,7 @@
  * frame using this geometry on first load.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { panToCenterBreakpointFrame } from '@site/canvas/canvasDomGeometry'
 
 /** Build a fake element whose `getBoundingClientRect()` returns the given box. */

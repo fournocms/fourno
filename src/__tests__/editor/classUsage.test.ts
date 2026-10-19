@@ -9,7 +9,7 @@
  *   - Corrupt localStorage payloads fall back to an empty table
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import {
   CLASS_USAGE_RECENT_LIMIT,
   CLASS_USAGE_FREQUENT_LIMIT,

@@ -3,7 +3,7 @@
  * Uses the dbTestFake harness so tests don't require a real DB.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   collectLoopNodes,
   prefetchLoopData,

@@ -6,7 +6,7 @@
  * recorded creator (its author was deleted) is a manager's to act on, never a
  * creator's.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { canActOnBranch, canMergeBranches } from '@core/branches'
 
 const mine = { createdByUserId: 'u1' }

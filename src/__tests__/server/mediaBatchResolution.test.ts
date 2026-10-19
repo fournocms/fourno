@@ -15,7 +15,7 @@
  * case where we can't inspect SQLite internals.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 import { createFakeDb } from './dbTestFake'
 import { resolveMediaIdsToPaths } from '../../../src/core/loops/sources/dataRowsMedia'

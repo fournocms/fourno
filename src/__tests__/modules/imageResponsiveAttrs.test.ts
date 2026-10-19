@@ -9,7 +9,7 @@
  * only allows `auto` on `loading="lazy"` images, so eager images emit the
  * fallback alone.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { RenderResolvedMedia } from '@core/publisher'
 import { registry } from '@core/module-engine'
 

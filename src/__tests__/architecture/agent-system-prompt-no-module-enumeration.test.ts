@@ -12,11 +12,11 @@
  * styling as CSS" must be present.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const PROMPT_FILE = join(REPO_ROOT, 'server/ai/tools/site/systemPrompt.ts')
 
 const src = readFileSync(PROMPT_FILE, 'utf8')

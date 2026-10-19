@@ -18,7 +18,7 @@
  * mutation isn't propagating through the page tree → instantiateVCAtRef →
  * VCInlineTree pipeline.
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { instantiateVCAtRef } from '@core/visualComponents'
 import type { BaseNode } from '@core/page-tree'

@@ -12,7 +12,7 @@
  *     status message; the menu does NOT close (we want the user to see the
  *     confirmation before they dismiss).
  */
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { AccountMenuButton } from '@admin/shared/AccountMenuButton'
 import { AdminSessionProvider } from '@admin/session'
@@ -91,7 +91,7 @@ describe('AccountMenuButton', () => {
     Object.defineProperty(window, 'location', {
       configurable: true,
       writable: true,
-      value: { ...originalLocation, assign: mock(() => {}) },
+      value: { ...originalLocation, assign: vi.fn(() => {}) },
     })
   })
 
@@ -140,7 +140,7 @@ describe('AccountMenuButton', () => {
 
   it('calls /logout and navigates to /admin on sign out', async () => {
     let logoutCalled = false
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/cms/logout')) {
         logoutCalled = true
@@ -163,7 +163,7 @@ describe('AccountMenuButton', () => {
   })
 
   it('calls /logout-all and surfaces the revoked count in the menu', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/cms/auth/logout-all')) {
         return jsonResponse({ ok: true, revokedCount: 3 })
@@ -181,7 +181,7 @@ describe('AccountMenuButton', () => {
   })
 
   it('shows a friendly status when no other devices were signed in', async () => {
-    globalThis.fetch = mock(async () => jsonResponse({ ok: true, revokedCount: 0 })) as typeof fetch
+    globalThis.fetch = vi.fn(async () => jsonResponse({ ok: true, revokedCount: 0 })) as typeof fetch
 
     renderWithUser(makeUser())
     fireEvent.click(screen.getByTestId('account-menu-trigger'))
@@ -228,7 +228,7 @@ describe('AccountMenuButton', () => {
   })
 
   it('renders the error message in role="alert" when logout-all fails', async () => {
-    globalThis.fetch = mock(async () => jsonResponse({ error: 'kaboom' }, 500)) as typeof fetch
+    globalThis.fetch = vi.fn(async () => jsonResponse({ error: 'kaboom' }, 500)) as typeof fetch
 
     renderWithUser(makeUser())
     fireEvent.click(screen.getByTestId('account-menu-trigger'))

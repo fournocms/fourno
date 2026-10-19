@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import type { DbClient } from '../../../server/db'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'

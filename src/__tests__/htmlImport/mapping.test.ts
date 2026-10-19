@@ -15,7 +15,7 @@
  * No round-trip pipeline, no fixtures — pure per-rule unit assertions.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 // Self-registers all base modules with the global registry singleton.
 // walkAndMap calls registry.getOrThrow(moduleId) — without this import it throws.
 import '@modules/base'

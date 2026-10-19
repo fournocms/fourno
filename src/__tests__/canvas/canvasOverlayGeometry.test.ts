@@ -5,7 +5,7 @@
  * scaled-measurement path needs a live, transformed iframe (covered by the
  * canvas integration paths), so only the guards are asserted here.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   measureCanvasElementRect,
   unionCanvasOverlayRects,

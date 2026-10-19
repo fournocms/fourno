@@ -8,7 +8,7 @@
  * commit and cancel-without-committing flows.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { useEffect, act } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { useEditorStore } from '@site/store/store'

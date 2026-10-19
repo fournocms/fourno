@@ -4,7 +4,7 @@
  * original): the editor canvas and media viewer must not download a
  * multi-MB original on high-DPI displays any more than a published page.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { buildVariantSrcset, pickVariantUrl } from '../variants'
 
 const asset = {

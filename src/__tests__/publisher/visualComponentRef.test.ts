@@ -13,7 +13,7 @@
  *  6. Nested VC refs (recursive inlining)
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { publishPage, renderNode } from '@core/publisher'
 import type { VisualComponent, VCParam, VCNode } from '@core/visualComponents'
 import { makeModule, makeRegistry, makePage, makeSite, makeAccumulators } from './helpers'

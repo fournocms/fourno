@@ -5,7 +5,7 @@
  * one shared place and behaves identically, plus the explicit publish-dispatch
  * contract (F2) and schema-derived defaults (F7).
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { SquareSolidIcon } from 'pixel-art-icons/icons/square-solid'
 
 import type { AnyModuleDefinition, ModuleDefinition } from '@core/module-engine'

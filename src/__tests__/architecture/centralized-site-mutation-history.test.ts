@@ -6,11 +6,11 @@
  * history/dirty/timestamp contract and can distinguish semantic no-ops from
  * real document changes.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { join, relative } from 'path'
 
-const ROOT = join(import.meta.dir, '../../../')
+const ROOT = join(import.meta.dirname, '../../../')
 const SLICE_FILES = [
   'src/admin/pages/site/store/slices/styleRuleSlice.ts',
   'src/admin/pages/site/store/slices/styleRule/crudActions.ts',

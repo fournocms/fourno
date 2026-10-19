@@ -8,7 +8,7 @@
  * which of the same-origin rules the registry happens to yield last.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import type { StyleRule } from '@core/page-tree'
 import type { NewStyleRule } from '@core/siteImport'
 import {

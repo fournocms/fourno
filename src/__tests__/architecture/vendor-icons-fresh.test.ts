@@ -25,12 +25,12 @@
  * catalog locally.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { spawnSync } from 'child_process'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const SRC_DIR = join(PROJECT_ROOT, 'src')
 const VENDOR_ICONS_DIR = join(PROJECT_ROOT, 'vendor/pixel-art-icons/icons')
 const VENDOR_DIST_ICONS_DIR = join(

@@ -3,7 +3,7 @@
  * the co-editing WebSocket. The full two-client convergence round-trip runs
  * in collabRelayIntegration.test.ts against a real Bun.serve.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import * as encoding from 'lib0/encoding'
 import { SITE_SOCKET_PATH } from '@core/collab'
 import { createCollabRelay, type CollabRelay } from '../../../server/collab/relay'

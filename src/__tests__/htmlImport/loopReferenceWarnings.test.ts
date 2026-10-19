@@ -11,7 +11,7 @@
  * The registry these are checked against is the same one `site_list_loop_sources`
  * advertises, so the documented shape and the accepted shape finally agree.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import '@modules/base'
 import '@core/loops/sources'
 import { importHtml } from '@core/htmlImport'

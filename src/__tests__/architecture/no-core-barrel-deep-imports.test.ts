@@ -24,11 +24,11 @@
  * outside the owning module. The bare barrel path `@core/<module>` is allowed.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname } from 'path'
 
-const ROOT = join(import.meta.dir, '../../..')
+const ROOT = join(import.meta.dirname, '../../..')
 
 const BARRELLED_MODULES = [
   'page-tree',

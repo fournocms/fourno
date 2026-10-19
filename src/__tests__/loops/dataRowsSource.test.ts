@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { DataRowsSource } from '@core/loops/sources/dataRows'
 
 describe('data.rows loop source', () => {

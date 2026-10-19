@@ -1,9 +1,9 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const dataTableCss = readFileSync(
-  join(import.meta.dir, '../../ui/components/DataTable/DataTable.module.css'),
+  join(import.meta.dirname, '../../ui/components/DataTable/DataTable.module.css'),
   'utf8',
 )
 

@@ -12,7 +12,7 @@
  * Runs on SQLite by default and on Postgres with
  * `DB=postgres TEST_POSTGRES_URL=...` (see `createTestDb`).
  */
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

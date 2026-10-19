@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, test } from 'bun:test'
+import { beforeAll, describe, expect, test } from 'vitest'
 import sharp from 'sharp'
 import {
   AI_USER_IMAGE_MAX_PER_MESSAGE,

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteDocument } from '@core/page-tree'
 import { publishPage, collectHoleSubtreeModuleIds } from '@core/publisher'
 import { makeModule, makePage, makeRegistry, makeSite } from './helpers'

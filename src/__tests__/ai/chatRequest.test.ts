@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import {
   AI_CHAT_MAX_REQUEST_BYTES,

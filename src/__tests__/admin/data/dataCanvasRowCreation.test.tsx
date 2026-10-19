@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { DataCanvas } from '@admin/pages/data/components/DataCanvas/DataCanvas'
@@ -68,7 +68,7 @@ function renderCanvas(table: DataTable, rows: DataRow[], overrides: Partial<Reac
       onSelectRow={() => {}}
       onAddRow={async () => {}}
       onDeleteRow={() => {}}
-      onDuplicateRow={mock()}
+      onDuplicateRow={vi.fn()}
       onEditInContent={() => {}}
       onOpenInSiteEditor={() => {}}
       onOpenRow={() => {}}

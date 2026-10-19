@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { getToolCallDisplay } from '@site/panels/AgentPanel'
 
 describe('site_apply_css tool-call display', () => {

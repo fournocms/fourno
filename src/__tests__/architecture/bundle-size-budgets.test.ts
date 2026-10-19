@@ -48,11 +48,11 @@
  * @see codemirror-lazy-only.test.ts — sibling gate (lazy boundary protection)
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, statSync, existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const DIST_ASSETS = join(REPO_ROOT, 'dist/assets')
 const VENDORED_ICON_DIST = join(REPO_ROOT, 'vendor/pixel-art-icons/dist/icons')
 

@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const INDEX_HTML_PATH = join(import.meta.dir, '../../../index.html')
+const INDEX_HTML_PATH = join(import.meta.dirname, '../../../index.html')
 
 describe('initial HTML loading shell', () => {
   it('renders the loading spinner before the React bundle executes', () => {

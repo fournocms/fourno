@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ModulePickerDropdown } from '@site/toolbar/ModulePickerDropdown'
 import { useEditorStore } from '@site/store/store'
@@ -59,7 +59,7 @@ function loadSite() {
 
 describe('ModuleInserterDialog favorites', () => {
   it('renders a favorite toggle for every visible module tile', async () => {
-    globalThis.fetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'PUT') return jsonResponse({ value: JSON.parse(String(init.body)).value })
       return jsonResponse({ value: { favorites: [] } })
     }) as typeof fetch
@@ -83,7 +83,7 @@ describe('ModuleInserterDialog favorites', () => {
   })
 
   it('uses aria-pressed and the label to expose active favorite state', async () => {
-    globalThis.fetch = mock(async (_input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'PUT') {
         return jsonResponse({ value: JSON.parse(String(init.body)).value })
       }
@@ -112,7 +112,7 @@ describe('ModuleInserterDialog favorites', () => {
 
   it('toggles a module favorite without inserting or closing the dialog', async () => {
     const calls: Array<{ input: RequestInfo | URL; init?: RequestInit }> = []
-    globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ input, init })
       if (init?.method === 'PUT') return jsonResponse({ value: JSON.parse(String(init.body)).value })
       return jsonResponse({ value: { favorites: [] } })

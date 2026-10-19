@@ -14,7 +14,7 @@
  *   - The Account workspace is accessible to a viewer-role user (no
  *     capability gating — self-targeted)
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { canAccessWorkspace } from '@admin/access'
 import { AccountPage } from '@admin/pages/account/AccountPage'

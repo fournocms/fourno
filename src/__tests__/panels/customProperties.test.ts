@@ -6,7 +6,7 @@
  * exercised by the browser smoke; here we lock the curated/uncurated split.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   getCustomProperties,
   isCuratedProperty,

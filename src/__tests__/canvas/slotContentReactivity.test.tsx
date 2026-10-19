@@ -10,7 +10,7 @@
  * inside a slot doesn't update the canvas preview.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { DndContext } from '@dnd-kit/core'

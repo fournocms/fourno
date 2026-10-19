@@ -10,7 +10,7 @@
  * genuinely separate from the list.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { CORE_CAPABILITIES } from '@core/capabilities'
 import { ALL_PICKER_CAPABILITIES } from '@admin/pages/users/utils/capabilities'
 import { CAPABILITY_META } from '@admin/shared/CapabilityPicker'

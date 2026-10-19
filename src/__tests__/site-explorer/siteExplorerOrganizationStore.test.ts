@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { createDefaultSiteExplorerOrganization, type SiteDocument } from '@core/page-tree'
 import { DEFAULT_SCRIPT_RUNTIME_CONFIG } from '@core/site-runtime'

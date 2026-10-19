@@ -14,7 +14,7 @@
  *   8. wrapNodes uses closest common ancestor for cross-parent selections.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import '@modules/base/index'
 

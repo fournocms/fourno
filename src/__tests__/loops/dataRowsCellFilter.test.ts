@@ -13,7 +13,7 @@
  * field some rows lack behaves the way an author expects.
  */
 
-import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
+import { describe, expect, it, beforeAll, afterAll } from 'vitest'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
 import { fetchPublishedDataRowItems } from '@core/loops/sources/dataRows'
 import type { CellFilter } from '@core/loops/cellFilter'

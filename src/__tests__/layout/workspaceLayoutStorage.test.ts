@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   EDITOR_LAYOUT_STORAGE_KEY,
   readEditorLayout,

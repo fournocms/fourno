@@ -14,7 +14,7 @@
  * globalThis), same pattern the agent-browser e2e and `cmsPlugins.test.ts`
  * lifecycle test use.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

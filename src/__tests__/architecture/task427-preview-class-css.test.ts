@@ -44,7 +44,7 @@
  * @see src/admin/pages/site/components/Canvas/ClassStyleInjector.tsx — generateClassCSS, bagToCSS
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { collectClassCSS, publishPage } from '@core/publisher'
 import { classKindSelector, type Page, type PageNode, type SiteDocument, type StyleRule } from '@core/page-tree'
 import { makeModule, makeRegistry, makePage, makeSite } from '../publisher/helpers'

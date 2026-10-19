@@ -7,7 +7,7 @@
  * the node needing to remember a binding it never had a UI to set.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeModule, makePage, makeRegistry, makeSite } from './helpers'
 import { publishPage } from '@core/publisher'
 import { effectiveNodeBindings, resolveDynamicProps } from '@core/templates/dynamicBindings'

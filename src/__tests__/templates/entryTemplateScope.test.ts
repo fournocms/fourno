@@ -9,7 +9,7 @@
  * own entry routes. The one place it was meant to apply was the one place it
  * could not.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeSite } from '../fixtures'
 import { composeTemplateChain, resolveTemplateChain } from '@core/templates'
 import { assetScopeAppliesToPage } from '@core/site-runtime/runtimeConfig'

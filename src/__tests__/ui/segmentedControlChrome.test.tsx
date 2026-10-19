@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { cleanup, render, screen } from '@testing-library/react'
 import { SegmentedControl } from '@ui/components/SegmentedControl'

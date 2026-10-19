@@ -17,7 +17,7 @@
  *  SS-11 New slot-instance has locked: true
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { syncSlotInstances, applySlotSyncResult } from '@core/visualComponents'
 import type { BaseNode } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'

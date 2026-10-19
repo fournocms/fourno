@@ -14,7 +14,7 @@
  * AbortSignal.timeout) that previously had to be worked around in plugin
  * authoring.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createPluginVm, type PluginVmEnv } from '../../../server/plugins/quickjs/vm'
 
 interface RecorderEntry {

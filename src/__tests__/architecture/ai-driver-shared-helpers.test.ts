@@ -20,11 +20,11 @@
  * 2026-06 unification.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const read = (rel: string) => readFileSync(join(REPO_ROOT, rel), 'utf8')
 
 const DRIVER_FILES = [

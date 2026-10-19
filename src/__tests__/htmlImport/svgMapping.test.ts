@@ -6,7 +6,7 @@
  * survives (text-only anchors stay leaves).
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import type { PageNode } from '@core/page-tree'
 import { importHtml } from '@core/htmlImport'

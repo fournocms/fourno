@@ -1,4 +1,4 @@
-import { describe, expect, it, spyOn } from 'bun:test'
+import { describe, expect, it, vi } from 'vitest'
 import { uploadMediaMcpTool } from './uploadMediaTool'
 import type { ToolContext } from '../../runtime/types'
 
@@ -65,7 +65,7 @@ describe('media_upload', () => {
       started = resolve
     })
     let observedSignal: AbortSignal | null = null
-    const fetchMock = spyOn(globalThis, 'fetch').mockImplementation((_input, init) => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation((_input, init) => {
       observedSignal = init?.signal ?? null
       started()
       return new Promise<Response>((_resolve, reject) => {

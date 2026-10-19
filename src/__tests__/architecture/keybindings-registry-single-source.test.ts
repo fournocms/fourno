@@ -20,11 +20,11 @@
  *   - Spotlight.tsx            — ⌘ symbol appears only in a JSDoc comment
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 const ADMIN_SRC = join(SRC_ROOT, 'admin')
 
 // ─── Allowlist (relative to SRC_ROOT) ────────────────────────────────────────

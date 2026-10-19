@@ -4,7 +4,7 @@
  * Uses the createFakeDb pattern from dbTestFake.ts and the session-stub
  * approach from cmsSiteHandlers.test.ts to avoid a real DB connection.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import { DataMetaSchema } from '@core/data/schemas'
 import { handleCmsRequest } from '../../../server/handlers/cms'

@@ -1,7 +1,7 @@
 import { mkdtemp, readFile, rm, writeFile, mkdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { resolveSiteDependencyLock } from '../../../server/publish/runtime/dependencyResolver'
 import {
   ensureRuntimeDependencyCache,

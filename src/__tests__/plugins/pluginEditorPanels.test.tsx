@@ -9,7 +9,7 @@
  *      React component, "unavailable" fallback when panel id is unknown,
  *      error boundary swallows render-time crashes
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { PluginEditorPanel } from '@site/panels/PluginEditorPanel'
 import { useEditorStore } from '@site/store/store'

@@ -4,7 +4,7 @@
  * Tests the transformation from a DataTable[] to the lean DataMeta shape
  * independently of HTTP — no server, no DB, no auth.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import { buildDataMeta } from '@core/data/fields'
 import { DataMetaSchema } from '@core/data/schemas'

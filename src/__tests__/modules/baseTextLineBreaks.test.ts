@@ -10,7 +10,7 @@
  *   - `readInlineEditableText` reads `innerText` back out of a DOM element;
  *   - the published `<br>` survives the publisher-boundary sanitizer.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { TextModule } from '@modules/base/text'
 import {
   textToBreakHtml,

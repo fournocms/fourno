@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { configurePublicOrigins, resetPublicOrigins } from '../../../auth/security'
 import type { DbClient } from '../../../db/client'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'

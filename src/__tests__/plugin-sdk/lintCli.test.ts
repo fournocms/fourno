@@ -14,14 +14,14 @@
  *  • The CLI's own content-editor scaffold builds a manifest that carries
  *    `contentAccess` through `definePlugin` and lints clean
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { lintPlugin } from '../../core/plugin-sdk/cli/lint'
 import { runPluginInit } from '../../core/plugin-sdk/cli/init'
 import { readPluginDefinition } from '../../core/plugin-sdk/cli/build'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../..')
+const PROJECT_ROOT = join(import.meta.dirname, '../../..')
 
 /**
  * Plugin source trees must live INSIDE the monorepo so the dynamic `import`

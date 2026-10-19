@@ -10,7 +10,7 @@
  * the function directly. The upload CSP tests go through handleServerRequest
  * to verify end-to-end behaviour within the router.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'

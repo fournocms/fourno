@@ -12,7 +12,7 @@
  * just not in the production hot path.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import sharp from 'sharp'
 import {
   isImageVariantOk,

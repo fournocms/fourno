@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { buildAdapterShim } from '../../../server/plugins/host/media'
 import { pendingRequests, workers } from '../../../server/plugins/host/workerState'
 import type { MainToWorkerMessage } from '../../../server/plugins/protocol/messages'

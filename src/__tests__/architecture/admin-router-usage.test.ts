@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 
 function collectFiles(dir: string, exts = ['.ts', '.tsx']): string[] {
   const results: string[] = []

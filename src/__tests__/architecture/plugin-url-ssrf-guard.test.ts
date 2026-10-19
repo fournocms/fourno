@@ -16,7 +16,7 @@
  * global `fetch(` anywhere under `server/handlers/cms/`.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readdir, readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join, dirname, relative } from 'node:path'

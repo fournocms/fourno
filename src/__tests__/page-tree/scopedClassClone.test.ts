@@ -12,7 +12,7 @@
  *     are unchanged.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import type { StyleRule, Page, SiteDocument } from '@core/page-tree'
 import {
   cloneScopedClassesForNodeMap,

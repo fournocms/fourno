@@ -9,7 +9,7 @@
  *
  * Setup now takes an optional `displayName`, and an unset name stays empty.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { createUser, findUserByEmail } from '../../../server/repositories/users'

@@ -9,7 +9,7 @@
  *     with roving tabindex on the triggers
  *   - testId lands on the underlying button
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { useState } from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Tab, TabList, TabPanel, Tabs } from '@ui/components/Tabs'

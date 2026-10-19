@@ -9,7 +9,7 @@
  * returns the same component-id set.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { forEachVCRef, collectVCRefs, getReferencedComponentIds } from '@core/visualComponents'
 
 /** Mixed node map: valid refs + every shape the predicate must reject. */

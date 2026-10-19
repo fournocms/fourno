@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import { resetForTests } from '../../../server/publish/renderCache'
 import type { PublishedPageSnapshot } from '../../../server/repositories/publish'

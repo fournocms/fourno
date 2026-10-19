@@ -4,7 +4,7 @@
  * single-entry template (parentEntry binding), and pagination markup.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeModule, makePage, makeRegistry, makeSite } from './helpers'
 import { publishPage, type ResolvedLoopRenderData } from '@core/publisher'
 import type { LoopItem } from '@core/loops/types'

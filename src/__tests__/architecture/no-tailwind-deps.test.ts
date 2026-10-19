@@ -14,11 +14,11 @@
  * @see src/ui/cn.ts — in-house cn implementation
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 
 // ---------------------------------------------------------------------------
 // File walkers

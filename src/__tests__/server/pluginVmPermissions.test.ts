@@ -17,7 +17,7 @@
  * These run the VM directly (not through the install flow) so the assertion is
  * unambiguously about the VM layer and not the host's lifecycle wrapping.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createPluginVm } from '../../../server/plugins/quickjs/vm'
 
 interface RecordedCall {

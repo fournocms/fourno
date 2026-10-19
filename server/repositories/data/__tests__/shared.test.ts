@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { userRefAt, type UserJoinColumns, type UserJoinPrefix } from '../shared'
 
 /** A row with every user-ref column present but null (the LEFT-JOIN-miss shape). */

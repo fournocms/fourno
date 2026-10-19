@@ -7,7 +7,7 @@
  *   - PUSH_SCOPE / POP_SCOPE clearing arg mode and pending confirm
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { spotlightReducer, initialState } from '../state'
 import type { SpotlightOpenState } from '../state'
 import type { Command } from '../types'

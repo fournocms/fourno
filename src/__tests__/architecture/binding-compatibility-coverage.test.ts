@@ -24,7 +24,7 @@
  * @see src/admin/shared/DataBindingPicker/bindingCompatibility.ts
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { DATA_FIELD_TYPES } from '@core/data/schemas'
 import { BINDING_COMPATIBILITY } from '@admin/shared/DataBindingPicker/bindingCompatibility'
 

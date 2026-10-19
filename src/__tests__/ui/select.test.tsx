@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach } from 'vitest'
 import React, { useRef } from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Select } from '@ui/components/Select'

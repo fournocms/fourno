@@ -13,7 +13,7 @@
  * deterministic — no happy-dom layout involved.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   createCanvasOverlayMeasureSession,
   measureCanvasElementRect,

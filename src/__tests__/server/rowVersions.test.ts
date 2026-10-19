@@ -2,7 +2,7 @@
  * Version history — listing a row's published versions and restoring one
  * into the draft on the request's branch.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { getDataRow, listDataRows, saveDataRowDraft } from '../../../server/repositories/data'
 import {

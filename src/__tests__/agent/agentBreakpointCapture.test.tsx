@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import type { AiToolOutput } from '@core/ai'
 import { DEFAULT_BREAKPOINTS, type Breakpoint } from '@core/page-tree'

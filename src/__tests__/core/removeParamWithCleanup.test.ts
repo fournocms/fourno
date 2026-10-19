@@ -13,7 +13,7 @@
  *   RP-6 — no-op when paramId doesn't exist
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { create } from 'mutative'
 import { useEditorStore } from '@site/store/store'
 import type { SiteDocument } from '@core/page-tree'

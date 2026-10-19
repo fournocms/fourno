@@ -11,7 +11,7 @@
  *   3. `executeAiTool` — pre-dispatch re-check (defence in depth).
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { Type } from '@sinclair/typebox'
 import { toolAllowedForCapabilities } from '../../../server/ai/tools/capabilityGate'
 import { selectToolsForScope } from '../../../server/ai/tools'

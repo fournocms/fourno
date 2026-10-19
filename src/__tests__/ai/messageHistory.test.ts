@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { INTERRUPTED_TOOL_RESULT_ERROR } from '@core/ai'
 import {
   buildMessageHistory,

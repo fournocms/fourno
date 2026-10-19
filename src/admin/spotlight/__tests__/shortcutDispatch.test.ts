@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { getKeybindingForCommand } from '../keybindings'
 import { findMatchingShortcutCommand } from '../shortcutDispatch'

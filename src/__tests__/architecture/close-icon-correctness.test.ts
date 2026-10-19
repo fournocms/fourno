@@ -36,11 +36,11 @@
  * @see User directive msg #1967 — Fix X logo used as close icon
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 
 // ---------------------------------------------------------------------------
 // File walker (same pattern as no-third-party-icons.test.ts)

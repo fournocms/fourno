@@ -6,7 +6,7 @@
  * Required before J5 (canvas) ships — the site store calls these.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { create } from 'mutative'
 import type { SiteDocument } from '@core/page-tree'
 import {

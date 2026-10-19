@@ -15,7 +15,7 @@
  * itself. End-to-end rendering is covered by dynamicRender.test.ts.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { resolveDynamicProps, type TemplateRenderDataContext } from '@core/templates/dynamicBindings'
 import {
   containsTokens,

@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it, vi } from 'vitest'
 import { runEntryOp, type EntryOpDeps } from '@content/utils/entryOp'
 import type { SaveMessage } from '@content/hooks/useContentEntryDraft'
 
@@ -15,7 +15,7 @@ function makeDeps() {
 describe('runEntryOp — save-state machine', () => {
   it('runs saving → saved and applies the result on success', async () => {
     const { deps, saveMessages, errors } = makeDeps()
-    const apply = mock((result: number) => { void result })
+    const apply = vi.fn((result: number) => { void result })
 
     await runEntryOp(deps, async () => 42, {
       permitted: true,
@@ -59,7 +59,7 @@ describe('runEntryOp — save-state machine', () => {
 
   it('skips the op and surfaces the permission message when not permitted', async () => {
     const { deps, saveMessages, errors } = makeDeps()
-    const fn = mock(async () => 1)
+    const fn = vi.fn(async () => 1)
 
     await runEntryOp(deps, fn, {
       permitted: false,

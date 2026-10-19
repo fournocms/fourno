@@ -19,11 +19,11 @@
  *      as a first-class function (not baked into `validateSite`).
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const ROOT = join(import.meta.dir, '../../../')
+const ROOT = join(import.meta.dirname, '../../../')
 
 const PAGE_TREE_SCHEMAS  = join(ROOT, 'src/core/page-tree/siteDocument.ts')
 const SITE_REPOSITORY    = join(ROOT, 'server/repositories/site.ts')

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { publishPage } from '@core/publisher'
 import type { PublishedPageRuntimeAssets } from '@core/site-runtime'
 import { makeModule, makePage, makeRegistry, makeSite } from './helpers'

@@ -4,7 +4,7 @@
  * tall as the whole document. The scanner itself is covered by
  * `canvas/resolveViewportUnits.test.ts`; this checks the HTML walk.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { resolveViewportUnitsInHtml } from '@core/utils/viewportUnits'
 
 const viewport = { width: 1280, height: 800 }

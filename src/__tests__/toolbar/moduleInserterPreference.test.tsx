@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import {
   DEFAULT_MODULE_INSERTER_PREFERENCE,
@@ -32,7 +32,7 @@ afterEach(() => {
 
 describe('useModuleInserterPreference', () => {
   it('starts with default favorites before the server preference loads', async () => {
-    globalThis.fetch = mock(async () => new Promise<Response>(() => {})) as typeof fetch
+    globalThis.fetch = vi.fn(async () => new Promise<Response>(() => {})) as typeof fetch
 
     const { result } = renderHook(() => useModuleInserterPreference())
 
@@ -44,7 +44,7 @@ describe('useModuleInserterPreference', () => {
     const stored: ModuleInserterPreference = {
       favorites: [{ kind: 'module', id: 'base.list' }],
     }
-    globalThis.fetch = mock(async () => jsonResponse({ value: stored })) as typeof fetch
+    globalThis.fetch = vi.fn(async () => jsonResponse({ value: stored })) as typeof fetch
 
     const { result } = renderHook(() => useModuleInserterPreference())
 
@@ -54,7 +54,7 @@ describe('useModuleInserterPreference', () => {
 
   it('toggles a favorite and persists the ordered preference', async () => {
     const calls: Array<{ input: RequestInfo | URL; init?: RequestInit }> = []
-    globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       calls.push({ input, init })
       if (init?.method === 'PUT') {
         return jsonResponse({ value: JSON.parse(String(init.body)).value })
@@ -87,7 +87,7 @@ describe('useModuleInserterPreference', () => {
   })
 
   it('keeps separate hook consumers in sync when favorites change', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === 'PUT') {
         return jsonResponse({ value: JSON.parse(String(init.body)).value })
       }
@@ -116,9 +116,9 @@ describe('useModuleInserterPreference', () => {
   })
 
   it('logs load failures and keeps default favorites available', async () => {
-    const logged = mock(() => {})
+    const logged = vi.fn(() => {})
     console.error = logged as typeof console.error
-    globalThis.fetch = mock(async () => jsonResponse({ error: 'nope' }, 500)) as typeof fetch
+    globalThis.fetch = vi.fn(async () => jsonResponse({ error: 'nope' }, 500)) as typeof fetch
 
     const { result } = renderHook(() => useModuleInserterPreference())
 
@@ -129,9 +129,9 @@ describe('useModuleInserterPreference', () => {
   })
 
   it('keeps defaults without logging when the session expires during preference load', async () => {
-    const logged = mock(() => {})
+    const logged = vi.fn(() => {})
     console.error = logged as typeof console.error
-    globalThis.fetch = mock(async () => jsonResponse({ error: 'Unauthorized' }, 401)) as typeof fetch
+    globalThis.fetch = vi.fn(async () => jsonResponse({ error: 'Unauthorized' }, 401)) as typeof fetch
 
     const { result } = renderHook(() => useModuleInserterPreference())
 

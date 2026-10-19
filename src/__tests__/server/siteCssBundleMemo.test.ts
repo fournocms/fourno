@@ -17,7 +17,7 @@
  *  (d) `userStyles` (page-scoped) is rebuilt per call, never memoised.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import {
   buildSiteCssBundle,
   buildPublishedSiteCssBundle,

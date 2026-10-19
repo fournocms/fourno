@@ -2,7 +2,7 @@
  * Site branches endpoints — registry CRUD, capability + step-up gates, and
  * the header-scoped fallback once a branch is gone.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { upsertDataRowDraft } from '../../../server/repositories/data'
 import {
   createCapabilityTestHarness,

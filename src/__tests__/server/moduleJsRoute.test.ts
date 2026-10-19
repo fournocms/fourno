@@ -3,7 +3,7 @@
  * Fake DbClient intercepts the published-snapshot query — same pattern as
  * holeRouteHandler.test.ts.
  */
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import {
   handleModuleJsAssetRequest,

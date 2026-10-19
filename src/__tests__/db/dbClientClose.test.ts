@@ -11,7 +11,7 @@
 import { mkdtemp, mkdir, rm, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { createTestDb } from '../helpers/createTestDb'
 

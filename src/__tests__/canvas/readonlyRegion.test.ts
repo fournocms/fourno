@@ -9,7 +9,7 @@
  * that editable content as read-only — the hover hint fired over the whole page
  * and double-click opened the template instead of editing the node.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { closestReadonlyRegion, isElementLike } from '@site/canvas/readonlyRegion'
 
 function readonly(tag: string): HTMLElement {

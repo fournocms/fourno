@@ -6,7 +6,7 @@
  * nested component body overwrite the real canvas iframe `<body>` attributes.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import { DndContext } from '@dnd-kit/core'

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { postToolResult } from '@admin/ai/toolResultApi'
 
 function abortError(): Error {

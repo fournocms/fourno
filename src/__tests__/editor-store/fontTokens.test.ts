@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { classKindSelector, type StyleRule } from '@core/page-tree'
 import type { FontEntry } from '@core/fonts'

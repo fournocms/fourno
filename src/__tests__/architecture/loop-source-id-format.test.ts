@@ -5,7 +5,7 @@
  * Mirrors `module-id-format.test.ts` for ModuleDefinitions.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { loopSourceRegistry } from '@core/loops/registry'
 import '@core/loops/sources'
 

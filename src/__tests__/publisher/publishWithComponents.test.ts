@@ -9,7 +9,7 @@
  *   - Unknown componentId → HTML comment
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 
 // Populate module registry (side-effect: registers all base modules)
 import '@modules/base'

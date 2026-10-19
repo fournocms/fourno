@@ -13,7 +13,7 @@
  * two divergent per-file copies (Task #296).
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { escapeHtml, isSafeUrl, safeUrl, sanitiseCssValue } from '@core/publisher'
 
 // ===========================================================================

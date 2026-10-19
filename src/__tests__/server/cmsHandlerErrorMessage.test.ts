@@ -16,7 +16,7 @@
  *     A well-formed payload yields the favicon; an empty or malformed payload
  *     resolves to `null` with no throw and no silently-wrong value.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 import { createSite } from '../../../server/repositories/setup'
 import { handleSetupRoutes } from '../../../server/handlers/cms/setup'

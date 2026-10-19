@@ -13,7 +13,7 @@
  * around.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { siteTools } from '../../../server/ai/tools/site'
 import { siteWriteTools } from '../../../server/ai/tools/site/writeTools'
 

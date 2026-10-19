@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it } from 'bun:test'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createSqliteClient } from '../db/sqlite'
@@ -21,7 +21,7 @@ import { tickPluginScheduler } from '../plugins/scheduler'
  *      (that's the duplication we removed), and each must keep its own
  *      documented, distinct lock key unchanged.
  */
-const SERVER_DIR = join(import.meta.dir, '..')
+const SERVER_DIR = join(import.meta.dirname, '..')
 
 let db: DbClient
 

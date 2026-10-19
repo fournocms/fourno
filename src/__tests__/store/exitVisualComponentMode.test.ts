@@ -8,7 +8,7 @@
  * Implementation: src/core/editor-store/slices/uiSlice.ts
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 
 // ---------------------------------------------------------------------------

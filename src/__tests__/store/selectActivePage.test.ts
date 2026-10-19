@@ -8,7 +8,7 @@
  * stable so per-node selector outputs don't churn.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { selectActivePage, type EditorStore } from '@site/store/store'
 
 interface CountingPages {

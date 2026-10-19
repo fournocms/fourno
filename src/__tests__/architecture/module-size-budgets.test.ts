@@ -54,11 +54,11 @@
  * @see bundle-size-budgets.test.ts — sibling gate (output size, not source size)
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'fs'
 import { join, relative, sep } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 
 /** Directories (relative to repo root) whose `.ts`/`.tsx` modules are gated. */
 const SCAN_ROOTS = ['src', 'server'] as const

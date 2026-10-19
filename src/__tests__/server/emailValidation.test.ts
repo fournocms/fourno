@@ -6,7 +6,7 @@
  * Patches that do not touch the email must still work on a user whose
  * stored address predates the check.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { hashPassword } from '../../../server/auth/tokens'

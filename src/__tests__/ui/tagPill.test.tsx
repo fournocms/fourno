@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { TagPill } from '@ui/components/TagPill'

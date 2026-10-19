@@ -6,11 +6,11 @@
  * module CSS is intentionally excluded because those styles ship to user pages.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 const SCAN_ROOTS = [join(SRC_ROOT, 'admin'), join(SRC_ROOT, 'ui')]
 const GLOBALS_CSS = join(SRC_ROOT, 'styles/globals.css')
 const EDITOR_CHROME_INJECTOR = join(SRC_ROOT, 'admin/pages/site/canvas/EditorChromeInjector.tsx')

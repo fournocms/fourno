@@ -8,7 +8,7 @@
  *   3. Host UI integration — `PluginCanvasOverlayLayer` renders the
  *      plugin's React component, ErrorBoundary contains crashes
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { PluginCanvasOverlayLayer } from '@site/canvas/PluginCanvasOverlayLayer'
 import {

@@ -10,7 +10,7 @@
  * reads and denial via the thrown access error (exactly what the dispatcher
  * turns into an error reply in production).
  */
-import { describe, expect, it, beforeEach } from 'bun:test'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { createSqliteClient } from '../../../db/sqlite'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'
 import { runMigrations } from '../../../db/runMigrations'

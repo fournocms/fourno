@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const ROOT = join(import.meta.dir, '../../..')
+const ROOT = join(import.meta.dirname, '../../..')
 const RUNTIME_SOURCE_ROOTS = ['server', 'src/admin', 'src/core']
 
 function read(path: string): string {

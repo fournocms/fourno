@@ -6,7 +6,7 @@
  * `siteImportCommands.test.ts`.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { getSiteExportCommands } from '@admin/spotlight/commands/siteExport'
 import { useAdminUi } from '@admin/state/adminUi'
 

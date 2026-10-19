@@ -21,7 +21,7 @@
  * @see server/db/migrations-sqlite.ts — SQLite dialect translations
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { pgMigrations } from '../../../server/db/migrations-pg'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, mock } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useEditorStore } from '@site/store/store'
@@ -18,7 +18,7 @@ function jsonResponse(body: unknown, status = 200): Response {
 beforeEach(() => {
   localStorage.clear()
   __resetModuleInserterPreferenceForTests()
-  globalThis.fetch = mock(async () => jsonResponse({ value: null })) as typeof fetch
+  globalThis.fetch = vi.fn(async () => jsonResponse({ value: null })) as typeof fetch
   useEditorStore.setState({
     site: null,
     activePageId: null,
@@ -76,7 +76,7 @@ describe('CanvasNotch insertion events', () => {
   })
 
   it('renders server favorite modules as notch shortcuts', async () => {
-    globalThis.fetch = mock(async () =>
+    globalThis.fetch = vi.fn(async () =>
       jsonResponse({
         value: { favorites: [{ kind: 'module', id: 'base.list' }] },
       }),

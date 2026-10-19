@@ -9,7 +9,7 @@
  * - base.visual-component-ref never shown
  */
 
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { ModulePickerDropdown } from '@site/toolbar/ModulePickerDropdown'
@@ -37,7 +37,7 @@ afterEach(() => {
 function resetStore() {
   localStorage.clear()
   __resetModuleInserterPreferenceForTests()
-  globalThis.fetch = mock(async () => jsonResponse({ value: null })) as typeof fetch
+  globalThis.fetch = vi.fn(async () => jsonResponse({ value: null })) as typeof fetch
   useEditorStore.setState({
     site: null,
     activePageId: null,

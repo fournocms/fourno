@@ -6,7 +6,7 @@
  * closed panels without using the top toolbar.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { readFileSync } from 'fs'
@@ -22,7 +22,7 @@ import { pageToCells } from '@core/data/pageFromRow'
 import '@modules/base/index'
 
 const LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 
 const originalFetch = globalThis.fetch
 

@@ -5,7 +5,7 @@
  * is the past-tense phrase a sentence embeds. They differ only under a minute,
  * where the bare form is "now" and appending the word would read "now ago".
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { relativeIso, relativeIsoAgo } from '@admin/pages/branches/reviewFormat'
 
 function isoAgo(ms: number): string {

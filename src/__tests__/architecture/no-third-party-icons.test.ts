@@ -32,11 +32,11 @@
  * @see Task #349     — Remove lucide-react dead dependency from package.json
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 
 // ---------------------------------------------------------------------------
 // File walker (shared pattern from no-anthropic-sdk.test.ts)

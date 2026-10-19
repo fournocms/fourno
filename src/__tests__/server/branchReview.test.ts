@@ -3,7 +3,7 @@
  * page tree diffs, file text), the request/comment/decline lifecycle over
  * HTTP with its capability gates, and the before/after page render.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { applyBranchMerge, planBranchMerge } from '../../../server/branches/merge'
 import { listDataRows, saveDataRowDraft, upsertDataRowDraft } from '../../../server/repositories/data'

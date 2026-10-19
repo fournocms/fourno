@@ -14,7 +14,7 @@
  *   - BreakpointFrame no longer mounts an inline-edit overlay (the node itself
  *     is the editor now).
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 
 const CANVAS_ROOT = new URL('../../admin/pages/site/canvas/CanvasRoot.tsx', import.meta.url)

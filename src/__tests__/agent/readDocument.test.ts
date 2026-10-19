@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeAll } from 'bun:test'
+import { describe, expect, it, beforeAll } from 'vitest'
 import { renderAgentDocument, type AgentDocumentRenderOptions } from '@core/ai'
 import { registry } from '@core/module-engine'
 import { classKindSelector, type Page, type SiteDocument } from '@core/page-tree'

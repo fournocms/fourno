@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { mkdtempSync, rmSync, readFileSync } from 'node:fs'
 import { readFile, writeFile } from 'node:fs/promises'
 import { extname, join } from 'node:path'
@@ -527,7 +527,7 @@ describe('CMS media handlers', () => {
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
     const body = new FormData()
     const originalConsoleError = console.error
-    const loggedErrors = mock(() => {})
+    const loggedErrors = vi.fn(() => {})
     console.error = loggedErrors as typeof console.error
     body.set(
       'file',

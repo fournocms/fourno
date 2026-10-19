@@ -2,7 +2,7 @@
  * Unit tests for conflicts — slug and rule-name collision detection.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { detectConflicts, applyConflictResolutions } from '@core/siteImport'
 import type {
   ImportPlan,

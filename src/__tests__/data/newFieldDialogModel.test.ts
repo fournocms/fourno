@@ -7,7 +7,7 @@
  * function and the dialog throws on open. Option ids must be generated with a
  * primitive that does not depend on secure-context availability.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import { DataFieldSchema } from '@core/data/schemas'
 import { fieldIdError, makeOption, slugifyOptionValue } from '@admin/pages/data/components/NewFieldDialog/newFieldDialogModel'

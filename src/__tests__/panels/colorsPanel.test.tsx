@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React, { act } from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { ColorsPanelBody } from '@site/panels/ColorsPanel'

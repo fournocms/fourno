@@ -1,4 +1,4 @@
-import { describe, expect, spyOn, test } from 'bun:test'
+import { describe, expect, test, vi } from 'vitest'
 import { resolveModelCapabilities } from '../../../server/ai/drivers/modelCapabilities'
 import { listProviderModels } from '../../../server/ai/drivers/modelList'
 import type {
@@ -67,7 +67,7 @@ describe('resolveModelCapabilities', () => {
   })
 
   test('fails closed to the static capability when live discovery fails', async () => {
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       const driver = provider(VISION, async () => {
         throw new Error('catalogue unavailable')
@@ -101,7 +101,7 @@ describe('resolveModelCapabilities', () => {
   })
 
   test('fails closed for every waiter when a de-duplicated lookup rejects', async () => {
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     let calls = 0
     try {
       const driver = provider(VISION, async () => {

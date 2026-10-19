@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { INTERRUPTED_TOOL_RESULT_ERROR } from '@core/ai'
 import type { AiProvider, AiStreamRequest } from '../../../server/ai/drivers/types'
 import type { ConversationsPersister } from '../../../server/ai/runtime/persister'

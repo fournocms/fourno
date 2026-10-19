@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, waitFor } from '@testing-library/react'
 import { withCanvasDomReadyReplay } from '@admin/pages/site/canvas/canvasDomReadyReplay'
 

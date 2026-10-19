@@ -8,7 +8,7 @@
  * frameworks in. The canvas and the publisher share one generator, so both are
  * asserted here.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { FrameworkPreferencesSettings, FrameworkSettings } from '@core/framework-schema'
 import {
   applyFrameworkPreset,

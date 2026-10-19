@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { getCanvasNodeClassIds, getCanvasNodeClassName } from '@site/canvas/canvasNodeClassName'
 import { classKindSelector, type StyleRule } from '@core/page-tree'
 

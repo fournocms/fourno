@@ -10,7 +10,7 @@
  * never the thing that broke: `resolveHref` returned a plausible-looking key and every consumer of it
  * dutifully failed to find that key. The defect was only visible as warnings and missing style rules.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import { buildImportPlan } from '@core/siteImport'
 import type { FileMap } from '@core/siteImport'

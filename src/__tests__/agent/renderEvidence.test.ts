@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 interface RasterOptions {
   backgroundColor?: string
@@ -26,7 +26,7 @@ interface RasterCall {
 }
 
 const rasterCalls: RasterCall[] = []
-const toCanvasMock = mock(async (root: HTMLElement, options: RasterOptions = {}) => {
+const toCanvasMock = vi.fn(async (root: HTMLElement, options: RasterOptions = {}) => {
   const ratio = options.pixelRatio ?? 1
   const rect = root.getBoundingClientRect()
   // Canvas width/height use WebIDL integer conversion rather than rounding.
@@ -79,7 +79,7 @@ const toCanvasMock = mock(async (root: HTMLElement, options: RasterOptions = {})
   return canvas
 })
 
-mock.module('html-to-image', () => ({ toCanvas: toCanvasMock }))
+vi.mock('html-to-image', () => ({ toCanvas: toCanvasMock }))
 
 const { captureAgentRenderSnapshot, SnapshotNodeNotFoundError } = await import('@site/agent')
 

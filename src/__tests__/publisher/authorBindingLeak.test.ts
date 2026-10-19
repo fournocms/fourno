@@ -12,7 +12,7 @@
  * people keys are leaf strings, and a non-scalar value renders as nothing
  * rather than as JSON.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { interpolateTokens } from '@core/templates/tokenInterpolation'
 import type { TemplateContext } from '@core/templates/contextFrames'
 

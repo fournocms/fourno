@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, spyOn } from 'bun:test'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { createSqliteClient } from '../../../db/sqlite'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'
 import { runMigrations } from '../../../db/runMigrations'
@@ -155,7 +155,7 @@ describe('mcp http transport', () => {
     expect(res?.status).toBe(200)
     expect(parseRpcBody(await res!.text()).result).toBeDefined()
 
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       const mismatch = await handleMcpHttp(
         mcpRequest(body, token, { ...headers, 'Mcp-Name': 'site_read_styles' }),
@@ -182,7 +182,7 @@ describe('mcp http transport', () => {
         },
       },
     })
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       const res = await handleMcpHttp(
         mcpRequest(body, token, {

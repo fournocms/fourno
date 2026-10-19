@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 
 const SEGMENTED_CONTROL_CSS = 'src/ui/components/SegmentedControl/SegmentedControl.module.css'

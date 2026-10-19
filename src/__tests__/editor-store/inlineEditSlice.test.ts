@@ -4,7 +4,7 @@
  * guards (non-editable modules, link-with-children, non-string props).
  * Spec: docs/superpowers/specs/2026-06-10-inline-text-editing-design.md
  */
-import { describe, it, expect, beforeEach, spyOn } from 'bun:test'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 // Side-effect imports: register the modules under test into the global registry.
 import '@modules/base/text'
@@ -99,7 +99,7 @@ describe('startInlineEdit', () => {
   it('no-ops with a [canvas] warning when the stored prop is not a string', () => {
     const { nodeId } = setupSiteWithTextNode()
     useEditorStore.getState().updateNodeProps(nodeId, { text: 42 })
-    const warn = spyOn(console, 'warn').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     useEditorStore.getState().startInlineEdit(nodeId, 'bp-desktop')
     expect(useEditorStore.getState().activeInlineEdit).toBeNull()
     expect(warn).toHaveBeenCalledTimes(1)

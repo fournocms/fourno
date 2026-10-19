@@ -9,7 +9,7 @@
  * stable and the loop body subtree does not re-render.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import type { Page, PageNode } from '@core/page-tree'
 import { selectSitePagesLoopItems } from '@site/canvas/useLoopPreviewItems'
 

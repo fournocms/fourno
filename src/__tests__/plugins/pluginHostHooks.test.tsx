@@ -8,7 +8,7 @@
  * never granted store access cannot subscribe to editor state just because
  * its code runs in the admin window.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { PluginEditorPanel } from '@site/panels/PluginEditorPanel'
 import { useEditorStore as useHostEditorStore } from '@site/store/store'

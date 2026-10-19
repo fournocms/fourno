@@ -3,7 +3,7 @@
  * field-level merges, conflicts and their resolutions, bases moving on, and
  * the endpoints' gates.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { MergeUndoError, applyBranchMerge, planBranchMerge, undoBranchMerge } from '../../../server/branches/merge'
 import { createDataTable, getDataRow, getDataTable, listDataRows, saveDataRowDraft, softDeleteDataRow, upsertDataRowDraft } from '../../../server/repositories/data'

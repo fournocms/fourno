@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { performGatedFetch, isBlockedAddress } from '../../../server/plugins/host/network'
 import type { HostPluginRecord } from '../../../server/plugins/host/types'

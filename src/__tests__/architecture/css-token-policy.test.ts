@@ -14,11 +14,11 @@
  * do not trigger false positives.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 const SCAN_ROOTS = [
   join(SRC_ROOT, 'admin'),
   join(SRC_ROOT, 'editor'),

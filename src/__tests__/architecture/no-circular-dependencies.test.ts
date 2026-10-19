@@ -1,7 +1,7 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { join } from 'node:path'
 
-const ROOT = join(import.meta.dir, '../../..')
+const ROOT = join(import.meta.dirname, '../../..')
 
 function decode(bytes: Uint8Array): string {
   return new TextDecoder().decode(bytes)

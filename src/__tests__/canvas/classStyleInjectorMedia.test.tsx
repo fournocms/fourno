@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { act, cleanup, render, waitFor } from '@testing-library/react'
 import { ClassStyleInjector } from '@site/canvas/ClassStyleInjector'

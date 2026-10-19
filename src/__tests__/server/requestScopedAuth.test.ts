@@ -15,7 +15,7 @@
  * last_seen_at` write — covering both the tagged-template and `db.unsafe`
  * code paths.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { findUserBySessionHash } from '../../../server/auth/sessions'

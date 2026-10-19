@@ -9,7 +9,7 @@
  * - Paste only appears when the clipboard has an entry; clicking pastes at root.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { TreeBackgroundContextMenu } from '@site/panels/DomPanel/TreeBackgroundContextMenu'

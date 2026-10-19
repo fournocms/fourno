@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { frameworkColorClassId } from '@core/framework'
 import type { FrameworkColorToken } from '@core/framework-schema'

@@ -11,7 +11,7 @@
  * the relay and the database. Colours the CSS then referenced simply did not
  * exist, and nothing in the authoring flow said so.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import {

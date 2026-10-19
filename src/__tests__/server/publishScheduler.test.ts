@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { tickPublishScheduler } from '../../../server/publish/publishScheduler'
 import { getDataRow, listDuePublishSchedules } from '../../../server/repositories/data/rows'
@@ -59,7 +59,7 @@ describe('publish scheduler', () => {
       updatedByUserId: null,
       scheduledPublishAt: scheduledAt,
     })
-    expect(row?.publishedAt).toBeString()
+    expect(row?.publishedAt).toBeTypeOf('string')
     await expect(listDuePublishSchedules(db, new Date().toISOString(), 25)).resolves.toHaveLength(0)
 
     const { rows: dataRows } = await db<{ active_version_id: string | null }>`
@@ -67,7 +67,7 @@ describe('publish scheduler', () => {
       from data_rows
       where id = ${rowId}
     `
-    expect(dataRows[0]?.active_version_id).toBeString()
+    expect(dataRows[0]?.active_version_id).toBeTypeOf('string')
 
     const { rows: versions } = await db<{ row_id: string; slug: string; published_by_user_id: string | null }>`
       select row_id, slug, published_by_user_id

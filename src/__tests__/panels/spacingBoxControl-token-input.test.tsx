@@ -15,7 +15,7 @@
  *      proving it is genuinely backed by the shared component.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, within } from '@testing-library/react'
 import { TokenAwareInput } from '@site/property-controls/TokenAwareInput'
 import type { Token } from '@site/property-controls/tokenUtils'

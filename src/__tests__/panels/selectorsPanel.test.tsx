@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { readFileSync } from 'fs'
@@ -18,7 +18,7 @@ import { classKindSelector, type StyleRule } from '@core/page-tree'
 import { makeNode, makePage, makeSite } from '../fixtures'
 import '@modules/base/index'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 
 afterEach(cleanup)
 

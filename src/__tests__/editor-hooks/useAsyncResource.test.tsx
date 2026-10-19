@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach } from 'vitest'
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { useAsyncResource } from '@admin/lib/useAsyncResource'
 

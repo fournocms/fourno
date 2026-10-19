@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createModuleImportMap, resolveDependencyUrl } from '@core/module-engine'
 import type { AnyModuleDefinition } from '@core/module-engine'
 import type { RuntimePackageImportmap } from '@core/site-runtime'

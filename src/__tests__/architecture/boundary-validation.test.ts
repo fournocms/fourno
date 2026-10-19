@@ -58,11 +58,11 @@
  * @see src/__tests__/architecture/db-postgres-isms.test.ts — mirror for DB rules
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 
 // ---------------------------------------------------------------------------
 // File walker — .ts and .tsx files, recursive

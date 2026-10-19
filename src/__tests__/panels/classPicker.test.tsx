@@ -12,7 +12,7 @@
  * via `useEditorStore.getState()`.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ClassPicker } from '@site/panels/PropertiesPanel/ClassPicker'

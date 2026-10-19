@@ -13,7 +13,7 @@
  * Manifests are built through `parsePluginManifest` so the tests also cover
  * the parser accepting the marker as a `contentAccess[].table` value.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { parsePluginManifest } from '@core/plugins/manifest'
 import { OWN_CREATED_TABLES_MARKER } from '@core/plugin-sdk'
 import type { ContentAccessEntry } from '@core/plugin-sdk'

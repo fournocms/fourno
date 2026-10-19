@@ -1,5 +1,6 @@
 /**
- * Collab end-to-end — a real `Bun.serve` running the relay + socket layer,
+ * Collab end-to-end — the real HTTP/WebSocket server adapter running the
+ * relay + socket layer,
  * with real client providers (the same transport the editor uses) over real
  * WebSockets:
  *
@@ -14,7 +15,7 @@
  *   - `runPublishFlush` drains the persist debounce, so publish bakes the
  *     edit an admin made seconds earlier instead of losing it.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import * as encoding from 'lib0/encoding'
@@ -40,9 +41,11 @@ import {
 import { createCollabRelay, type CollabRelay } from '../../../server/collab/relay'
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 import {
+  authorizeCollabSocket,
   createCollabSocketLayer,
-  handleCollabSocketUpgrade,
 } from '../../../server/collab/socket'
+import { startHttpServer, type HttpServerHandle } from '../../../server/runtime/httpServer'
+import type { DbClient } from '../../../server/db/client'
 import { getCollabDocumentState } from '../../../server/repositories/collabDocuments'
 import { runPublishFlush } from '../../../server/publish/publishFlush'
 import { getDataRow, saveDataRowDraft } from '../../../server/repositories/data'
@@ -75,6 +78,26 @@ async function waitFor(
   }
 }
 
+/** The production wiring of server/index.ts, minus the HTTP router. */
+async function startCollabServer(
+  db: DbClient,
+  socketLayer: ReturnType<typeof createCollabSocketLayer>,
+): Promise<HttpServerHandle> {
+  const server = await startHttpServer({
+    port: 0,
+    hostname: '127.0.0.1',
+    fetch: async () => new Response('not found', { status: 404 }),
+    upgrade: {
+      path: SITE_SOCKET_PATH,
+      authorize: (req) => authorizeCollabSocket(req, db),
+      handlers: socketLayer.handlers,
+    },
+  })
+  socketLayer.setPublisher(server)
+  cleanups.push(() => server.stop())
+  return server
+}
+
 interface Stack {
   harness: CapabilityTestHarness
   relay: CollabRelay
@@ -91,20 +114,7 @@ async function startStack(): Promise<Stack> {
   cleanups.push(() => relay.destroy())
   const socketLayer = createCollabSocketLayer(relay)
 
-  const server = Bun.serve({
-    port: 0,
-    fetch: async (req, srv) => {
-      if (new URL(req.url).pathname === SITE_SOCKET_PATH) {
-        const rejection = await handleCollabSocketUpgrade(req, harness.db, srv)
-        if (rejection === null) return undefined
-        return rejection
-      }
-      return new Response('not found', { status: 404 })
-    },
-    websocket: socketLayer.handlers,
-  })
-  socketLayer.setPublisher(server)
-  cleanups.push(() => server.stop(true))
+  const server = await startCollabServer(harness.db, socketLayer)
 
   const { rows } = await harness.db<{ id: string }>`
     select id from data_rows where table_id = ${'pages'}
@@ -112,7 +122,7 @@ async function startStack(): Promise<Stack> {
   return {
     harness,
     relay,
-    url: `ws://localhost:${server.port}${SITE_SOCKET_PATH}`,
+    url: `ws://127.0.0.1:${server.port}${SITE_SOCKET_PATH}`,
     cookie,
     homeId: rows[0].id,
   }
@@ -126,7 +136,7 @@ function connectClient(
   let lastSocket: WebSocket | null = null
   const provider = createCollabProvider({
     createSocket: () => {
-      // Bun's WebSocket client supports custom handshake headers.
+      // Node's (undici) WebSocket client accepts custom handshake headers.
       lastSocket = new WebSocket(stack.url, { headers: { cookie } })
       return lastSocket as unknown as CollabSocketLike
     },
@@ -510,20 +520,7 @@ describe('collab relay integration (real server, real sockets)', () => {
     cleanups.push(() => relay.destroy())
     const socketLayer = createCollabSocketLayer(relay)
 
-    const server = Bun.serve({
-      port: 0,
-      fetch: async (req, srv) => {
-        if (new URL(req.url).pathname === SITE_SOCKET_PATH) {
-          const rejection = await handleCollabSocketUpgrade(req, harness.db, srv)
-          if (rejection === null) return undefined
-          return rejection
-        }
-        return new Response('not found', { status: 404 })
-      },
-      websocket: socketLayer.handlers,
-    })
-    socketLayer.setPublisher(server)
-    cleanups.push(() => server.stop(true))
+    const server = await startCollabServer(harness.db, socketLayer)
 
     const { rows } = await harness.db<{ id: string }>`
       select id from data_rows where table_id = ${'pages'}
@@ -531,7 +528,7 @@ describe('collab relay integration (real server, real sockets)', () => {
     const homeId = rows[0].id
     const stack: Stack = {
       harness,
-      url: `ws://localhost:${server.port}${SITE_SOCKET_PATH}`,
+      url: `ws://127.0.0.1:${server.port}${SITE_SOCKET_PATH}`,
       cookie,
       homeId,
     }

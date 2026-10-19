@@ -20,7 +20,7 @@
  * so a future change cannot repair one and leave the others open.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { escapeHtml, hasDangerousUrlScheme, isSafeUrl, safeUrl } from '@core/html-sanitize'
 import { sanitizeRenderableHtmlAttribute } from '@core/htmlAttributes'
 import { safeUrl as sdkSafeUrl } from '@core/plugin-sdk'

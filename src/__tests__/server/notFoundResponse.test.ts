@@ -11,7 +11,7 @@
  *   - No notFound template in the published site → null (the dispatcher's
  *     bare JSON 404 takes over), and nothing is cached.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'

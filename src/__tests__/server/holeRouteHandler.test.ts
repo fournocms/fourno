@@ -13,7 +13,7 @@
  *   - Runtime asset endpoint serves HOLE_RUNTIME_JS with correct headers
  */
 
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import {
   handleHoleRequest,

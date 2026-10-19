@@ -8,7 +8,7 @@
  * in effect after the extraction.
  */
 
-import { describe, it, expect, spyOn, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach, vi } from 'vitest'
 import { Type } from '@core/utils/typeboxHelpers'
 import type { Command, CommandContext } from '../types'
 import { MAX_RESULTS, makeServerProvider, fetchOnAbortEmpty } from '../providers/serverProvider'
@@ -59,21 +59,21 @@ function abortError(): Error {
 }
 
 afterEach(() => {
-  spyOn(globalThis, 'fetch').mockRestore?.()
+  vi.spyOn(globalThis, 'fetch').mockRestore?.()
 })
 
 // ─── Empty-query guard ──────────────────────────────────────────────────────
 
 describe('makeServerProvider — empty-query guard', () => {
   it('returns [] for an empty query without calling fetch', async () => {
-    const fetchSpy = spyOn(globalThis, 'fetch')
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
     const result = await makeProvider().search('', ctx, signal)
     expect(result).toEqual([])
     expect(fetchSpy).not.toHaveBeenCalled()
   })
 
   it('returns [] for a whitespace-only query without calling fetch', async () => {
-    const fetchSpy = spyOn(globalThis, 'fetch')
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
     const result = await makeProvider().search('   ', ctx, signal)
     expect(result).toEqual([])
     expect(fetchSpy).not.toHaveBeenCalled()
@@ -84,7 +84,7 @@ describe('makeServerProvider — empty-query guard', () => {
 
 describe('makeServerProvider — URL construction', () => {
   it('builds the endpoint with the query and limit params', async () => {
-    const fetchSpy = spyOn(globalThis, 'fetch').mockImplementation(
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(
       jsonFetch({ items: [] }) as typeof fetch,
     )
     await makeProvider().search('hello world', ctx, signal)
@@ -97,7 +97,7 @@ describe('makeServerProvider — URL construction', () => {
 
 describe('makeServerProvider — schema validation and mapping', () => {
   it('validates the body via the schema and maps each item to a Command', async () => {
-    spyOn(globalThis, 'fetch').mockImplementation(
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
       jsonFetch({ items: [{ id: 'a', name: 'Alpha' }, { id: 'b', name: 'Beta' }] }) as typeof fetch,
     )
     const result = await makeProvider().search('x', ctx, signal)
@@ -108,7 +108,7 @@ describe('makeServerProvider — schema validation and mapping', () => {
   })
 
   it('throws when the body fails schema validation', async () => {
-    spyOn(globalThis, 'fetch').mockImplementation(
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
       jsonFetch({ items: [{ id: 123 }] }) as typeof fetch,
     )
     await expect(makeProvider().search('x', ctx, signal)).rejects.toThrow()
@@ -119,13 +119,13 @@ describe('makeServerProvider — schema validation and mapping', () => {
 
 describe('makeServerProvider — abort handling', () => {
   it('returns [] (does not throw) when the request is aborted', async () => {
-    spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(abortError()))
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(abortError()))
     const result = await makeProvider().search('x', ctx, signal)
     expect(result).toEqual([])
   })
 
   it('rethrows a non-abort error', async () => {
-    spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(new Error('boom')))
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(new Error('boom')))
     await expect(makeProvider().search('x', ctx, signal)).rejects.toThrow('boom')
   })
 })
@@ -134,7 +134,7 @@ describe('makeServerProvider — abort handling', () => {
 
 describe('fetchOnAbortEmpty', () => {
   it('returns the validated body on success', async () => {
-    spyOn(globalThis, 'fetch').mockImplementation(
+    vi.spyOn(globalThis, 'fetch').mockImplementation(
       jsonFetch({ items: [{ id: 'a', name: 'Alpha' }] }) as typeof fetch,
     )
     const body = await fetchOnAbortEmpty(ENDPOINT, ResponseSchema, signal)
@@ -142,13 +142,13 @@ describe('fetchOnAbortEmpty', () => {
   })
 
   it('returns null when the request is aborted', async () => {
-    spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(abortError()))
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(abortError()))
     const body = await fetchOnAbortEmpty(ENDPOINT, ResponseSchema, signal)
     expect(body).toBeNull()
   })
 
   it('rethrows a non-abort error', async () => {
-    spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(new Error('boom')))
+    vi.spyOn(globalThis, 'fetch').mockImplementation(() => Promise.reject(new Error('boom')))
     await expect(fetchOnAbortEmpty(ENDPOINT, ResponseSchema, signal)).rejects.toThrow('boom')
   })
 })

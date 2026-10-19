@@ -12,7 +12,7 @@
  * "Hello & World" → "Hello &amp;amp; World" in published output.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { publishPage, renderNode, type RenderConfig } from '@core/publisher'
 import { makePage, makeSite, makeModule, makeRegistry, makeAccumulators } from './helpers'
 

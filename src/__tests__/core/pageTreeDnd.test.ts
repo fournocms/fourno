@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { Page, PageNode } from '@core/page-tree'
 import { resolvePageTreeDropTarget, reindexNodeParents } from '@core/page-tree'
 

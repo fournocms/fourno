@@ -2,7 +2,7 @@
  * Branch preview links — issuing, the cookie handshake, rendering the
  * branch's draft on the public site, and revocation.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { handleServerRequest } from '../../../server/router'
 import { listDataRows, saveDataRowDraft, upsertDataRowDraft } from '../../../server/repositories/data'
 import {

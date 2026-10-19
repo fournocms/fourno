@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { isNode, collectSameOriginDocuments } from '@ui/lib/sameOriginDocuments'
 
 describe('isNode', () => {

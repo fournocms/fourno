@@ -36,7 +36,7 @@ async function insertMediaAsset(
       (id, filename, mime_type, size_bytes, storage_path, public_path,
        storage_adapter_id, externally_hosted)
     values
-      (${id}, ${id + '.png'}, 'image/png', 100, ${id + '.png'}, ${publicPath}, '', 0)
+      (${id}, ${id + '.png'}, 'image/png', 100, ${id + '.png'}, ${publicPath}, '', false)
   `
 }
 

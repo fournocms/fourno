@@ -146,7 +146,8 @@ async function storedRows(harness: CapabilityTestHarness, tableId: string): Prom
     from data_rows
     where table_id = ${tableId}
   `
-  return new Map(rows.map((row) => [row.id, row]))
+  // Postgres returns int8 (`seq`) as a string; SQLite already gives a number.
+  return new Map(rows.map((row) => [row.id, { ...row, seq: Number(row.seq) }]))
 }
 
 async function backdateRows(harness: CapabilityTestHarness, tableId: string): Promise<void> {

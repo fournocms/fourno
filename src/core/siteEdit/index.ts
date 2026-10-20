@@ -41,3 +41,34 @@ export {
   type DeleteCssRulesResult,
   type RemoveCssRulePropertiesResult,
 } from './styleRules'
+export { reconcileFrameworkClasses } from './frameworkReconcile'
+export {
+  upsertFrameworkColorTokens,
+  applyFrameworkColorTokenPatch,
+  cloneFrameworkColorToken,
+  createFrameworkColorTokenFromInput,
+  ensureFrameworkColors,
+  reorderFrameworkColorTokenInGroup,
+  type ColorVariantOptions,
+  type CreateFrameworkColorTokenInput,
+  type UpdateFrameworkColorTokenPatch,
+  type UpsertedColorToken,
+} from './frameworkColors'
+export {
+  applyScaleGroupPatch,
+  ensureScaleSettings,
+  generatedScaleVars,
+  readScaleGroups,
+  readScaleSettings,
+  SCALE_FAMILY_FACTORIES,
+  scalePatchFromToolInput,
+  setScaleGroup,
+  type CommonScaleGroupPatch,
+  type ScaleFamily,
+  type ScaleFamilyTypes,
+  type SetScaleGroupRequest,
+  type SetScaleGroupResult,
+  type UpdateFrameworkSpacingGroupPatch,
+  type UpdateFrameworkTypographyGroupPatch,
+} from './frameworkScales'
+export { nextOrderValue } from './order'

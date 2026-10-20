@@ -1,7 +1,7 @@
 import { type MouseEvent } from 'react'
 import { ColorInput } from '@ui/components/ColorInput'
 import type { FrameworkColorToken } from '@core/framework-schema'
-import type { UpdateFrameworkColorTokenPatch } from '@site/store/slices/site/types'
+import type { UpdateFrameworkColorTokenPatch } from '@core/siteEdit'
 import { ColorTokenEditor } from './ColorTokenEditor'
 import styles from './ColorTokenCard.module.css'
 

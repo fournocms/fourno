@@ -47,7 +47,7 @@ import {
 } from '@admin/shared/dialogs/FrameworkManagerDialog'
 import { cmsAdapter } from '@core/persistence/cms'
 import { applyFrameworkPreset } from '@core/framework'
-import { reconcileFrameworkClasses } from '@site/store/slices/site/framework/reconcile'
+import { reconcileFrameworkClasses } from '@core/siteEdit'
 import styles from './OnboardingPanel.module.css'
 
 interface StepDef {

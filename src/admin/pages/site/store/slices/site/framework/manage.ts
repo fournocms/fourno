@@ -10,7 +10,7 @@
  */
 import { applyFrameworkPreset } from '@core/framework'
 import type { SiteSlice, SiteSliceHelpers } from '../types'
-import { reconcileFrameworkClasses } from './reconcile'
+import { reconcileFrameworkClasses } from '@core/siteEdit'
 
 type FrameworkManagerActions = Pick<SiteSlice, 'setFrameworkPreset'>
 

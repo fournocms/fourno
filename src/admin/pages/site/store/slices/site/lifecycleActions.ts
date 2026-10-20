@@ -16,7 +16,7 @@ import {
 import { clearCanvasSelectionDraft } from '../selectionSlice'
 import { resetCollabDocsFromSite } from './collabBinding'
 import { createDefaultSiteDocument } from './defaults'
-import { reconcileFrameworkClasses } from './framework/reconcile'
+import { reconcileFrameworkClasses } from '@core/siteEdit'
 import type { SiteSlice, SiteSliceHelpers } from './types'
 
 type LifecycleActions = Pick<

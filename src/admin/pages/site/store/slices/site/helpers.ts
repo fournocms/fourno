@@ -21,7 +21,7 @@ import type { NewStyleRule } from '@core/siteImport'
 import { addImportedScriptDependencies, addImportedScripts, addImportedStylesheets } from './importedSiteFiles'
 import { applyLocalSitePatches, notifyCollabBlocked } from './collabBinding'
 import type { EditorStore } from '@site/store/types'
-import { reconcileFrameworkClasses } from './framework/reconcile'
+import { reconcileFrameworkClasses } from '@core/siteEdit'
 import {
   createStyleRuleOrderAllocator,
   indexStyleRulesByName,

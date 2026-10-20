@@ -85,12 +85,12 @@ describe('mcp server', () => {
   })
 
   it('lists browser editing tools but errors with an open-editor hint when no editor is connected', async () => {
-    const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'content.manage'])
+    const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'site.style.edit', 'content.manage'])
     const { tools } = await client.listTools()
-    expect(tools.some((t) => t.name === 'site_insert_html')).toBe(true) // browser tool is listed
-    expect(tools.some((t) => t.name === 'site_delete_node')).toBe(true)
+    expect(tools.some((t) => t.name === 'site_assign_class')).toBe(true) // browser tool is listed
+    expect(tools.some((t) => t.name === 'site_apply_css')).toBe(true)
 
-    const result = await client.callTool({ name: 'site_insert_html', arguments: { html: '<p>hi</p>' } })
+    const result = await client.callTool({ name: 'site_assign_class', arguments: { nodeId: 'n1', classId: 'c1' } })
     expect(result.isError).toBe(true)
     const text = (result.content as Array<{ type: string; text: string }>)[0].text
     expect(text).toContain('Site editor')
@@ -98,11 +98,11 @@ describe('mcp server', () => {
   })
 
   it('advertises the open-workspace requirement on browser tools, not on headless ones', async () => {
-    const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'content.manage'])
+    const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'site.style.edit', 'content.manage'])
     const { tools } = await client.listTools()
 
-    const sitePage = tools.find((t) => t.name === 'site_add_page')
-    expect(sitePage?.description).toContain('Requires the Fourno Site editor to be open')
+    const siteBrowserTool = tools.find((t) => t.name === 'site_assign_class')
+    expect(siteBrowserTool?.description).toContain('Requires the Fourno Site editor to be open')
 
     const contentTool = tools.find((t) => t.name === 'content_set_document_field')
     expect(contentTool?.description).toContain('Requires the Fourno Content workspace to be open')
@@ -110,6 +110,10 @@ describe('mcp server', () => {
     // Headless tools must stay free of the hint — they work with no editor open.
     const headless = tools.find((t) => t.name === 'site_read_styles')
     expect(headless?.description).not.toContain('Requires the Fourno')
+
+    // Page-editing tools run on the server (PRD 8.6): no editor precondition either.
+    const serverEdit = tools.find((t) => t.name === 'site_insert_html')
+    expect(serverEdit?.description).not.toContain('Requires the Fourno')
 
     await client.close()
   })
@@ -130,18 +134,18 @@ describe('mcp server', () => {
       [
         'ai.chat',
         'ai.tools.write',
-        'site.structure.edit',
+        'site.style.edit',
         'content.create',
       ],
       userId,
     )
 
     const siteCall = client.callTool({
-      name: 'site_insert_html',
-      arguments: { parentId: 'root', html: '<p>site</p>' },
+      name: 'site_assign_class',
+      arguments: { nodeId: 'root', classId: 'hero' },
     })
     const siteRequest = await readUntil(siteReader, (event) => event.type === 'toolRequest')
-    expect(siteRequest.toolName).toBe('site_insert_html')
+    expect(siteRequest.toolName).toBe('site_assign_class')
     resolveBridgeToolResult(siteReady.bridgeId as string, siteRequest.requestId as string, {
       ok: true,
       data: { inserted: 1 },
@@ -176,13 +180,13 @@ describe('mcp server', () => {
     await readUntil(reader, (event) => event.type === 'bridgeReady')
     const client = await connectClient(
       db,
-      ['ai.chat', 'ai.tools.write', 'site.structure.edit'],
+      ['ai.chat', 'ai.tools.write', 'site.style.edit'],
       userId,
     )
 
     const call = client.callTool({
-      name: 'site_insert_html',
-      arguments: { parentId: 'root', html: '<p>site</p>' },
+      name: 'site_assign_class',
+      arguments: { nodeId: 'root', classId: 'hero' },
     })
     await readUntil(reader, (event) => event.type === 'toolRequest')
     controller.abort()

@@ -32,6 +32,9 @@ describe('mcp registry', () => {
     expect(names).toContain('site_apply_css')
     expect(names).toContain('site_set_color_tokens')
     expect(tools.some((t) => t.execution === 'browser')).toBe(true)
+    // Page edits run on the server (PRD 8.6) and shadow the editor-bridged tool.
+    expect(tools.find((t) => t.name === 'site_insert_html')?.execution).toBe('server')
+    expect(tools.find((t) => t.name === 'site_apply_css')?.execution).toBe('browser')
   })
 
   it('does not expose the removed headless page-tree tools', () => {

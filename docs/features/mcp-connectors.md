@@ -124,7 +124,8 @@ server/ai/mcp/server.ts + registry.ts
        ▼
 executeAiTool(...) / live editor bridge
   ├─ repositories and publisher for headless tools
-  └─ connection owner's open Site or Content workspace for browser tools
+  ├─ server/collab/siteEditor.ts → live Yjs docs (page edits, no editor needed)
+  └─ connection owner's open Site or Content workspace for the remaining browser tools
 ```
 
 ### Module layout
@@ -145,6 +146,7 @@ executeAiTool(...) / live editor bridge
 | `transports/http.ts` | Authenticated, Origin-validated `createMcpHandler` entry for MCP 2026-07-28 plus the stateless 2025 fallback. |
 | `server.ts` / `registry.ts` | Low-level SDK server, TypeBox input schemas, catalog deduplication, and capability filtering. |
 | `editorBridge.ts` | Per-user, per-scope live workspace bridge. The stream carries an **idle lease** (120s, re-armed by every relayed tool request) so an active batch is never cut mid-flight; only quiet streams recycle. The workspace's reconnect loop (`useMcpWorkspaceBridge`) reopens a recycled healthy stream immediately off the stream-end network event — deliberately timer-free, because hidden webviews (backgrounded browser tabs) clamp timers to minutes while network events still fire — and a tab becoming visible short-circuits any pending retry delay. |
+| `tools/siteEditTools.ts` | Server-side page-editing tools (insert/replace HTML, node edits, page lifecycle, document reads). Re-homes the browser tool of the same name onto `server/collab/siteEditor.ts`. |
 | `tools/publishTool.ts` | Explicit canonical full-site publish with MCP audit metadata. |
 | `tools/uploadMediaTool.ts` | Server-resolved image upload (`media_upload`) — inline base64 or SSRF-guarded `sourceUrl` download, through the shared media pipeline. |
 
@@ -152,13 +154,27 @@ executeAiTool(...) / live editor bridge
 
 MCP exposes the full deduplicated tool catalog, filtered by the connection's capabilities.
 
-Server-resolved tools work without an editor open. They include content reads, `get_context`, `site_list_documents`, `site_read_styles`, `site_list_breakpoints`, `media_upload`, and explicit `site_publish`. Publishing requires `ai.tools.write` plus `pages.publish`, runs the canonical full-site pipeline, swaps the static slot atomically, and records the connection id in the publish audit event.
+Server-resolved tools work without an editor open. They include content reads, `get_context`, `site_list_documents`, `site_read_styles`, `site_list_breakpoints`, `media_upload`, explicit `site_publish`, and the **server-side page-editing tools** (next section). Publishing requires `ai.tools.write` plus `pages.publish`, runs the canonical full-site pipeline, swaps the static slot atomically, and records the connection id in the publish audit event.
 
 `media_upload` is the one server-resolved write that mutates outside the live editor draft: it adds an image to the Media library through the same `acceptUploadedMedia` core the HTTP route uses (magic-byte sniffing, SVG sanitisation, storage dispatch, responsive variants). Bytes arrive inline (base64) or via an https `sourceUrl` the host downloads under the plugin network layer's SSRF blocklist — https-only, DNS-resolved, per-redirect-hop re-validation, size-capped. It requires `ai.tools.write` plus `media.write`.
 
-Browser tools run against the connection owner's live workspace. Site structure, HTML/CSS, page lifecycle, design-token, content mutation, code-asset, and live-DOM tools route to the matching open Site or Content workspace. If that workspace is not open, the tool returns a scope-specific error while headless tools remain available. `tools/list` states that requirement in each browser tool's description, so a client learns the precondition when it picks the tool rather than from a failed call.
+### Editing pages without an open editor
 
-There is intentionally no headless page-tree mutation path. The open editor store is the single source of truth for draft edits; a second DB mutation path would desynchronize node state and overwrite the live document. Relayed edits need no post-tool save step: store mutations stream to the collab relay the moment they land, and every headless read (plus `site_publish`) flushes the relay server-side before it touches the DB — so a following read or publish always observes the edit. There is no client-side save flush, and no window in which the MCP caller can see stale data.
+PRD §8.6: an agent can build a page while nobody is in the admin. The page-editing tools run **on the server** against the same Yjs documents the editors hold — `site_read_document`, `site_get_node_html`, `site_insert_html`, `site_replace_node_html`, `site_delete_node`, `site_update_node_props`, `site_move_node`, `site_rename_node`, `site_duplicate_node`, and the page lifecycle (`site_add_page`, `site_delete_page`, `site_rename_page`, `site_duplicate_page`, `site_set_page_template`, `site_clear_page_template`). They inherit schema, description and capability requirements from the browser tool of the same name (`server/ai/mcp/tools/siteEditTools.ts`); the MCP registry lists them first, so they replace the editor-bridged version for MCP callers.
+
+The server is one more Yjs peer (`server/collab/siteEditor.ts`), not a second write path:
+
+1. The site (shell + page/component/layout docs) is projected from the relay's **live** docs — never from the database, so an edit still inside the persist debounce is visible.
+2. A pure recipe from `@core/siteEdit` / `@core/page-tree` — the same functions the editor store runs — mutates a Mutative draft.
+3. The recipe's patches are translated by the editor's own write translator (`applySitePatchesToDocs`) onto forks of the live docs, giving one update per touched doc.
+4. Each update passes `validateGuardedUpdate` with the **connection's capabilities** (structure / content / style, the check partial-capability sockets get). One refused update refuses the whole edit and nothing is written.
+5. The updates are applied to the live docs in one synchronous pass. The relay then persists them (debounced blob + derived row JSON) and broadcasts them, so every open editor sees the edit live.
+
+Steps 1–4 contain no `await`, so a human edit cannot interleave with a recipe. Every changed edit writes a `site.edit` audit event (tool, connector, touched docs). Richtext props are sanitised exactly like the editor executor does. Server edits address nodes by id (node ids are unique across all documents of a site) and run on the main branch; branch-scoped agent work belongs to the approval queue (PRD §8.8).
+
+Still relayed to an open workspace (not yet headless): CSS and class tools (`site_apply_css`, `site_assign_class`, `site_remove_class`), design-token tools, code assets, `site_open_document`, `site_render_snapshot`, and the content-workspace write tools. Until those move, a `<style>` block inside `site_insert_html` is the headless way to author CSS.
+
+Browser tools that remain run against the connection owner's live workspace. Code-asset, live-DOM, design-token, CSS/class and content-mutation tools route to the matching open Site or Content workspace. If that workspace is not open, the tool returns a scope-specific error while headless tools remain available. `tools/list` states that requirement in each remaining browser tool's description, so a client learns the precondition when it picks the tool rather than from a failed call.
 
 Writes remain drafts. Clients should finish and verify an edit sequence, then call `site_publish` once only when deployment was requested.
 
@@ -190,7 +206,7 @@ Create and manual revoke actions retain the existing `ai.mcp_connector.created` 
 - Management and consent require `ai.providers.manage`.
 - Token creation and OAuth approval require step-up authentication.
 - Mutating tools require `ai.tools.write`.
-- Page-tree edits require the matching site/page edit capabilities.
+- Page-tree edits require the matching site/page edit capabilities. Server-side edits are additionally checked per touched document by the collab update guard (the check partial-capability sockets get), so a tool that slips past selection-time gating still cannot write a change class the connection was not granted.
 - Full-site deployment additionally requires `pages.publish`.
 - Own-vs-any content permissions are checked again against the target row before browser relay.
 - The approver can grant only capabilities they hold.
@@ -203,5 +219,6 @@ Create and manual revoke actions retain the existing `ai.mcp_connector.created` 
 - `server/ai/mcp/auth.test.ts` covers personal and OAuth bearer resolution plus the protected-resource challenge with and without a trustworthy issuer.
 - `src/__tests__/ai/mcpOAuthAuthorizationHandler.test.ts` covers signed-in consent, capability selection, exact callback redirects, denial, and privilege floors.
 - `src/__tests__/ai/mcpConnectorsHandler.test.ts` covers connection listing, personal-token creation, step-up, revoke, and privilege floors.
+- `src/__tests__/server/siteEditor.test.ts` covers server-side page editing against a real relay and database: no editor connected, an open editor peer seeing the edit live, a human edit between two agent calls surviving, the update guard refusing a capability the connection lacks, persistence of derived rows, and the `site.edit` audit event.
 - `server/ai/mcp/e2e.test.ts`, `transports/http.test.ts`, and `publishTool.test.ts` cover the real MCP request flow and publish path.
 - `src/__tests__/architecture/ai-mcp-connectors-never-leak.test.ts` gates the token-free connection projection.

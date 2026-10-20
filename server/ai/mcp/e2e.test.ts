@@ -89,7 +89,7 @@ describe('MCP end-to-end (2026-07-28 stateless requests, real handler)', () => {
     const names = (list.json.result?.tools ?? []).map((t) => t.name)
     expect(names).toContain('content_list_collections') // headless content read
     expect(names).toContain('site_read_styles') // headless design-system read
-    expect(names).toContain('site_insert_html') // browser editing tool, relayed to the editor
+    expect(names).toContain('site_insert_html') // page editing tool, runs on the server (no editor needed)
 
     const read = await rpc('tools/call', { name: 'content_list_collections', arguments: {} })
     expect(read.json.result?.isError).toBeFalsy()

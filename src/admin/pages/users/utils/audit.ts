@@ -153,6 +153,8 @@ export function auditTitle(
       return `Data row ${dataRow} author changed`
     case 'publish':
       return 'Site was published'
+    case 'site.edit':
+      return 'Site was edited by an agent'
     case 'plugin.install':
       return `${pluginId} was installed`
     case 'plugin.update':

@@ -22,6 +22,7 @@ const { handleServerRequest } = await import('./router')
 const { activateInstalledServerPlugins } = await import('./plugins/runtime')
 const { mediaStorageRegistry } = await import('@core/plugins/mediaStorageRegistry')
 const { createCollabRelay } = await import('./collab/relay')
+const { configureSiteEditor } = await import('./collab/siteEditor')
 const { SITE_SOCKET_PATH, authorizeCollabSocket, createCollabSocketLayer } =
   await import('./collab/socket')
 
@@ -55,6 +56,10 @@ startConversationPurgeTick(db)
 // the multiplexed y-protocols wire (see server/collab/socket.ts).
 const collabRelay = createCollabRelay(db)
 const collabSocket = createCollabSocketLayer(collabRelay)
+// Server-side editing (PRD 8.6): MCP page-edit tools write the same Y docs the
+// editors hold, so an agent needs no open editor and an open editor sees every
+// change live.
+configureSiteEditor(collabRelay)
 
 /**
  * Build the CORS response headers for an incoming request.

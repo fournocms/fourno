@@ -15,7 +15,8 @@
  * with the update guard partial-capability sockets get. Richtext props are
  * sanitised exactly as in the editor executor.
  *
- * Not yet headless (still relayed to an open editor): design tokens, code assets, `site_open_document`, `site_render_snapshot`.
+ * Design tokens live in `siteTokenTools.ts`. Not yet headless (still relayed to an open editor): font
+ * tokens (install runs over HTTP), code assets, `site_open_document`, `site_render_snapshot`.
  */
 import { aiToolError, aiToolOk, describeAgentDocuments, documentRefEquals, documentRefForPage, renderAgentDocument } from '@core/ai'
 import { ApplyCssExecutionInputSchema } from '@core/ai'
@@ -78,69 +79,11 @@ import {
 import { subtreeHasOutlet } from '@core/templates'
 import { flattenVCToVirtualPage } from '@core/visualComponents'
 import type { AiTool, ToolContext } from '../../runtime/types'
-import { siteTools } from '../../tools/site'
-import {
-  getSiteEditor,
-  SiteEditForbiddenError,
-  SiteEditRefusedError,
-} from '../../../collab/siteEditor'
-import { createAuditEvent } from '../../../repositories/audit'
+import { editAsCaller, readAsCaller, refuse, serverBacked } from './siteEditPlumbing'
 
 // ---------------------------------------------------------------------------
 // Plumbing
 // ---------------------------------------------------------------------------
-
-/** MCP tool contexts carry the connector in `conversationId` (`mcp:<id>`). */
-function connectorIdOf(ctx: ToolContext): string | null {
-  return ctx.conversationId.startsWith('mcp:') ? ctx.conversationId.slice('mcp:'.length) : null
-}
-
-/**
- * Run one edit as the calling identity and audit it. Refusals — a recipe that
- * cannot apply, or a capability the update guard denies — are ordinary tool
- * errors the model can recover from.
- */
-async function editAsCaller<T>(
-  toolName: string,
-  ctx: ToolContext,
-  recipe: (site: SiteDocument) => T,
-  describe: (value: T) => Record<string, unknown>,
-): Promise<AiToolOutput> {
-  try {
-    const outcome = await getSiteEditor().edit(
-      { branchId: ctx.branch.branchId, capabilities: ctx.capabilities },
-      recipe,
-    )
-    if (outcome.changed) {
-      await createAuditEvent(ctx.db, {
-        actorUserId: ctx.userId,
-        action: 'site.edit',
-        targetType: 'site',
-        targetId: 'default',
-        metadata: {
-          tool: toolName,
-          source: 'mcp',
-          connectorId: connectorIdOf(ctx),
-          documents: outcome.touchedDocIds,
-        },
-      })
-    }
-    return aiToolOk(describe(outcome.value))
-  } catch (err) {
-    if (err instanceof SiteEditRefusedError || err instanceof SiteEditForbiddenError) {
-      return aiToolError(err.message)
-    }
-    throw err
-  }
-}
-
-async function readAsCaller<T>(ctx: ToolContext, reader: (site: SiteDocument) => T): Promise<T> {
-  return getSiteEditor().read(ctx.branch.branchId, reader)
-}
-
-function refuse(message: string): never {
-  throw new SiteEditRefusedError(message)
-}
 
 /** A page/component id passed where a node id belongs gets a pointed hint. */
 function nodeNotFound(site: SiteDocument, id: string): never {
@@ -610,23 +553,6 @@ function setClassAssignment(
 // ---------------------------------------------------------------------------
 // Registration
 // ---------------------------------------------------------------------------
-
-/**
- * Re-home a browser tool onto the server: schema, description and capability
- * requirements stay the browser tool's, so the two can never drift apart.
- */
-function serverBacked<TInput>(
-  name: string,
-  handler: (input: TInput, ctx: ToolContext) => Promise<AiToolOutput>,
-): AiTool {
-  const browserTool = siteTools.find((tool) => tool.name === name)
-  if (!browserTool) throw new Error(`[mcp] site tool "${name}" is not defined`)
-  return {
-    ...browserTool,
-    execution: 'server',
-    handler: (rawInput, ctx) => handler(parseValue(browserTool.inputSchema, rawInput) as TInput, ctx),
-  }
-}
 
 export const siteEditMcpTools: AiTool[] = [
   serverBacked('site_read_document', readDocument),

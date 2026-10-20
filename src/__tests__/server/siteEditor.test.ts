@@ -16,6 +16,7 @@ import { createCollabRelay, type CollabRelay } from '../../../server/collab/rela
 import { configureSiteEditor, getSiteEditor } from '../../../server/collab/siteEditor'
 import { executeAiTool } from '../../../server/ai/drivers/http/execTool'
 import { siteEditMcpTools } from '../../../server/ai/mcp/tools/siteEditTools'
+import { siteTokenMcpTools } from '../../../server/ai/mcp/tools/siteTokenTools'
 import type { AiBrowserBridge, AiTool, AiToolOutput } from '../../../server/ai/runtime/types'
 import { getDataRow } from '../../../server/repositories/data'
 import { handleMcpHttp } from '../../../server/ai/mcp'
@@ -82,7 +83,7 @@ async function startStack(): Promise<Stack> {
   const { doc } = await relay.openDoc(homeDocId)
   const rootNodeId = projectPageDoc(doc, homeId).rootNodeId
 
-  const tools = new Map<string, AiTool>(siteEditMcpTools.map((tool) => [tool.name, tool]))
+  const tools = new Map<string, AiTool>([...siteEditMcpTools, ...siteTokenMcpTools].map((tool) => [tool.name, tool]))
   return {
     harness,
     relay,
@@ -371,6 +372,92 @@ describe('server-side site editing', () => {
     expect(unknownNode.error).toContain('Node not found')
   })
 
+  it('installs and updates a color palette with no editor connected', async () => {
+    const stack = await startStack()
+    const frameworkOf = () => getSiteEditor().read(MAIN_SCOPE.branchId, (site) => site.settings.framework)
+
+    const created = ok(
+      await stack.call('site_set_color_tokens', {
+        tokens: [
+          { slug: 'primary', lightValue: '#3b82f6' },
+          { slug: 'ink', lightValue: '#0a0a0a', category: 'Neutrals' },
+        ],
+      }),
+    ) as { tokens: Array<{ slug: string; action: string; ref: string }> }
+    expect(created.tokens.map((token) => token.action)).toEqual(['created', 'created'])
+    expect(created.tokens[0]!.ref).toBe('var(--primary)')
+
+    // Re-running patches in place, even for a slug repeated inside one batch.
+    const updated = ok(
+      await stack.call('site_set_color_tokens', {
+        tokens: [
+          { slug: 'primary', lightValue: '#2563eb' },
+          { slug: 'primary', lightValue: '#1d4ed8' },
+          { slug: 'accent', lightValue: '#f59e0b' },
+        ],
+      }),
+    ) as { tokens: Array<{ slug: string; action: string }> }
+    expect(updated.tokens.map((token) => token.action)).toEqual(['updated', 'updated', 'created'])
+
+    const framework = await frameworkOf()
+    const tokens = framework!.colors.tokens
+    expect(tokens.map((token) => token.slug).sort()).toEqual(['accent', 'ink', 'primary'])
+    expect(tokens.find((token) => token.slug === 'primary')!.lightValue).toBe('#1d4ed8')
+    expect(tokens.find((token) => token.slug === 'ink')!.category).toBe('Neutrals')
+    // The generated utility classes follow the palette (reconcile ran in the same edit).
+    const classNames = await getSiteEditor().read(MAIN_SCOPE.branchId, (site) =>
+      Object.values(site.styleRules).map((rule) => rule.name),
+    )
+    expect(classNames).toContain('text-primary')
+    expect(classNames).toContain('bg-accent')
+  })
+
+  it('configures the type and spacing scales, creating a group when none matches', async () => {
+    const stack = await startStack()
+    const groupsOf = (family: 'typography' | 'spacing') =>
+      getSiteEditor().read(
+        MAIN_SCOPE.branchId,
+        (site) => site.settings.framework?.[family]?.groups.map((group) => ({ ...group })) ?? [],
+      )
+
+    const type = ok(
+      await stack.call('site_set_type_scale', {
+        groupId: 'root',
+        namingConvention: 'text',
+        steps: 'xs,s,m',
+        min: { fontSize: 14 },
+        max: { fontSize: 18 },
+      }),
+    ) as { groupId: string; action: string; namingConvention: string; generatedVars: string[] }
+    expect(type.action).toBe('created')
+    expect(type.generatedVars).toEqual(['--text-xs', '--text-s', '--text-m'])
+    const [typeGroup] = await groupsOf('typography')
+    expect(typeGroup).toMatchObject({ id: type.groupId, steps: 'xs,s,m' })
+    expect(typeGroup!.min).toMatchObject({ fontSize: 14 })
+
+    // Same group by id: patched, not duplicated.
+    const retyped = ok(await stack.call('site_set_type_scale', { groupId: type.groupId, steps: 'xs,s,m,l' }))
+    expect(retyped).toMatchObject({ groupId: type.groupId, action: 'updated' })
+    expect(await groupsOf('typography')).toHaveLength(1)
+
+    const spacing = ok(
+      await stack.call('site_set_spacing_scale', { namingConvention: 'space', steps: '2xs,xs,s' }),
+    ) as { action: string; generatedVars: string[] }
+    expect(spacing.generatedVars).toEqual(['--space-2xs', '--space-xs', '--space-s'])
+    expect(await groupsOf('spacing')).toHaveLength(1)
+  })
+
+  it('refuses an unknown scale group and leaves the site untouched', async () => {
+    const stack = await startStack()
+    const before = await getSiteEditor().read(MAIN_SCOPE.branchId, (site) => site.settings.framework)
+    const refused = await stack.call('site_set_type_scale', { groupId: 'no-such-group', steps: 'a,b' })
+    expect(refused.ok).toBe(false)
+    expect(refused.error).toContain('Typography group not found: no-such-group')
+    const refusedSpacing = await stack.call('site_set_spacing_scale', { groupId: 'no-such-group' })
+    expect(refusedSpacing.error).toContain('Spacing group not found: no-such-group')
+    expect(await getSiteEditor().read(MAIN_SCOPE.branchId, (site) => site.settings.framework)).toEqual(before)
+  })
+
   it('hides style tools from a caller without the style capability', async () => {
     const stack = await startStack()
     const refused = await stack.call(
@@ -380,6 +467,12 @@ describe('server-side site editing', () => {
     )
     expect(refused.ok).toBe(false)
     expect(refused.error).toMatch(/not permitted/)
+    const refusedTokens = await stack.call(
+      'site_set_color_tokens',
+      { tokens: [{ slug: 'primary', lightValue: '#3b82f6' }] },
+      ['ai.tools.write', 'site.read', 'site.structure.edit', 'site.content.edit'],
+    )
+    expect(refusedTokens.error).toMatch(/not permitted/)
   })
 
   it('reports a missing node as a recoverable tool error', async () => {

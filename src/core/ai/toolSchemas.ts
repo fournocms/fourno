@@ -359,6 +359,8 @@ export const SetColorTokensInputSchema = Type.Object({
   ),
 })
 
+export type SetColorTokensInput = Static<typeof SetColorTokensInputSchema>
+
 export const SetFontTokensInputSchema = Type.Object({
   tokens: Type.Array(
     Type.Object({
@@ -398,6 +400,9 @@ export const SetSpacingScaleInputSchema = Type.Object({
   min: Type.Optional(ScaleBreakpointInputSchema('size')),
   max: Type.Optional(ScaleBreakpointInputSchema('size')),
 })
+
+export type SetTypeScaleInput = Static<typeof SetTypeScaleInputSchema>
+export type SetSpacingScaleInput = Static<typeof SetSpacingScaleInputSchema>
 
 // ---------------------------------------------------------------------------
 // render_snapshot

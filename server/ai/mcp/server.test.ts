@@ -87,10 +87,9 @@ describe('mcp server', () => {
   it('lists browser editing tools but errors with an open-editor hint when no editor is connected', async () => {
     const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'site.style.edit', 'content.manage'])
     const { tools } = await client.listTools()
-    expect(tools.some((t) => t.name === 'site_set_color_tokens')).toBe(true) // browser tool is listed
-    expect(tools.some((t) => t.name === 'site_set_font_tokens')).toBe(true)
+    expect(tools.some((t) => t.name === 'site_set_font_tokens')).toBe(true) // browser tool is listed
 
-    const result = await client.callTool({ name: 'site_set_color_tokens', arguments: { tokens: [{ slug: 'primary', lightValue: '#336699' }] } })
+    const result = await client.callTool({ name: 'site_set_font_tokens', arguments: { tokens: [{ name: 'Heading', fallback: 'serif' }] } })
     expect(result.isError).toBe(true)
     const text = (result.content as Array<{ type: string; text: string }>)[0].text
     expect(text).toContain('Site editor')
@@ -101,7 +100,7 @@ describe('mcp server', () => {
     const client = await connectClient(db, ['ai.chat', 'ai.tools.write', 'site.structure.edit', 'site.style.edit', 'content.manage'])
     const { tools } = await client.listTools()
 
-    const siteBrowserTool = tools.find((t) => t.name === 'site_set_color_tokens')
+    const siteBrowserTool = tools.find((t) => t.name === 'site_set_font_tokens')
     expect(siteBrowserTool?.description).toContain('Requires the Fourno Site editor to be open')
 
     const contentTool = tools.find((t) => t.name === 'content_set_document_field')
@@ -141,11 +140,11 @@ describe('mcp server', () => {
     )
 
     const siteCall = client.callTool({
-      name: 'site_set_color_tokens',
-      arguments: { tokens: [{ slug: 'primary', lightValue: '#336699' }] },
+      name: 'site_set_font_tokens',
+      arguments: { tokens: [{ name: 'Heading', fallback: 'serif' }] },
     })
     const siteRequest = await readUntil(siteReader, (event) => event.type === 'toolRequest')
-    expect(siteRequest.toolName).toBe('site_set_color_tokens')
+    expect(siteRequest.toolName).toBe('site_set_font_tokens')
     resolveBridgeToolResult(siteReady.bridgeId as string, siteRequest.requestId as string, {
       ok: true,
       data: { inserted: 1 },
@@ -185,8 +184,8 @@ describe('mcp server', () => {
     )
 
     const call = client.callTool({
-      name: 'site_set_color_tokens',
-      arguments: { tokens: [{ slug: 'primary', lightValue: '#336699' }] },
+      name: 'site_set_font_tokens',
+      arguments: { tokens: [{ name: 'Heading', fallback: 'serif' }] },
     })
     await readUntil(reader, (event) => event.type === 'toolRequest')
     controller.abort()

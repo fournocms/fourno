@@ -31,6 +31,7 @@ import { styleMcpTools } from './tools/styleTools'
 import { contextMcpTools } from './tools/contextTool'
 import { documentMcpTools } from './tools/documentTools'
 import { siteEditMcpTools } from './tools/siteEditTools'
+import { siteTokenMcpTools } from './tools/siteTokenTools'
 import { createPublishMcpTool, type McpPublishRuntime } from './tools/publishTool'
 import { uploadMediaMcpTool } from './tools/uploadMediaTool'
 
@@ -54,6 +55,7 @@ function allMcpTools(runtime?: McpPublishRuntime): AiTool[] {
     ...styleMcpTools,
     ...documentMcpTools,
     ...siteEditMcpTools,
+    ...siteTokenMcpTools,
     createPublishMcpTool(runtime),
     uploadMediaMcpTool,
     ...contentTools,

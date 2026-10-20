@@ -137,3 +137,16 @@ export function uniqueClassCopyName(classes: Record<string, StyleRule>, original
   }
   return `${baseName}-${suffix}`
 }
+
+/** Drop active / selected selector references that pointed at deleted rules. */
+export function clearDeletedRuleSelection(state: Draft<EditorStore>, deletedRuleIds: ReadonlySet<string>): void {
+  if (state.activeClassId && deletedRuleIds.has(state.activeClassId)) {
+    state.activeClassId = null
+  }
+  if (state.selectedSelectorClassId && deletedRuleIds.has(state.selectedSelectorClassId)) {
+    state.selectedSelectorClassId = null
+  }
+  if (state.selectedSelectorClassIds.length > 0) {
+    state.selectedSelectorClassIds = state.selectedSelectorClassIds.filter((id) => !deletedRuleIds.has(id))
+  }
+}

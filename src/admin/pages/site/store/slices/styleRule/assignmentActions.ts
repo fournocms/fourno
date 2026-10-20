@@ -9,6 +9,7 @@
  * never-matching token into the rendered `class=` attribute.
  */
 
+import { setNodeClassAssigned } from '@core/siteEdit'
 import type { SiteSliceHelpers } from '../site/types'
 import type { StyleRuleSlice } from './types'
 import { findNodeWithClassIds, mutateNodeClassIds } from './helpers'
@@ -23,44 +24,19 @@ type AssignmentActions = Pick<
   | 'reorderNodeClass'
 >
 
-export function createAssignmentActions({ get, mutateSiteState }: SiteSliceHelpers): AssignmentActions {
+export function createAssignmentActions({ get, mutateSiteState, mutateSite }: SiteSliceHelpers): AssignmentActions {
   function updateNodeClassAssignments(
     nodeIds: string[],
     classId: string,
     assigned: boolean,
   ): void {
-    const { site } = get()
     const uniqueNodeIds = [...new Set(nodeIds)]
-    if (!site || uniqueNodeIds.length === 0) return
+    if (uniqueNodeIds.length === 0) return
 
-    // `kind` was added after the original class registry, so an absent kind
-    // remains a normal class. Ambient rules are selector-attached and must
-    // never enter a node's classIds array.
-    const cls = site.styleRules[classId]
-    if (cls && cls.kind && cls.kind !== 'class') {
-      console.error(
-        '[styleRuleSlice] setNodeClassAssignments refused: classId references an ambient rule',
-        { nodeIds: uniqueNodeIds, classId, selector: cls.selector },
-      )
-      return
-    }
-
-    mutateSiteState((state) => {
+    mutateSite((site) => {
       let changed = false
       for (const nodeId of uniqueNodeIds) {
-        mutateNodeClassIds(state, nodeId, (classIds) => {
-          if (assigned) {
-            if (classIds.includes(classId)) return
-            classIds.push(classId)
-            changed = true
-            return
-          }
-
-          const index = classIds.indexOf(classId)
-          if (index === -1) return
-          classIds.splice(index, 1)
-          changed = true
-        })
+        if (setNodeClassAssigned(site, nodeId, classId, assigned)) changed = true
       }
       return changed
     })

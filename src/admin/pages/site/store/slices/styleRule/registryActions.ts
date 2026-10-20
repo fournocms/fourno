@@ -8,10 +8,12 @@ import { nanoid } from 'nanoid'
 import type { StyleRule } from '@core/page-tree'
 import { classKindSelector } from '@core/page-tree'
 import { isGeneratedClassLocked, isUserVisibleClass } from '@core/page-tree'
+import { deleteStyleRules } from '@core/siteEdit'
 import { renameStyleRule } from '../../styleRuleRename'
 import type { SiteSliceHelpers } from '../site/types'
 import type { StyleRuleSlice } from './types'
 import {
+  clearDeletedRuleSelection,
   nextRuleOrder,
   cloneContextStyles,
   uniqueClassCopyName,
@@ -166,55 +168,10 @@ export function createRegistryActions({
     },
 
     deleteClasses(classIds) {
-      const { site } = get()
-      if (!site) return
-      // Resolve the deletable set up front: existing, non-locked classes only.
-      const targets = new Set(
-        classIds.filter((id) => {
-          const cls = site.styleRules[id]
-          return cls && !isGeneratedClassLocked(cls)
-        }),
-      )
-      if (targets.size === 0) return
-
       mutateSiteState((state, site) => {
-        let mutated = false
-        for (const classId of targets) {
-          if (!site.styleRules[classId]) continue
-          // Remove from registry
-          delete site.styleRules[classId]
-          mutated = true
-          // Remove from every node on every page AND every Visual Component
-          // tree — class IDs are global, so a deleted class must disappear
-          // from both surfaces or a VC keeps a dangling reference.
-          for (const page of site.pages) {
-            for (const node of Object.values(page.nodes)) {
-              if (node.classIds && node.classIds.includes(classId)) {
-                node.classIds = node.classIds.filter((id) => id !== classId)
-              }
-            }
-          }
-          for (const vc of site.visualComponents) {
-            for (const node of Object.values(vc.tree.nodes)) {
-              if (node.classIds && node.classIds.includes(classId)) {
-                node.classIds = node.classIds.filter((id) => id !== classId)
-              }
-            }
-          }
-        }
-        if (!mutated) return false
-        // Clear active / selected references that pointed at a deleted class.
-        if (state.activeClassId && targets.has(state.activeClassId)) {
-          state.activeClassId = null
-        }
-        if (state.selectedSelectorClassId && targets.has(state.selectedSelectorClassId)) {
-          state.selectedSelectorClassId = null
-        }
-        if (state.selectedSelectorClassIds.length > 0) {
-          state.selectedSelectorClassIds = state.selectedSelectorClassIds.filter(
-            (id) => !targets.has(id),
-          )
-        }
+        const deleted = deleteStyleRules(site, classIds)
+        if (deleted.size === 0) return false
+        clearDeletedRuleSelection(state, deleted)
         return true
       })
     },

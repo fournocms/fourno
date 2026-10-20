@@ -27,3 +27,17 @@ export {
   type DocumentTreeTarget,
 } from './documentTree'
 export { allTreeNodeMaps, syncAllVCRefSlotInstances } from './slotReconcile'
+export {
+  applyCssRules,
+  deleteCssRules,
+  deleteStyleRules,
+  describeCssRefusal,
+  NO_CSS_RULES_PARSED_MESSAGE,
+  findNodeInSite,
+  removeCssRuleProperties,
+  resolveClassId,
+  setNodeClassAssigned,
+  type ApplyCssRulesResult,
+  type DeleteCssRulesResult,
+  type RemoveCssRulePropertiesResult,
+} from './styleRules'

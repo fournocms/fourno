@@ -287,6 +287,101 @@ describe('server-side site editing', () => {
     })
   })
 
+  it('applies, updates, trims and deletes CSS rules with no editor connected', async () => {
+    const stack = await startStack()
+    const readCss = async () =>
+      String(ok(await stack.call('site_read_document', { document: { type: 'page', id: stack.homeId } })).css)
+
+    const created = ok(
+      await stack.call('site_apply_css', {
+        operation: 'merge',
+        css: '.card { padding: 8px; color: red } nav a:hover { text-decoration: underline }',
+      }),
+    )
+    expect(created).toMatchObject({ cssRulesCreated: 2, cssRulesUpdated: 0 })
+
+    // Merge touches only the declarations it names; replace swaps the whole rule.
+    ok(await stack.call('site_apply_css', { operation: 'merge', css: '.card { color: blue }' }))
+    ok(await stack.call('site_assign_class', { nodeId: stack.rootNodeId, classId: 'card' }))
+    const merged = await readCss()
+    expect(merged).toContain('padding')
+    expect(merged).toContain('blue')
+    ok(await stack.call('site_apply_css', { operation: 'replace', css: '.card { margin: 4px }' }))
+    expect(await readCss()).not.toContain('padding')
+
+    const trimmed = ok(
+      await stack.call('site_apply_css', { operation: 'remove-properties', selectors: ['.card'], properties: ['margin'] }),
+    )
+    // `margin` is stored as its side longhands, so one property removes several keys.
+    expect(trimmed.cssRulesUpdated).toBe(1)
+    expect(trimmed.cssPropertiesRemoved).toBeGreaterThan(0)
+    expect(await readCss()).not.toContain('margin')
+
+    const deleted = ok(await stack.call('site_apply_css', { operation: 'delete', selectors: ['.card'] }))
+    expect(deleted).toMatchObject({ cssRulesDeleted: 1 })
+    // Deleting a class also detaches it from every node that carried it.
+    const read = ok(await stack.call('site_read_document', { document: { type: 'page', id: stack.homeId } }))
+    expect(String(read.html)).not.toContain('card')
+  })
+
+  it('refuses CSS calls it cannot apply and leaves the site untouched', async () => {
+    const stack = await startStack()
+    const missing = await stack.call('site_apply_css', { operation: 'delete', selectors: ['.nope'] })
+    expect(missing.ok).toBe(false)
+    expect(missing.error).toContain('CSS selectors not found: .nope')
+
+    const empty = await stack.call('site_apply_css', { operation: 'merge', css: '/* nothing */' })
+    expect(empty.ok).toBe(false)
+    expect(empty.error).toContain('No CSS rules parsed')
+
+    const missingProperty = await stack.call('site_apply_css', { operation: 'merge', css: '.box { color: red }' })
+    expect(missingProperty.ok).toBe(true)
+    const unset = await stack.call('site_apply_css', {
+      operation: 'remove-properties',
+      selectors: ['.box'],
+      properties: ['margin'],
+    })
+    expect(unset.ok).toBe(false)
+    expect(unset.error).toContain('CSS properties are not set')
+  })
+
+  it('assigns and removes classes by name, and refuses ambient rules and unknown targets', async () => {
+    const stack = await startStack()
+    ok(await stack.call('site_apply_css', { operation: 'merge', css: '.badge { color: green } h2 { margin: 0 }' }))
+    const inserted = ok(
+      await stack.call('site_insert_html', { parentId: stack.rootNodeId, html: '<p>tagged</p>' }),
+    )
+    const nodeId = (inserted.nodeIds as string[])[0]!
+    const html = async () =>
+      String(ok(await stack.call('site_get_node_html', { nodeId })).html)
+
+    ok(await stack.call('site_assign_class', { nodeId, classId: 'badge' }))
+    expect(await html()).toContain('badge')
+    // Assigning twice is a no-op, not an error.
+    ok(await stack.call('site_assign_class', { nodeId, classId: 'badge' }))
+    ok(await stack.call('site_remove_class', { nodeId, classId: 'badge' }))
+    expect(await html()).not.toContain('badge')
+
+    const ambient = await stack.call('site_assign_class', { nodeId, classId: 'h2' })
+    expect(ambient.ok).toBe(false)
+    expect(ambient.error).toContain('ambient rule')
+    const unknownClass = await stack.call('site_assign_class', { nodeId, classId: 'no-such-class' })
+    expect(unknownClass.error).toContain('Class not found')
+    const unknownNode = await stack.call('site_assign_class', { nodeId: 'ghost', classId: 'badge' })
+    expect(unknownNode.error).toContain('Node not found')
+  })
+
+  it('hides style tools from a caller without the style capability', async () => {
+    const stack = await startStack()
+    const refused = await stack.call(
+      'site_apply_css',
+      { operation: 'merge', css: '.x { color: red }' },
+      ['ai.tools.write', 'site.read', 'site.structure.edit', 'site.content.edit'],
+    )
+    expect(refused.ok).toBe(false)
+    expect(refused.error).toMatch(/not permitted/)
+  })
+
   it('reports a missing node as a recoverable tool error', async () => {
     const stack = await startStack()
     const output = await stack.call('site_delete_node', { nodeId: 'does-not-exist' })

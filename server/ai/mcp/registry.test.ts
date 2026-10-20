@@ -26,7 +26,7 @@ describe('mcp registry', () => {
     expect(names).toContain('site_read_styles') // headless design-system read
     expect(names).toContain('site_publish') // explicit full-site deployment
     expect(names).toContain('content_list_collections')
-    // browser-execution editing (relayed via the editor bridge)
+    // editing tools: page + CSS edits run on the server, tokens are still relayed via the editor bridge
     expect(names).toContain('site_insert_html')
     expect(names).toContain('site_delete_node')
     expect(names).toContain('site_apply_css')
@@ -34,7 +34,8 @@ describe('mcp registry', () => {
     expect(tools.some((t) => t.execution === 'browser')).toBe(true)
     // Page edits run on the server (PRD 8.6) and shadow the editor-bridged tool.
     expect(tools.find((t) => t.name === 'site_insert_html')?.execution).toBe('server')
-    expect(tools.find((t) => t.name === 'site_apply_css')?.execution).toBe('browser')
+    expect(tools.find((t) => t.name === 'site_apply_css')?.execution).toBe('server')
+    expect(tools.find((t) => t.name === 'site_set_color_tokens')?.execution).toBe('browser')
   })
 
   it('does not expose the removed headless page-tree tools', () => {

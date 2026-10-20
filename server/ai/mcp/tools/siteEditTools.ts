@@ -15,12 +15,15 @@
  * with the update guard partial-capability sockets get. Richtext props are
  * sanitised exactly as in the editor executor.
  *
- * Not yet headless (still relayed to an open editor): CSS and class tools,
- * design tokens, code assets, `site_open_document`, `site_render_snapshot`.
+ * Not yet headless (still relayed to an open editor): design tokens, code assets, `site_open_document`, `site_render_snapshot`.
  */
 import { aiToolError, aiToolOk, describeAgentDocuments, documentRefEquals, documentRefForPage, renderAgentDocument } from '@core/ai'
+import { ApplyCssExecutionInputSchema } from '@core/ai'
 import type {
   AgentDocumentRef,
+  ApplyCssInput,
+  AssignClassInput,
+  RemoveClassInput,
   AiToolOutput,
   DeleteNodeInput,
   DeletePageInput,
@@ -59,10 +62,18 @@ import {
 } from '@core/page-tree'
 import { renderNode, type RenderAccumulators, type RenderConfig } from '@core/publisher'
 import {
+  applyCssRules,
+  deleteCssRules,
+  describeCssRefusal,
   duplicateNodeWithScopedClasses,
   editDocumentTree,
   findNodeDocument,
+  findNodeInSite,
   insertImportedFragment,
+  NO_CSS_RULES_PARSED_MESSAGE,
+  removeCssRuleProperties,
+  resolveClassId,
+  setNodeClassAssigned,
 } from '@core/siteEdit'
 import { subtreeHasOutlet } from '@core/templates'
 import { flattenVCToVirtualPage } from '@core/visualComponents'
@@ -525,6 +536,77 @@ async function getNodeHtml(input: GetNodeHtmlInput, ctx: ToolContext): Promise<A
   })
 }
 
+function applyCssTool(providerInput: ApplyCssInput, ctx: ToolContext): Promise<AiToolOutput> {
+  const input = parseValue(ApplyCssExecutionInputSchema, providerInput)
+  // Parse before editing so malformed CSS never opens a write.
+  const parsed =
+    input.operation === 'delete' || input.operation === 'remove-properties' ? null : input.css
+  return editAsCaller(
+    'site_apply_css',
+    ctx,
+    (site) => {
+      if (input.operation === 'delete') {
+        const result = deleteCssRules(site, input.selectors)
+        const refusal = describeCssRefusal(result)
+        if (refusal) refuse(refusal)
+        return { cssRulesDeleted: result.deleted }
+      }
+      if (input.operation === 'remove-properties') {
+        const result = removeCssRuleProperties(site, input.selectors, input.properties)
+        const refusal = describeCssRefusal(result)
+        if (refusal) refuse(refusal)
+        return { cssRulesUpdated: result.updated, cssPropertiesRemoved: result.removed }
+      }
+      const { rules, conditions } = parsed?.trim()
+        ? cssToStyleRules(parsed, {
+            breakpoints: site.breakpoints.map(({ id, width, mediaQuery }) => ({ id, width, mediaQuery })),
+          })
+        : { rules: [], conditions: [] }
+      if (rules.length === 0) refuse(NO_CSS_RULES_PARSED_MESSAGE)
+      const result = applyCssRules(site, rules, conditions, input.operation)
+      const refusal = describeCssRefusal(result)
+      if (refusal) refuse(refusal)
+      return { cssRulesCreated: result.created, cssRulesUpdated: result.updated }
+    },
+    (counts) => counts,
+  )
+}
+
+function assignClassTool(input: AssignClassInput, ctx: ToolContext): Promise<AiToolOutput> {
+  return setClassAssignment('site_assign_class', input, true, ctx)
+}
+
+function removeClassTool(input: RemoveClassInput, ctx: ToolContext): Promise<AiToolOutput> {
+  return setClassAssignment('site_remove_class', input, false, ctx)
+}
+
+function setClassAssignment(
+  toolName: string,
+  input: AssignClassInput | RemoveClassInput,
+  assigned: boolean,
+  ctx: ToolContext,
+): Promise<AiToolOutput> {
+  return editAsCaller(
+    toolName,
+    ctx,
+    (site) => {
+      const classId = resolveClassId(site, input.classId)
+      if (!classId) refuse(`Class not found: ${input.classId}`)
+      if (!findNodeInSite(site, input.nodeId)) nodeNotFound(site, input.nodeId)
+      const rule = site.styleRules[classId]
+      if (assigned && rule.kind && rule.kind !== 'class') {
+        refuse(
+          `"${rule.name}" is an ambient rule (${rule.selector}) and attaches by selector. ` +
+            'Only classes can be assigned to a node.',
+        )
+      }
+      setNodeClassAssigned(site, input.nodeId, classId, assigned)
+      return {}
+    },
+    () => ({}),
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Registration
 // ---------------------------------------------------------------------------
@@ -562,4 +644,7 @@ export const siteEditMcpTools: AiTool[] = [
   serverBacked('site_duplicate_page', duplicatePageTool),
   serverBacked('site_set_page_template', setPageTemplateTool),
   serverBacked('site_clear_page_template', clearPageTemplateTool),
+  serverBacked('site_apply_css', applyCssTool),
+  serverBacked('site_assign_class', assignClassTool),
+  serverBacked('site_remove_class', removeClassTool),
 ]

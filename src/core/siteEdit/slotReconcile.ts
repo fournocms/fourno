@@ -1,7 +1,7 @@
 /**
  * Slot-instance reconciliation helpers for Visual Component edits.
  *
- * Split out of `visualComponentsSlice.ts` (which owns the slice actions) so the
+ * Shared by the editor store and the server edit path so the
  * tree-sweeping logic — which must cover pages AND every VC tree, including refs
  * nested inside other VCs (ISS-026) — lives in one focused module.
  */

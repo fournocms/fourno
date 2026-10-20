@@ -15,7 +15,7 @@ import {
   findReimportedStyleRule,
   indexStyleRulesByOrigin,
   registerStyleRuleOrigin,
-} from '@admin/pages/site/store/slices/site/importLinking'
+} from '@core/siteEdit'
 
 const ORIGIN = { source: 'style.css', ordinal: 2 }
 

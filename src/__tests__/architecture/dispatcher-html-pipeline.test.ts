@@ -31,11 +31,11 @@
  * If you add a new HTML-emitting code path, wire it through
  * `applyPublishedHtmlPipeline` — don't reimplement the pipeline.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
-const ROOT = resolve(import.meta.dir, '../../..')
+const ROOT = resolve(import.meta.dirname, '../../..')
 
 /** Walk a tree, returning every `.ts` file path (skipping tests and dist). */
 function* walk(dir: string): Generator<string> {

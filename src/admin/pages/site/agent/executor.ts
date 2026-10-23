@@ -1,5 +1,5 @@
 /**
- * Browser-side executor for instatic write tools.
+ * Browser-side executor for fourno write tools.
  *
  * The AI runtime defines these browser-executed tools server-side, then emits a
  * `toolRequest` stream event so the browser can apply the mutation against the
@@ -286,7 +286,7 @@ function runInsertHtml(input: InsertHtmlInput): AiToolOutput {
   }
 
   // Report references the importer could not resolve. Without this an
-  // `<instatic-loop>` naming a source that does not exist inserts cleanly,
+  // `<fourno-loop>` naming a source that does not exist inserts cleanly,
   // publishes an empty section, and passes every downstream check — the
   // caller only finds out by looking at the rendered page.
   return aiToolOk({
@@ -577,7 +577,7 @@ function runDuplicateNode(input: DuplicateNodeInput): AiToolOutput {
 // ---------------------------------------------------------------------------
 
 /**
- * Apply a single instatic write tool against the editor store.
+ * Apply a single fourno write tool against the editor store.
  *
  * The browser receives a `toolRequest` event from the server stream,
  * dispatches the tool here, and POSTs the canonical result back to
@@ -673,7 +673,7 @@ export async function executeAgentTool(
         return await runRenderSnapshotAtBreakpoint({ ...parsed, breakpointId })
       }
       default:
-        return aiToolError(`Unknown instatic tool: ${toolName}`)
+        return aiToolError(`Unknown fourno tool: ${toolName}`)
     }
   } catch (err) {
     const message = getErrorMessage(err, String(err))

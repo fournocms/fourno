@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { resolveLivePath } from '@site/hooks/useActiveLivePath'
 import type { Page } from '@core/page-tree'
 import type { LoopItem } from '@core/loops/types'

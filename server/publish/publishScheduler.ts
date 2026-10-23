@@ -62,7 +62,7 @@ const TICK_BATCH_LIMIT = 25
 /**
  * Postgres advisory-lock key — must be a bigint. Distinct from the
  * plugin scheduler's key (712830541) so the two locks don't interfere
- * with each other. Derived from djb2('instatic-publish-scheduler')
+ * with each other. Derived from djb2('fourno-publish-scheduler')
  * mod 2^31.
  */
 const ADVISORY_LOCK_KEY = 982410937

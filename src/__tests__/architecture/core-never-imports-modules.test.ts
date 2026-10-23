@@ -28,8 +28,8 @@
  *
  * One allowlisted directory, for the same reason:
  *
- *   - `src/core/plugin-sdk/cli/` — the `instatic-plugin` CLI. An executable
- *     entry point that always runs under Bun, never reaches a browser bundle,
+ *   - `src/core/plugin-sdk/cli/` — the `fourno-plugin` CLI. An executable
+ *     entry point that always runs under Node, never reaches a browser bundle,
  *     and is deliberately kept out of the SDK barrel. Its pack-compile
  *     environment side-effect-imports `@modules/base` to populate the module
  *     registry, exactly as `server/` does — the tool at the top of the stack
@@ -39,11 +39,11 @@
  * @see src/core/htmlAttributes/tags.ts — the hoisted tag-resolution logic
  */
 
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { dirname, extname, join, relative, resolve, sep } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const CORE_ROOT = join(PROJECT_ROOT, 'src/core')
 const MODULES_ROOT = join(PROJECT_ROOT, 'src/modules')
 

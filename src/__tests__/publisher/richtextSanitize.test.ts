@@ -8,7 +8,7 @@
  * These tests exercise the publisher pipeline directly (not via VCs).
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { escapeProps, publishPage, renderNode } from '@core/publisher'
 import type { PropertySchema } from '@core/module-engine'
 import { makeModule, makeRegistry, makePage, makeSite, makeAccumulators } from './helpers'

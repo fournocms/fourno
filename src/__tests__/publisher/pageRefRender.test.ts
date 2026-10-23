@@ -3,7 +3,7 @@
  * (`cms:page:<id>`) to the target page's current public path at render time.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { renderNode, type RenderConfig } from '@core/publisher'
 import { makeModule, makeRegistry, makePage, makeSite, makeAccumulators } from './helpers'
 

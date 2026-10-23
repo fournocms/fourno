@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, render, waitFor } from '@testing-library/react'
 import { EditorView } from '@codemirror/view'

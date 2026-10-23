@@ -1,5 +1,5 @@
 /**
- * Plugin runtime bootstrap — populates `globalThis.__instatic` with the
+ * Plugin runtime bootstrap — populates `globalThis.__fourno` with the
  * host's React, ReactDOM, JSX runtime, design-system primitives, and
  * plugin SDK builders so the import-map shims in `public/runtime/*.js`
  * can re-export them.
@@ -47,7 +47,7 @@ import type * as ReactJsxDevRuntimeNs from 'react/jsx-dev-runtime'
 import type * as ReactDOMNs from 'react-dom'
 
 declare global {
-  var __instatic: {
+  var __fourno: {
     React: typeof ReactNs
     ReactJsxRuntime: typeof ReactJsxRuntimeNs
     ReactJsxDevRuntime: typeof ReactJsxDevRuntimeNs
@@ -58,8 +58,8 @@ declare global {
   } | undefined
 }
 
-/** The frozen runtime shape we publish on `globalThis.__instatic`. */
-type PluginRuntime = NonNullable<typeof globalThis.__instatic>
+/** The frozen runtime shape we publish on `globalThis.__fourno`. */
+type PluginRuntime = NonNullable<typeof globalThis.__fourno>
 
 // Memoised install promise. The first caller triggers the dynamic
 // imports; concurrent / subsequent callers receive the same resolved
@@ -67,13 +67,13 @@ type PluginRuntime = NonNullable<typeof globalThis.__instatic>
 let installPromise: Promise<void> | null = null
 
 /**
- * Ensure `globalThis.__instatic` is populated. Returns a promise that
+ * Ensure `globalThis.__fourno` is populated. Returns a promise that
  * resolves once all the runtime deps (host UI, host hooks, plugin SDK)
  * have been loaded and the global is set.
  *
  * Call this BEFORE dynamically importing a plugin asset — the plugin module
  * evaluates its `import * as React from 'react'` statements via
- * the `/runtime/*.js` shims, which read `globalThis.__instatic`.
+ * the `/runtime/*.js` shims, which read `globalThis.__fourno`.
  *
  * Cost on first call: downloads + parses `@admin/plugin-host-ui`,
  * `@admin/plugin-host-hooks` (which pulls in the editor store chunk),
@@ -115,14 +115,14 @@ async function doInstall(): Promise<void> {
     import('@core/plugin-sdk'),
   ])
 
-  if (globalThis.__instatic && globalThis.__instatic.React !== React) {
+  if (globalThis.__fourno && globalThis.__fourno.React !== React) {
     // Defensive single-React check — see the previous installPluginRuntime
     // implementation for rationale. Fail loudly if a plugin author
     // accidentally bundled their own React.
     throw new Error(
-      '[@instatic/runtime] Detected a second React instance during plugin runtime bootstrap. ' +
-      `Host React: ${React.version}; existing React: ${globalThis.__instatic.React.version}. ` +
-      'Plugin authors must build with `instatic-plugin build` so React is externalized.',
+      '[@fourno/runtime] Detected a second React instance during plugin runtime bootstrap. ' +
+      `Host React: ${React.version}; existing React: ${globalThis.__fourno.React.version}. ` +
+      'Plugin authors must build with `fourno-plugin build` so React is externalized.',
     )
   }
 
@@ -196,12 +196,12 @@ async function doInstall(): Promise<void> {
   }
 
   // Freeze the top-level so a plugin (or stray third-party script) cannot
-  // overwrite `__instatic.hostUi` etc. and substitute components.
+  // overwrite `__fourno.hostUi` etc. and substitute components.
   // The shim files in `public/runtime/*.js` rely on these references being
   // stable for the lifetime of the page.
   //
   // The cast pins the runtime's React/ReactDOM/JSX-runtime members to the
-  // type-only namespace shape declared on `globalThis.__instatic`. Under
+  // type-only namespace shape declared on `globalThis.__fourno`. Under
   // `verbatimModuleSyntax: true` + `moduleResolution: bundler` + no
   // `esModuleInterop`, TS infers `await import('react')` as a wider union
   // (it includes the synthetic CJS-interop default shape on top of the
@@ -209,5 +209,5 @@ async function doInstall(): Promise<void> {
   // module instance in play — so the narrowing is a true statement, not a
   // band-aid. This is the only place that knows how the dynamic-import
   // results land in the strict global contract.
-  globalThis.__instatic = Object.freeze(runtime) as PluginRuntime
+  globalThis.__fourno = Object.freeze(runtime) as PluginRuntime
 }

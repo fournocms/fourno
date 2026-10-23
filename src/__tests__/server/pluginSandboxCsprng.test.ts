@@ -16,7 +16,7 @@
  * test records observations through a `test.record` recorder and asserts on
  * the host side.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createPluginVm, type PluginVmEnv } from '../../../server/plugins/quickjs/vm'
 import { CRYPTO_RANDOM_BYTES_MAX } from '../../../server/plugins/quickjs/bootstrap/crypto'
 

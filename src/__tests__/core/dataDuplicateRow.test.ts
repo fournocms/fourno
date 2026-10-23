@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { buildDuplicateRowCells } from '@core/data/duplicateRow'
 import type { DataRow, DataTable } from '@core/data/schemas'
 

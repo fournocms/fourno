@@ -1,7 +1,7 @@
 /**
  * Static hole-subtree module census.
  *
- * A `<instatic-hole>` placeholder defers its subtree to request time, so the
+ * A `<fourno-hole>` placeholder defers its subtree to request time, so the
  * page render never executes those modules' render() — their `js` cannot land
  * in `RenderAccumulators.jsMap`. This walker statically gathers every moduleId
  * reachable inside the page's hole subtrees (descending through page-tree

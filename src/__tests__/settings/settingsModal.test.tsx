@@ -28,7 +28,7 @@
  * leaking between tests.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 import { render, screen, cleanup, fireEvent, act, within } from '@testing-library/react'
 import { readFileSync } from 'fs'
@@ -530,7 +530,7 @@ describe('SettingsModal — PreferencesSection toggles', () => {
     fireEvent.click(previewToggle)
 
     expect(previewToggle.getAttribute('aria-checked')).toBe('false')
-    expect(JSON.parse(localStorage.getItem('instatic-editor-prefs') ?? '{}').hoverPreview).toBe(false)
+    expect(JSON.parse(localStorage.getItem('fourno-editor-prefs') ?? '{}').hoverPreview).toBe(false)
   })
 
   it('toggle labels are linked via htmlFor / id (label accessibility)', () => {

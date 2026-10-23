@@ -16,7 +16,7 @@ The workspace is canvas-style: it uses `AdminWorkspaceCanvasLayout`, the lighter
 - **Floating windows:** Asset viewer, upload queue, bulk edit. Each uses the shared `@admin/shared/FloatingWindow` shell or its `useDraggablePanel` hook with a unique id (`mediaDetachedInspector`, `mediaUploadQueue`, `mediaBulkEdit`). Position survives reload via `workspaceLayoutStorage`.
 - **Auto-open behavior:** upload queue opens when uploads start; bulk-edit opens at 2+ selected; viewer opens on primary selection.
 - **Server side:** `media_assets`, `media_folders`, `media_asset_folders` tables. Handlers under `/admin/api/cms/media`, `/admin/api/cms/media/folders`, `/admin/api/cms/media/storage`. Repositories at `server/repositories/media*.ts`.
-- **Storage adapters:** built-in local-disk plus plugin-registered adapters. Non-public-url adapters route through `/_instatic/media/<adapterId>/<storagePath>` for signed redirects.
+- **Storage adapters:** built-in local-disk plus plugin-registered adapters. Non-public-url adapters route through `/_fourno/media/<adapterId>/<storagePath>` for signed redirects.
 - **Plugin media ingestion:** `api.cms.media.upsert(...)` lets plugins import allowlisted HTTPS images or contained package assets through the same validation, storage, and responsive-variant pipeline as admin uploads.
 
 ---
@@ -171,7 +171,7 @@ Media data lives in dedicated tables (not in `data_tables` — they predate the 
 |-----------------------|---------------|-----------------|-------------------------------------------------------------------------------------------------|
 | `id`                  | `text` PK     | `text` PK       |                                                                                                 |
 | `filename`            | `text`        | `text`          | Original upload filename                                                                        |
-| `public_path`         | `text`        | `text`          | URL the browser uses: `/uploads/...` for local-disk; `/_instatic/media/<adapterId>/<storagePath>` for non-public-url adapters |
+| `public_path`         | `text`        | `text`          | URL the browser uses: `/uploads/...` for local-disk; `/_fourno/media/<adapterId>/<storagePath>` for non-public-url adapters |
 | `mime_type`           | `text`        | `text`          |                                                                                                 |
 | `size_bytes`          | `bigint`      | `integer`       |                                                                                                 |
 | `storage_path`        | `text`        | `text`          | Adapter-internal handle (local basename or S3 key). Never exposed to the browser.              |
@@ -261,7 +261,7 @@ Uploads initiated outside the Media page use the same pipeline. In particular, t
 
 The multipart body carries the `file` part and, optionally, an `altText` text part: Site Import sends the authored `<img alt>` so the record is created with it (`createMediaAsset` writes `alt_text`), instead of leaving every imported image blank for the user to back-fill. Every other upload omits it and the record starts empty.
 
-Plugins enter this same pipeline through `api.cms.media.upsert(...)`. Only source metadata crosses QuickJS. For a `remote` source, the Bun host performs a bounded, SSRF-guarded download. For a `pluginAsset` source, it reads a package-relative file beneath the plugin's canonical installed asset root and rejects traversal or symlink escapes. Both branches call the ordinary create or replace path, so storage-adapter election, MIME sniffing, intrinsic dimensions, BlurHash, and responsive variants stay identical to an admin upload. The provenance row determines whether the call creates, replaces, or returns the existing asset unchanged.
+Plugins enter this same pipeline through `api.cms.media.upsert(...)`. Only source metadata crosses QuickJS. For a `remote` source, the Node host performs a bounded, SSRF-guarded download. For a `pluginAsset` source, it reads a package-relative file beneath the plugin's canonical installed asset root and rejects traversal or symlink escapes. Both branches call the ordinary create or replace path, so storage-adapter election, MIME sniffing, intrinsic dimensions, BlurHash, and responsive variants stay identical to an admin upload. The provenance row determines whether the call creates, replaces, or returns the existing asset unchanged.
 
 ```text
 POST /admin/api/cms/media
@@ -282,7 +282,7 @@ mediaVariants.ts (host)    ← coordinates raster variant generation
     │                       the local ladder and we emit URL-template
     │                       variants only)
     ▼
-imageVariantWorker          ← Bun.Worker: sharp probe + blurhash + WebP
+imageVariantWorker          ← worker thread: sharp probe + blurhash + WebP
   (server/handlers/cms/      ladder. Bytes cross the boundary as
    imageVariantWorker.ts)    transferable ArrayBuffers. The main thread
                              stays free for visitor traffic during the
@@ -314,7 +314,7 @@ Built-in: local-disk (`mediaStorageRegistry.configureLocalDisk(...)` at boot). P
 Two serving modes:
 
 - **`public-url`** — the adapter returns a public URL the browser hits directly (or via CDN). Used by local-disk (`/uploads/...`).
-- **non–`public-url`** — the asset URL is host-owned (`/_instatic/media/<adapterId>/<storagePath>`); the browser hits the host, which 302-redirects to a freshly-signed read URL.
+- **non–`public-url`** — the asset URL is host-owned (`/_fourno/media/<adapterId>/<storagePath>`); the browser hits the host, which 302-redirects to a freshly-signed read URL.
 
 The redirect handler is `tryServeMediaRedirect` in `server/router.ts`. The redirect target has a 1-hour TTL — long enough for browser fetches, short enough that a leaked signed URL becomes useless fast.
 
@@ -370,7 +370,7 @@ See [docs/features/plugin-system.md](plugin-system.md). The plugin SDK's `api.cm
 
 ## Related
 
-- [docs/architecture.md](../architecture.md) — system overview (request lifecycle includes `/_instatic/media/`)
+- [docs/architecture.md](../architecture.md) — system overview (request lifecycle includes `/_fourno/media/`)
 - [docs/server.md](../server.md) — server-side handlers and storage adapters
 - [docs/editor.md](../editor.md) — admin workspace layout (Media uses `AdminWorkspaceCanvasLayout`)
 - [docs/reference/database-dialects.md](../reference/database-dialects.md) — `_json` columns + migration parity

@@ -4,7 +4,7 @@
  * Public API:
  *
  *   importHtml(source)   — parse → harvest → strip → walk; the single entry point.
- *   parseHtml(source)    — DOMParser wrapper (browser / test polyfill).
+ *   parseHtml(source)    — DOMParser wrapper (browser / test polyfill / server jsdom via configureHtmlParser).
  *   stripUnsafe(doc)     — mutates doc in place, returns StripReport.
  *   collectStyleCss(doc) — concatenated CSS of every <style> block (pre-strip).
  *   harvestInlineStyles  — per-element inline style="…" bags (pre-strip).
@@ -24,7 +24,7 @@
 
 export type {  ImportFragment, ImportResult } from './walkAndMap'
 
-export { parseHtml } from './parseHtml'
+export { parseHtml, configureHtmlParser, type HtmlParser } from './parseHtml'
 export { stripUnsafe } from './stripUnsafe'
 export { walkAndMap, importHtml } from './walkAndMap'
 

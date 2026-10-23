@@ -244,7 +244,7 @@ test.describe('media', () => {
     const tag = `mobile-${suffix}`
 
     await page.addInitScript(() => {
-      localStorage.removeItem('instatic-editor-layout-v2')
+      localStorage.removeItem('fourno-editor-layout-v2')
     })
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)
@@ -362,7 +362,7 @@ test.describe('media', () => {
     const replacementFilename = `mobile-replacement-${suffix}.png`
 
     await page.addInitScript(() => {
-      localStorage.removeItem('instatic-editor-layout-v2')
+      localStorage.removeItem('fourno-editor-layout-v2')
     })
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)
@@ -434,7 +434,7 @@ test.describe('media', () => {
     page,
   }) => {
     await page.addInitScript(() => {
-      localStorage.removeItem('instatic-editor-layout-v2')
+      localStorage.removeItem('fourno-editor-layout-v2')
     })
     await login(page)
     await page.goto('/admin/media')
@@ -469,7 +469,7 @@ test.describe('media', () => {
     test.setTimeout(60_000)
 
     await page.addInitScript(() => {
-      localStorage.removeItem('instatic-editor-layout-v2')
+      localStorage.removeItem('fourno-editor-layout-v2')
     })
     await page.setViewportSize({ width: 390, height: 844 })
     await login(page)

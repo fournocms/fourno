@@ -20,7 +20,7 @@
  * @see Contribution #619 Phase 2 §C
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import type { SiteDocument } from '@core/page-tree'
 

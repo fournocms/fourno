@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { readFileSync } from 'node:fs'
 import { cleanup, fireEvent, render } from '@testing-library/react'
@@ -65,11 +65,11 @@ describe('CanvasModulePlaceholder', () => {
     expect(moduleCss).toContain('.icon > svg')
     expect(moduleCss).toContain('margin: 0;')
     expect(moduleCss).toContain('padding: 0;')
-    expect(chromeInjector).toContain('[data-instatic-placeholder-content]')
+    expect(chromeInjector).toContain('[data-fourno-placeholder-content]')
     expect(chromeInjector).toContain('place-items: center')
     expect(chromeInjector).toContain('row-gap: var(--chrome-space-s)')
     expect(chromeInjector).toContain('[data-variant="block"][data-layout="row"]')
-    expect(chromeInjector).toContain('[data-instatic-placeholder-icon] > svg')
+    expect(chromeInjector).toContain('[data-fourno-placeholder-icon] > svg')
     expect(chromeInjector).toContain('margin: 0;')
     expect(chromeInjector).toContain('padding: 0;')
   })
@@ -82,7 +82,7 @@ describe('CanvasModulePlaceholder', () => {
     )
 
     const root = container.querySelector('[data-canvas-module-placeholder]')
-    const icon = container.querySelector('[data-instatic-placeholder-icon]')
+    const icon = container.querySelector('[data-fourno-placeholder-icon]')
     const svg = icon?.querySelector('svg')
     expect(root?.getAttribute('data-layout')).toBe('row')
     expect(icon?.hasAttribute('data-icon-sizing')).toBe(false)
@@ -99,9 +99,9 @@ describe('CanvasModulePlaceholder', () => {
     )
 
     const root = container.querySelector('[data-canvas-module-placeholder]')
-    const content = root?.querySelector('[data-instatic-placeholder-content]')
+    const content = root?.querySelector('[data-fourno-placeholder-content]')
     expect(content).not.toBeNull()
-    expect(content?.querySelector('[data-instatic-placeholder-icon]')).not.toBeNull()
-    expect(content?.querySelector('[data-instatic-placeholder-label]')?.textContent).toBe('No image selected')
+    expect(content?.querySelector('[data-fourno-placeholder-icon]')).not.toBeNull()
+    expect(content?.querySelector('[data-fourno-placeholder-label]')?.textContent).toBe('No image selected')
   })
 })

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeSite } from '../fixtures'
 import { normalizeRouteBase } from '@core/templates/templateMatching'
 import { resolveTemplateChain } from '@core/templates'

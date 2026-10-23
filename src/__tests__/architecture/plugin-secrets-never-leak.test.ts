@@ -20,11 +20,11 @@
  *     and the per-field key-fingerprint state.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const HANDLERS_DIR = join(REPO_ROOT, 'server/handlers')
 
 /** The only module allowed to import the plaintext runtime projection. */

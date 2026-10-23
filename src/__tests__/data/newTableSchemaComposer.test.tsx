@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { NewTableDialog } from '@admin/pages/data/components/NewTableDialog/NewTableDialog'
@@ -129,7 +129,7 @@ describe('NewTableDialog schema composer', () => {
         { type: 'text', id: 'client', label: 'Client' },
       ],
     }
-    const onUpdateTable = mock(async (input: Partial<DataTable>) => ({
+    const onUpdateTable = vi.fn(async (input: Partial<DataTable>) => ({
       ...table,
       ...input,
     }))
@@ -223,7 +223,7 @@ describe('NewTableDialog schema composer', () => {
   it('creates a table and its repeater schema in one atomic input', async () => {
     const user = userEvent.setup()
     const created: CreateDataTableInput[] = []
-    const onCreate = mock(async (input: CreateDataTableInput) => {
+    const onCreate = vi.fn(async (input: CreateDataTableInput) => {
       created.push(input)
     })
 
@@ -305,7 +305,7 @@ describe('NewTableDialog schema composer', () => {
       { type: 'text', id: 'name', label: 'Name' },
       { type: 'text', id: 'caption', label: 'Caption' },
     ]
-    const onSchemaChange = mock(async (fields: DataField[]) => {
+    const onSchemaChange = vi.fn(async (fields: DataField[]) => {
       schemaFields = fields
     })
 

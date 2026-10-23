@@ -19,7 +19,7 @@
  * setup from src/__tests__/setup.ts (preloaded via bunfig.toml).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import React from 'react'
@@ -29,11 +29,11 @@ import { LayerTreeNodeContent } from '@site/panels/DomPanel/LayerTreeNodeContent
 import { useEditorStore } from '@site/store/store'
 import { makeSite, makePage, makeNode, makeVC, makeVCNode, makeVCTree } from '../fixtures'
 
-const TREE_ROW_CSS_PATH = join(import.meta.dir, '../../admin/pages/site/ui/Tree/TreeRow.module.css')
-const TREE_DROP_CSS_PATH = join(import.meta.dir, '../../admin/pages/site/ui/Tree/TreeDrop.module.css')
-const TREE_NODE_CSS_PATH = join(import.meta.dir, '../../admin/pages/site/panels/DomPanel/TreeNode.module.css')
-const TREE_NODE_SOURCE_PATH = join(import.meta.dir, '../../admin/pages/site/panels/DomPanel/TreeNode.tsx')
-const DOM_PANEL_SOURCE_PATH = join(import.meta.dir, '../../admin/pages/site/panels/DomPanel/DomPanel.tsx')
+const TREE_ROW_CSS_PATH = join(import.meta.dirname, '../../admin/pages/site/ui/Tree/TreeRow.module.css')
+const TREE_DROP_CSS_PATH = join(import.meta.dirname, '../../admin/pages/site/ui/Tree/TreeDrop.module.css')
+const TREE_NODE_CSS_PATH = join(import.meta.dirname, '../../admin/pages/site/panels/DomPanel/TreeNode.module.css')
+const TREE_NODE_SOURCE_PATH = join(import.meta.dirname, '../../admin/pages/site/panels/DomPanel/TreeNode.tsx')
+const DOM_PANEL_SOURCE_PATH = join(import.meta.dirname, '../../admin/pages/site/panels/DomPanel/DomPanel.tsx')
 
 afterEach(cleanup)
 

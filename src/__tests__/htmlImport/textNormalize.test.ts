@@ -4,7 +4,7 @@
  * would, so editor text fields don't show stray leading spaces / line breaks.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import { importHtml } from '@core/htmlImport'
 import { normalizeImportedText } from '@core/htmlImport'
@@ -16,7 +16,7 @@ function singleProps(html: string): Record<string, unknown> {
 
 describe('normalizeImportedText', () => {
   it('collapses whitespace runs and trims', () => {
-    expect(normalizeImportedText('\n      instatic  ')).toBe('instatic')
+    expect(normalizeImportedText('\n      fourno  ')).toBe('fourno')
     expect(normalizeImportedText('The Club\n  is how\tit stays')).toBe('The Club is how it stays')
     expect(normalizeImportedText('   ')).toBe('')
   })
@@ -29,8 +29,8 @@ describe('imported text props are normalized', () => {
   })
 
   it('button label is trimmed', () => {
-    const props = singleProps('<button>\n   Get Instatic   \n</button>')
-    expect(props.label).toBe('Get Instatic')
+    const props = singleProps('<button>\n   Get Fourno   \n</button>')
+    expect(props.label).toBe('Get Fourno')
   })
 
   it('text-only link text is trimmed', () => {

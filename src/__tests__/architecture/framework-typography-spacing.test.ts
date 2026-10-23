@@ -6,7 +6,7 @@
  *     .../scale.ts, .../preferences.ts) MUST stay React-free so the publisher
  *     and any future server-side code can import it.
  *   - The editor panels MUST live under src/admin/pages/site/components/<Family>Panel/
- *     and consume only the instatic design tokens (no raw hex, no Tailwind).
+ *     and consume only the fourno design tokens (no raw hex, no Tailwind).
  *   - Colors / Typography / Spacing are consolidated into one Framework rail
  *     entry; the per-family tabs live inside the FrameworkPanel.
  *
@@ -14,11 +14,11 @@
  * never silently drops a constraint.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { join } from 'path'
 
-const ROOT = join(import.meta.dir, '../..')
+const ROOT = join(import.meta.dirname, '../..')
 
 function readSource(relative: string): string {
   const path = join(ROOT, relative)

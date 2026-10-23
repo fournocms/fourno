@@ -4,9 +4,9 @@ Describe the change and why it is needed.
 
 ## Verification
 
-- [ ] `bun run build`
-- [ ] `bun test`
-- [ ] `bun run lint`
+- [ ] `pnpm build`
+- [ ] `pnpm test`
+- [ ] `pnpm lint`
 - [ ] Docker/deployment check, if relevant
 
 ## Checklist

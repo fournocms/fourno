@@ -9,7 +9,7 @@
  *   3. Plugin SDK shape — `EditorPluginApi.dashboard.widgets.register` is
  *      reachable from an activated plugin module.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   activateEditorPlugin,
   bindDashboardWidgetIconResolver,

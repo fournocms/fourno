@@ -1,12 +1,10 @@
-import { execFile } from 'node:child_process'
 import { createHash } from 'node:crypto'
-import { promisify } from 'node:util'
 import { expect, test, type Locator, type Page } from '@playwright/test'
+import Database from 'better-sqlite3'
 import { ANONYMOUS_STATE, OWNER, completeStepUp, login, loginAs } from './helpers'
 
-const execFileAsync = promisify(execFile)
 const E2E_DB_PATH = '.tmp/e2e-agent.db'
-const SESSION_COOKIE_NAME = 'instatic_admin_session'
+const SESSION_COOKIE_NAME = 'fourno_admin_session'
 const EXPIRED_STEP_UP_TIMESTAMP = '2000-01-01T00:00:00.000Z'
 
 /**
@@ -498,24 +496,17 @@ async function expireCurrentStepUpWindow(page: Page): Promise<void> {
   if (!sessionCookie) throw new Error('No admin session cookie available')
 
   const idHash = createHash('sha256').update(sessionCookie.value).digest('hex')
-  const script = `
-import { Database } from 'bun:sqlite'
-
-const db = new Database(${JSON.stringify(E2E_DB_PATH)})
-const result = db.run(
-  'update sessions set step_up_expires_at = ? where id_hash = ? and revoked_at is null',
-  ${JSON.stringify(EXPIRED_STEP_UP_TIMESTAMP)},
-  ${JSON.stringify(idHash)},
-)
-db.close()
-
-if (result.changes !== 1) {
-  console.error(\`Expected to expire one live session row, changed \${result.changes}\`)
-  process.exit(1)
-}
-`
-
-  await execFileAsync('bun', ['-e', script])
+  const db = new Database(E2E_DB_PATH)
+  try {
+    const result = db
+      .prepare('update sessions set step_up_expires_at = ? where id_hash = ? and revoked_at is null')
+      .run(EXPIRED_STEP_UP_TIMESTAMP, idHash)
+    if (result.changes !== 1) {
+      throw new Error(`Expected to expire one live session row, changed ${result.changes}`)
+    }
+  } finally {
+    db.close()
+  }
 }
 
 /** Create a custom role granting only Site (read) and Media (read). */

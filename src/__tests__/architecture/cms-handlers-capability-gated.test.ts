@@ -13,7 +13,7 @@
  * auth helper. Each entry needs a one-line justification.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -66,13 +66,13 @@ const ALLOWLIST: ReadonlyMap<string, string> = new Map([
   ['mediaVariants.ts', 'Variant generation helper called by gated parent handlers.'],
   ['mediaStorageReader.ts', 'Adapter read helper called by gated parent handlers.'],
   ['imageVariantProtocol.ts', 'Worker protocol type definitions; no handlers.'],
-  ['imageVariantWorker.ts', 'Worker thread entrypoint; runs out-of-band, not a Bun.serve route.'],
+  ['imageVariantWorker.ts', 'Worker thread entrypoint; runs out-of-band, not an HTTP route.'],
   ['imageVariantWorkerHost.ts', 'Worker host helper; called by gated parent handlers.'],
-  // Loop runtime — `/_instatic/loop/...` is a runtime endpoint for published
+  // Loop runtime — `/_fourno/loop/...` is a runtime endpoint for published
   // pages, not a CMS admin route. Reached only via the public router.
   ['loop.ts', 'Published-page runtime endpoint; not a /admin/api/cms/ route.'],
   ['hole.ts', 'Published-page runtime endpoint; not a /admin/api/cms/ route.'],
-  // Module-JS assets — `/_instatic/module-js/<moduleId>.js` serves published
+  // Module-JS assets — `/_fourno/module-js/<moduleId>.js` serves published
   // module runtimes to anonymous visitors, same trust model as hole/loop.
   ['moduleJs.ts', 'Published-page runtime endpoint; not a /admin/api/cms/ route.'],
   // Plugins sub-handlers — the dispatcher at plugins/index.ts resolves
@@ -119,7 +119,7 @@ function listHandlerFiles(dir: string): string[] {
     const full = join(dir, entry)
     const s = statSync(full)
     if (s.isDirectory()) {
-      // Test files are never Bun.serve routes — skip the `__tests__` tree.
+      // Test files are never HTTP routes — skip the `__tests__` tree.
       if (entry === '__tests__') continue
       out.push(...listHandlerFiles(full))
     } else if (s.isFile() && extname(entry) === '.ts') {

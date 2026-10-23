@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { ApiError } from '@core/http'
 import { createCmsDataTable, listCmsDataTables } from '@core/persistence/cmsData'
 import { setUserPreference } from '@core/persistence/userPreferences'

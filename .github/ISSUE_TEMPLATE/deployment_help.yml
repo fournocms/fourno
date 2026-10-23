@@ -18,7 +18,7 @@ body:
         - Railway
         - Render
         - Generic Docker host
-        - Direct Bun install
+        - Direct Node install
         - Other
     validations:
       required: true

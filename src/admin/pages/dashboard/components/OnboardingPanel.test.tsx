@@ -9,7 +9,7 @@
  * This pins the fix: a successful onboarding import dispatches
  * CMS_SITE_RELOAD_EVENT so the editor refetches.
  */
-import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from '@admin/lib/routing'
 import { cmsAdapter } from '@core/persistence/cms'
@@ -49,15 +49,15 @@ const FACTS: OnboardingFacts = {
 
 describe('OnboardingPanel framework import', () => {
   it('dispatches a CMS site reload after a successful import so the editor refetches', async () => {
-    const loadSpy = spyOn(cmsAdapter, 'loadSite')
+    const loadSpy = vi.spyOn(cmsAdapter, 'loadSite')
       .mockResolvedValue({ site: fakeSite(), rowSeqs: {}, shellSeq: 0 })
-    const saveSpy = spyOn(cmsAdapter, 'saveSite').mockResolvedValue({ seq: 1 })
+    const saveSpy = vi.spyOn(cmsAdapter, 'saveSite').mockResolvedValue({ seq: 1 })
 
     let reloadFired = false
     const onReload = () => { reloadFired = true }
     window.addEventListener(CMS_SITE_RELOAD_EVENT, onReload)
 
-    const onFrameworkImported = mock(() => {})
+    const onFrameworkImported = vi.fn(() => {})
 
     try {
       render(

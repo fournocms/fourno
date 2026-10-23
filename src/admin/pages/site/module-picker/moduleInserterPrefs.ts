@@ -3,7 +3,7 @@ import { parseJsonWithFallback } from '@core/utils/jsonValidate'
 import type { ModuleInserterItemRef } from '@core/persistence/userPreferences'
 import { recentKey } from './moduleInserterModel'
 
-export const MODULE_INSERTER_STORAGE_KEY = 'instatic-module-inserter-v1'
+export const MODULE_INSERTER_STORAGE_KEY = 'fourno-module-inserter-v1'
 
 const MAX_RECENT_INSERTIONS = 8
 

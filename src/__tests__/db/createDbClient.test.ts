@@ -1,14 +1,14 @@
 import { mkdtemp, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { createDbClient, isSqliteUrl, parseSqlitePath } from '../../../server/db'
 import { pgMigrations } from '../../../server/db/migrations-pg'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'
 
 async function withTempDir<T>(fn: (dir: string) => Promise<T>): Promise<T> {
-  const dir = await mkdtemp(join(tmpdir(), 'instatic-db-selection-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fourno-db-selection-'))
   try {
     return await fn(dir)
   } finally {
@@ -19,14 +19,14 @@ async function withTempDir<T>(fn: (dir: string) => Promise<T>): Promise<T> {
 describe('createDbClient — DATABASE_URL dialect selection', () => {
   test('recognizes every SQLite URL form used by server and dev tooling', () => {
     expect(isSqliteUrl('sqlite:./.tmp/dev.db')).toBe(true)
-    expect(isSqliteUrl('file:/tmp/instatic.db')).toBe(true)
-    expect(isSqliteUrl('/tmp/instatic.db')).toBe(true)
-    expect(isSqliteUrl('postgres://instatic:secret@localhost:5432/instatic')).toBe(false)
-    expect(isSqliteUrl('postgresql://instatic:secret@localhost:5432/instatic')).toBe(false)
+    expect(isSqliteUrl('file:/tmp/fourno.db')).toBe(true)
+    expect(isSqliteUrl('/tmp/fourno.db')).toBe(true)
+    expect(isSqliteUrl('postgres://fourno:secret@localhost:5432/fourno')).toBe(false)
+    expect(isSqliteUrl('postgresql://fourno:secret@localhost:5432/fourno')).toBe(false)
 
     expect(parseSqlitePath('sqlite:./.tmp/dev.db')).toBe('./.tmp/dev.db')
-    expect(parseSqlitePath('file:/tmp/instatic.db')).toBe('/tmp/instatic.db')
-    expect(parseSqlitePath('/tmp/instatic.db')).toBe('/tmp/instatic.db')
+    expect(parseSqlitePath('file:/tmp/fourno.db')).toBe('/tmp/fourno.db')
+    expect(parseSqlitePath('/tmp/fourno.db')).toBe('/tmp/fourno.db')
   })
 
   test('creates SQLite clients, parent directories, and SQLite migrations for SQLite URLs', async () => {
@@ -55,8 +55,8 @@ describe('createDbClient — DATABASE_URL dialect selection', () => {
 
   test('selects Postgres clients and Postgres migrations for supported Postgres schemes', () => {
     for (const databaseUrl of [
-      'postgres://instatic:secret@127.0.0.1:65432/instatic',
-      'postgresql://instatic:secret@127.0.0.1:65432/instatic',
+      'postgres://fourno:secret@127.0.0.1:65432/fourno',
+      'postgresql://fourno:secret@127.0.0.1:65432/fourno',
     ]) {
       const { db, migrations } = createDbClient(databaseUrl)
 
@@ -66,7 +66,7 @@ describe('createDbClient — DATABASE_URL dialect selection', () => {
   })
 
   test('rejects unsupported DATABASE_URL schemes with an operator-facing message', () => {
-    expect(() => createDbClient('mysql://instatic:secret@localhost/instatic'))
+    expect(() => createDbClient('mysql://fourno:secret@localhost/fourno'))
       .toThrow('Unsupported DATABASE_URL: mysql:. Expected sqlite:..., file:..., postgres://..., or postgresql://...')
   })
 })

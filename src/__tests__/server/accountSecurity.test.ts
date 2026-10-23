@@ -8,7 +8,7 @@ import { createHmac } from 'node:crypto'
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { createSession } from '../../../server/auth/sessions'
@@ -363,7 +363,7 @@ describe('Account security endpoints', () => {
     if (!user) throw new Error('Expected setup user')
     expect(user.avatarMediaId).toBeNull()
 
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-avatar-uploads-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-avatar-uploads-'))
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })
 
     try {

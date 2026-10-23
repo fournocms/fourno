@@ -11,7 +11,7 @@
  * FrameworkHome now reads fonts with the same tolerant
  * `s.site?.settings.fonts?.items ?? EMPTY` selector pattern as FontsSection.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { FrameworkHome } from '@site/panels/FrameworkPanel/FrameworkHome'

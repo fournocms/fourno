@@ -6,7 +6,7 @@
  *   POST /admin/api/cms/import/archive?strategy=<strategy>
  *
  * Export uses a same-origin browser form POST so the browser owns the attachment
- * download stream. Instatic archive import posts the original ZIP Blob to the
+ * download stream. Fourno archive import posts the original ZIP Blob to the
  * server-side streaming importer. Preview and import return standard JSON
  * envelopes validated with TypeBox via `readEnvelope`.
  */
@@ -75,7 +75,7 @@ export function submitSiteBundleExport(opts: ExportRequest): void {
     throw new Error('Export download requires a browser document')
   }
 
-  const targetName = `instatic-export-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  const targetName = `fourno-export-${Date.now()}-${Math.random().toString(36).slice(2)}`
 
   const iframe = document.createElement('iframe')
   iframe.name = targetName

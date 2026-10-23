@@ -7,7 +7,7 @@
  * numbers a script only on first sight cannot do once two pages share a file.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import { buildImportPlan } from '@core/siteImport'
 import type { FileMap, ImportPlan } from '@core/siteImport'

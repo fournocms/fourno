@@ -14,7 +14,8 @@
  * @see Task #261 — Enforce DOMPurify at Properties Panel boundary
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
+import { runTypeScriptSnippet } from '../helpers/runTypeScriptSnippet'
 import { sanitizeRichtext, isRichtextPropKey, PLAIN_TEXT_CONFIG } from '@core/sanitize'
 
 // ---------------------------------------------------------------------------
@@ -174,11 +175,7 @@ describe('sanitizeRichtext() with PLAIN_TEXT_CONFIG', () => {
 
 describe('sanitizeRichtext() in server runtime', () => {
   it('imports without DOM globals and removes executable content', () => {
-    const result = Bun.spawnSync({
-      cmd: [
-        process.execPath,
-        '-e',
-        `
+    const result = runTypeScriptSnippet(`
           const { sanitizeRichtext } = await import('./src/core/sanitize.ts')
           const sanitized = sanitizeRichtext('<script>alert(1)</script><p>Safe</p>')
           if (sanitized.includes('<script') || sanitized.includes('alert(1)')) {
@@ -187,11 +184,7 @@ describe('sanitizeRichtext() in server runtime', () => {
           if (!sanitized.includes('Safe')) {
             throw new Error('lost safe text: ' + sanitized)
           }
-        `,
-      ],
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
+        `)
 
     if (result.exitCode !== 0) {
       const stderr = new TextDecoder().decode(result.stderr)
@@ -200,11 +193,7 @@ describe('sanitizeRichtext() in server runtime', () => {
   })
 
   it('preserves safe richtext through the explicit server sanitizer without DOM globals', () => {
-    const result = Bun.spawnSync({
-      cmd: [
-        process.execPath,
-        '-e',
-        `
+    const result = runTypeScriptSnippet(`
           await import('./server/richtextSanitizer.ts')
           if ('window' in globalThis || 'document' in globalThis) {
             throw new Error('server sanitizer installed DOM globals')
@@ -217,11 +206,7 @@ describe('sanitizeRichtext() in server runtime', () => {
           if (!sanitized.includes('rel="noopener noreferrer"')) {
             throw new Error('lost safe link attributes: ' + sanitized)
           }
-        `,
-      ],
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
+        `)
 
     if (result.exitCode !== 0) {
       const stderr = new TextDecoder().decode(result.stderr)
@@ -235,11 +220,7 @@ describe('sanitizeRichtext() in server runtime', () => {
   // unsanitized. Run through the real server sanitizer in a clean process so
   // the ambient happy-dom test DOM cannot mask the production backend.
   it('sanitizes siblings that follow a removed node (no NodeIterator skip)', () => {
-    const result = Bun.spawnSync({
-      cmd: [
-        process.execPath,
-        '-e',
-        `
+    const result = runTypeScriptSnippet(`
           await import('./server/richtextSanitizer.ts')
           const { sanitizeRichtext } = await import('./src/core/sanitize.ts')
           const vectors = [
@@ -257,11 +238,7 @@ describe('sanitizeRichtext() in server runtime', () => {
           if (!kept.includes('Text stays.')) {
             throw new Error('lost content after a removed node: ' + kept)
           }
-        `,
-      ],
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
+        `)
 
     if (result.exitCode !== 0) {
       const stderr = new TextDecoder().decode(result.stderr)

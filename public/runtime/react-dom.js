@@ -5,14 +5,14 @@
  * Plugin-runtime shim for `react-dom`.
  *
  * Mirrors `react.js`: the host's main bundle exposes its react-dom on
- * `globalThis.__instatic.ReactDOM`; this file re-exports the named
+ * `globalThis.__fourno.ReactDOM`; this file re-exports the named
  * API for plugin code that needs portals or `flushSync`. Plugins should
  * NOT need `createRoot` — the host already controls the React root.
  */
-const G = globalThis.__instatic?.ReactDOM
+const G = globalThis.__fourno?.ReactDOM
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host ReactDOM not initialized. Did the host bundle finish loading before the plugin import?",
+    "[@fourno/runtime] Host ReactDOM not initialized. Did the host bundle finish loading before the plugin import?",
   )
 }
 

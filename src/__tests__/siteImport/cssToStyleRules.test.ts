@@ -16,7 +16,7 @@
  * graceful non-crashing behavior for both cases.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { cssToStyleRules } from '@core/siteImport'
 import { conditionId } from '@core/page-tree'
 

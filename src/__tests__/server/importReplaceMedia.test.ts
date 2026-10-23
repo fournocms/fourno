@@ -12,7 +12,7 @@
  * Runs on SQLite by default and on Postgres with
  * `DB=postgres TEST_POSTGRES_URL=...` (see `createTestDb`).
  */
-import { afterEach, beforeEach, describe, expect, test } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -206,7 +206,7 @@ describe('replace import removes the previous site media', () => {
   beforeEach(async () => {
     testDb = await createTestDb()
     db = testDb.db
-    uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-replace-media-'))
+    uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-replace-media-'))
     // Old files are removed through the asset's pinned storage adapter,
     // exactly like a single hard delete; local disk is adapter ''.
     mediaStorageRegistry.__reset()

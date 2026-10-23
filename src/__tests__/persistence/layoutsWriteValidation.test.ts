@@ -7,7 +7,7 @@
  * Mirrors visualComponentsWriteValidation.test.ts for the layouts roster.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { SiteValidationError } from '@core/persistence/validate'
 import {
   validateSavedLayouts,

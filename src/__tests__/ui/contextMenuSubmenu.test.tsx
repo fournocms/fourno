@@ -10,7 +10,7 @@
  *  - Escape in submenu closes submenu only (not parent)
  */
 
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { ContextMenuSubmenu, ContextMenuItem } from '@ui/components/ContextMenu'
@@ -180,7 +180,7 @@ describe('ContextMenuSubmenu — keyboard navigation', () => {
 
 describe('ContextMenuSubmenu — item click calls onClose', () => {
   it('calls the provided onClose when a submenu item is clicked', () => {
-    const onClose = mock(() => {})
+    const onClose = vi.fn(() => {})
     renderSubmenu(onClose)
     fireEvent.click(getTrigger())
 

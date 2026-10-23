@@ -17,7 +17,7 @@ The shell is stored in a single `site` row. Pages and VCs live separately in `da
   - `Record<string, StyleRule>` — the style rule registry (user-defined CSS rules)
   - `SiteFile[]` — arbitrary text/CSS/JS files attached to the site
   - `SiteExplorerOrganization` — path-derived folders for pages/styles/scripts plus decorative folders for templates/components
-  - `SitePackageJson` — `package.json` for the per-site `bun install` workspace
+  - `SitePackageJson` — `package.json` for the per-site `npm install` workspace
   - `SiteRuntimeConfig` — dependency lock + scripts
 - Pages and VCs are **not** embedded. The architecture gate `no-vc-in-site-shell.test.ts` enforces this.
 - Tolerant parse: missing identity fields throw; missing settings / files / styleRules / runtime fall back to defaults.
@@ -333,9 +333,9 @@ type SitePackageJson = {
 }
 ```
 
-The CMS supports plugins that ship their own npm deps and runtime imports (e.g. `three`). When a site declares a dependency, `bun install` runs against a per-site workspace under `uploads/sites/<siteId>/runtime/`, producing a hashed cache directory the server serves at `/_instatic/runtime/cache/<hash>/...`. The runtime cache layout is owned by `src/core/site-runtime/` and served by `server/publish/runtime/`.
+The CMS supports plugins that ship their own npm deps and runtime imports (e.g. `three`). When a site declares a dependency, `npm install` runs against a per-site workspace under `uploads/sites/<siteId>/runtime/`, producing a hashed cache directory the server serves at `/_fourno/runtime/cache/<hash>/...`. The runtime cache layout is owned by `src/core/site-runtime/` and served by `server/publish/runtime/`.
 
-The Site → Dependencies panel edits this `package.json`: it browses the npm registry through the server proxy and installs into `dependencies` (or `devDependencies`) with a caret range. Every manifest change is picked up by `useAutoResolveDependencies`, which resolves the lock and runs `bun install`. Panel and proxy: [`dependencies.md`](dependencies.md).
+The Site → Dependencies panel edits this `package.json`: it browses the npm registry through the server proxy and installs into `dependencies` (or `devDependencies`) with a caret range. Every manifest change is picked up by `useAutoResolveDependencies`, which resolves the lock and runs `npm install`. Panel and proxy: [`dependencies.md`](dependencies.md).
 
 ### `SiteRuntimeConfig`
 
@@ -369,7 +369,7 @@ type SiteRuntimeConfig = {
 }
 ```
 
-`dependencyLock` is the resolved snapshot from the last successful `bun install` — the publisher uses it to build the `<script type="importmap">` entries that map bare specifiers (`three`) to `/_instatic/runtime/cache/<hash>/...` URLs.
+`dependencyLock` is the resolved snapshot from the last successful `npm install` — the publisher uses it to build the `<script type="importmap">` entries that map bare specifiers (`three`) to `/_fourno/runtime/cache/<hash>/...` URLs.
 
 `scripts` and `styles` share the `SiteAssetScope` shape and the `assetScopeAppliesToPage` helper, so a script and a stylesheet target pages identically. Scripts additionally carry `placement`/`timing`/`runInCanvas` (a `<link>` has no execution model, so stylesheets omit those). Both are edited from the floating code editor's left rail (`ScriptSettingsPane` / `StyleSettingsPane`).
 
@@ -637,12 +637,8 @@ gate.
 The socket is same-origin in production and under `vite dev` alike: the
 Vite proxy forwards the upgrade to the CMS (`ws: true` on the `/admin/api`
 entry in `vite.config.ts`), so the provider simply dials
-`window.location.host` + `SITE_SOCKET_PATH`. Before Bun 1.4.1 the
-`node:http` client Vite runs on inside Bun never emitted `'upgrade'`, so the
-socket had to dial the CMS port directly and the dev process could be killed
-by a `socket.destroySoon()` call Bun lacked; 1.4.1 fixed both, and
-`devWorkflow.test.ts` now gates the proxy the other way, requiring `ws`
-forwarding to stay on.
+`window.location.host` + `SITE_SOCKET_PATH`. `devWorkflow.test.ts` gates
+the proxy, requiring `ws` forwarding to stay on.
 
 **Presence** (`src/admin/pages/site/collab/awarenessState.ts`; per-frame
 publishers in `collab/framePresencePublishers.ts`, rendering in
@@ -744,7 +740,7 @@ Site → Dependencies panel (search the registry, open the package, Install) wri
 }
 ```
 
-The auto-resolve hook posts the manifest to `/runtime/dependencies/resolve` → the server resolves versions through `server/registry/client.ts` and runs `bun install` in the per-site workspace → `runtime.dependencyLock` updates → the publisher emits a `<script type="importmap">` mapping `three` to `/_instatic/runtime/cache/<hash>/three/build/three.module.js`.
+The auto-resolve hook posts the manifest to `/runtime/dependencies/resolve` → the server resolves versions through `server/registry/client.ts` and runs `npm install` in the per-site workspace → `runtime.dependencyLock` updates → the publisher emits a `<script type="importmap">` mapping `three` to `/_fourno/runtime/cache/<hash>/three/build/three.module.js`.
 
 A plugin canvas module can then `import * as THREE from 'three'` and it resolves at runtime.
 
@@ -760,7 +756,7 @@ A plugin canvas module can then `import * as THREE from 'three'` and it resolves
 | Hard-failing the entire editor on a corrupt `settings_json`           | The parser falls back; the editor renders with defaults     |
 | Hardcoding the breakpoint list                                       | Read from `site.breakpoints` — users can add custom ones    |
 | Writing CSS for a user class manually                                | Add a `StyleRule` to the registry; the publisher compiles it |
-| Editing `runtime.dependencyLock` by hand                             | It's the output of `bun install` — let the install handler write it |
+| Editing `runtime.dependencyLock` by hand                             | It's the output of `npm install` — let the install handler write it |
 
 ---
 

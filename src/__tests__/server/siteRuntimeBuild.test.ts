@@ -1,7 +1,7 @@
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteDocument } from '@core/page-tree'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { buildRuntimePreviewDocument } from '../../../server/publish/runtime/previewRuntime'
@@ -29,7 +29,7 @@ function runtimeSite(overrides: Partial<SiteDocument> = {}): SiteDocument {
         type: 'script',
         content: `
           import { message } from './message'
-          window.__instaticRuntimeMessage = message
+          window.__fournoRuntimeMessage = message
         `,
         createdAt: 1,
         updatedAt: 1,
@@ -65,7 +65,7 @@ describe('site runtime build', () => {
       site: runtimeSite(),
       page,
       target: 'publish',
-      assetBasePath: '/_instatic/assets/runtime/',
+      assetBasePath: '/_fourno/assets/runtime/',
     })
 
     expect(result.diagnostics).toEqual([])
@@ -76,7 +76,7 @@ describe('site runtime build', () => {
       placement: 'head',
       priority: 10,
     })
-    expect(result.runtimeAssets.scripts[0].src).toStartWith('/_instatic/assets/runtime/')
+    expect(result.runtimeAssets.scripts[0].src).toMatch(/^\/_fourno\/assets\/runtime\//)
     const entryAsset = result.files.find((file) => file.publicPath === result.runtimeAssets.scripts[0].src)
     expect(entryAsset?.content).toContain('hello-runtime')
   })
@@ -99,7 +99,7 @@ describe('site runtime build', () => {
       site,
       page,
       target: 'publish',
-      assetBasePath: '/_instatic/assets/runtime/',
+      assetBasePath: '/_fourno/assets/runtime/',
     })
 
     expect(result.files).toEqual([])
@@ -139,7 +139,7 @@ describe('site runtime build', () => {
       site,
       page,
       target: 'publish',
-      assetBasePath: '/_instatic/assets/runtime/',
+      assetBasePath: '/_fourno/assets/runtime/',
     })
 
     expect(result.files).toEqual([])
@@ -178,7 +178,7 @@ describe('site runtime build', () => {
     const result = await buildSiteRuntimeScripts({
       site,
       target: 'publish',
-      assetBasePath: '/_instatic/runtime-validation/',
+      assetBasePath: '/_fourno/runtime-validation/',
       scriptSelection: 'all-enabled',
     })
 
@@ -213,7 +213,7 @@ describe('site runtime build', () => {
       site,
       page,
       target: 'publish',
-      assetBasePath: '/_instatic/assets/runtime/',
+      assetBasePath: '/_fourno/assets/runtime/',
     })
 
     expect(result.files).toEqual([])
@@ -258,7 +258,7 @@ describe('site runtime build', () => {
     const result = await buildSiteRuntimeScripts({
       site,
       target: 'publish',
-      assetBasePath: '/_instatic/runtime-validation/',
+      assetBasePath: '/_fourno/runtime-validation/',
       scriptSelection: 'all-enabled',
     })
 
@@ -283,17 +283,17 @@ describe('site runtime build', () => {
       site: runtimeSite(),
       page,
       registry,
-      assetBasePath: '/_instatic/preview/runtime/',
+      assetBasePath: '/_fourno/preview/runtime/',
     })
 
     expect(result.diagnostics).toEqual([])
     expect(result.html).toContain("script-src 'self'")
-    expect(result.html).toContain('data-instatic-runtime-script="entry"')
-    expect(result.html).toContain('/_instatic/preview/runtime/')
+    expect(result.html).toContain('data-fourno-runtime-script="entry"')
+    expect(result.html).toContain('/_fourno/preview/runtime/')
   })
 
   it('resolves declared package imports from a dependency cache node_modules directory', async () => {
-    const cacheRoot = await mkdtemp(join(tmpdir(), 'instatic-runtime-node-modules-'))
+    const cacheRoot = await mkdtemp(join(tmpdir(), 'fourno-runtime-node-modules-'))
     const nodeModulesDir = join(cacheRoot, 'node_modules')
     await mkdir(join(nodeModulesDir, 'fake-runtime-package'), { recursive: true })
     await writeFile(
@@ -316,7 +316,7 @@ describe('site runtime build', () => {
             type: 'script',
             content: `
               import { packageMessage } from 'fake-runtime-package'
-              window.__instaticRuntimeMessage = packageMessage
+              window.__fournoRuntimeMessage = packageMessage
             `,
             createdAt: 1,
             updatedAt: 1,
@@ -332,7 +332,7 @@ describe('site runtime build', () => {
         site,
         page,
         target: 'publish',
-        assetBasePath: '/_instatic/assets/runtime/',
+        assetBasePath: '/_fourno/assets/runtime/',
         dependencyNodeModulesDir: nodeModulesDir,
       })
 
@@ -348,7 +348,7 @@ describe('site runtime build', () => {
       site: runtimeSite(),
       page,
       target: 'publish',
-      assetBasePath: '/_instatic/assets/runtime/',
+      assetBasePath: '/_fourno/assets/runtime/',
       // bundleTimeoutMs <= 0 short-circuits to a synchronous timeout error
       // before esbuild runs. This is deterministic — a real `setTimeout(0)`
       // race against esbuild's promise can be won by either side depending

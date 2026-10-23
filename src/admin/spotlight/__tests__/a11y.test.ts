@@ -6,14 +6,14 @@
  * duplicate the component source one string at a time.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { rowId, computeHighlightedRowId } from '../spotlightSearch'
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
-const spotlightDir = resolve(import.meta.dir, '..')
+const spotlightDir = resolve(import.meta.dirname, '..')
 
 function readSrc(filename: string): string {
   return readFileSync(resolve(spotlightDir, filename), 'utf-8')

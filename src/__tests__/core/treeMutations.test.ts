@@ -7,7 +7,7 @@
  * Each test builds the minimal input tree as `{ nodes: {...}, rootNodeId }`,
  * calls the mutation, and asserts the resulting tree state.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import type { PageNode } from '@core/page-tree'
 import type { NodeTree } from '@core/page-tree'
 import {

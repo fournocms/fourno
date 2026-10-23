@@ -467,8 +467,8 @@ async function rollbackUpgrade(args: {
   )
 
   // Drop new version assets — the upgrade didn't take. With worker
-  // isolation, plugin server files no longer live in the host's `bun
-  // --watch` graph; plain `await rm` is safe.
+  // isolation, plugin server files no longer live in the host's
+  // `tsx watch` graph; plain `await rm` is safe.
   //
   // NOT when the versions match. A same-version reinstall writes into the
   // directory the restored manifest still points at, so deleting "the new

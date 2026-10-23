@@ -2,7 +2,7 @@
  * Site branches endpoints — registry CRUD, capability + step-up gates, and
  * the header-scoped fallback once a branch is gone.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { upsertDataRowDraft } from '../../../server/repositories/data'
 import {
   createCapabilityTestHarness,
@@ -13,7 +13,7 @@ import {
 } from '../helpers/capabilityHarness'
 
 const BRANCHES = '/admin/api/cms/branches'
-const BRANCH_HEADER = 'x-instatic-branch'
+const BRANCH_HEADER = 'x-fourno-branch'
 
 interface BranchPayload {
   id: string
@@ -96,7 +96,7 @@ describe('branches endpoints', () => {
     const owner = await harness.setupOwner()
     // A tab remembering a branch that no longer exists sends its header on
     // every request, the sign-in included; the account routes must not care.
-    const stale = { 'X-Instatic-Branch': 'long-gone' }
+    const stale = { 'X-Fourno-Branch': 'long-gone' }
     expect((await harness.cms('/admin/api/cms/setup/status', { headers: stale })).status).toBe(200)
     expect((await harness.cms('/admin/api/cms/me', { cookie: owner, headers: stale })).status).toBe(200)
     // Wrong password answers as a login failure, not as a missing branch.

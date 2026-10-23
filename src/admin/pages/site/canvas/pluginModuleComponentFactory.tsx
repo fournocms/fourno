@@ -94,7 +94,7 @@ export const editorPluginModuleComponentFactory: PluginModuleComponentFactory = 
       css = out.css
     } catch (err) {
       console.error(`[plugin-module:${definition.id}] preview/render() threw:`, err)
-      html = `<!-- instatic: plugin module "${definition.id}" render failed -->`
+      html = `<!-- fourno: plugin module "${definition.id}" render failed -->`
     }
     if (css) injectModuleCss(definition.id, css)
     if (canHaveChildren) {

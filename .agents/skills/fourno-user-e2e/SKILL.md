@@ -1,13 +1,13 @@
 ---
-name: instatic-user-e2e
-description: Run user-facing Instatic E2E audits with a real browser and disposable local data. Use when asked to test the app as a user, run an agent-browser pass, perform a fresh-install smoke test, audit UX friction, verify setup/login/edit/publish/public-page flows, retest E2E issues, or update the Instatic E2E protocol and feature matrix.
+name: fourno-user-e2e
+description: Run user-facing Fourno E2E audits with a real browser and disposable local data. Use when asked to test the app as a user, run an agent-browser pass, perform a fresh-install smoke test, audit UX friction, verify setup/login/edit/publish/public-page flows, retest E2E issues, or update the Fourno E2E protocol and feature matrix.
 ---
 
-# Instatic User E2E
+# Fourno User E2E
 
 ## Overview
 
-Use this skill to operate Instatic like a real user through the browser, record product-quality findings, and keep durable run logs. This is not a replacement for `bun test`; it covers the gaps that unit, API, architecture, and happy-dom tests cannot see.
+Use this skill to operate Fourno like a real user through the browser, record product-quality findings, and keep durable run logs. This is not a replacement for `pnpm test`; it covers the gaps that unit, API, architecture, and happy-dom tests cannot see.
 
 ## Core Rule
 
@@ -40,7 +40,7 @@ Prefer an isolated SQLite database and upload directory for each run:
 ```sh
 DATABASE_URL=sqlite:./.tmp/e2e-agent.db \
 UPLOADS_DIR=./.tmp/e2e-uploads \
-bun run dev
+pnpm dev
 ```
 
 Before deleting data, verify the target is disposable:

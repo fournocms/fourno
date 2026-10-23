@@ -8,7 +8,7 @@
  *      generators) so the editor → publisher pipeline does not regress.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import { FrameworkPreferencesSettingsSchema } from '@core/framework-schema'
 import {

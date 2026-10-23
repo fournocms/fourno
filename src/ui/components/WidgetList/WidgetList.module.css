@@ -1,7 +1,7 @@
 /**
  * WidgetList — shared list-row chrome for dashboard widget bodies. Used
  * by first-party widgets (Top pages, Publish queue, Activity feed) AND
- * plugin-registered widgets composed via `@instatic/host-ui`.
+ * plugin-registered widgets composed via `@fourno/host-ui`.
  *
  * The list anchors to the bottom of the widget body (margin-top: auto)
  * so a single-line header sits at the top and rows fill the remaining

@@ -6,7 +6,7 @@
  * is consumed by the Fonts section in the editor's Typography panel — the
  * editor never reaches Google directly, only this bundled list.
  *
- * Run with `bun scripts/build-google-fonts.ts` to refresh.
+ * Run with `pnpm tsx scripts/build-google-fonts.ts` to refresh.
  *
  * Why a bundled snapshot rather than a runtime fetch:
  * - Works offline / in air-gapped self-hosted installs

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -25,7 +25,7 @@ interface RpcResponse {
 let rpcId = 0
 
 function rpcRequest(token: string, method: string, params: unknown): Request {
-  return new Request('http://localhost/_instatic/mcp', {
+  return new Request('http://localhost/_fourno/mcp', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
@@ -115,7 +115,7 @@ describe('site_publish MCP tool', () => {
 
     const html = await readArtefact(uploadsDir, '/')
     expect(html).not.toBeNull()
-    const cssPaths = [...(html ?? '').matchAll(/href="(\/_instatic\/css\/[^"]+\.css)"/g)]
+    const cssPaths = [...(html ?? '').matchAll(/href="(\/_fourno\/css\/[^"]+\.css)"/g)]
       .map((match) => match[1]!)
     const cssAssets = await Promise.all(cssPaths.map((path) => readStaticAsset(uploadsDir, path)))
     const css = cssAssets

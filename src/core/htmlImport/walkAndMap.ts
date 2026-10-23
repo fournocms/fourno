@@ -127,11 +127,11 @@ const MODULE_GENERATED_ATTRIBUTE_NAMES: Record<string, readonly string[]> = {
   'base.button': ['aria-disabled', 'disabled', 'href', 'rel', 'target', 'type'],
   'base.form': [
     'action',
-    'data-instatic-form-id',
-    'data-instatic-form-mode',
-    'data-instatic-success-message',
-    'data-instatic-success-redirect',
-    'data-instatic-target-table',
+    'data-fourno-form-id',
+    'data-fourno-form-mode',
+    'data-fourno-success-message',
+    'data-fourno-success-redirect',
+    'data-fourno-target-table',
     'method',
   ],
   'base.image': [

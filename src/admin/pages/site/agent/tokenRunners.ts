@@ -27,6 +27,7 @@ import {
 } from '@core/ai'
 import { apiRequest } from '@core/http'
 import { getErrorMessage } from '@core/utils/errorMessage'
+import { generatedScaleVars, scalePatchFromToolInput } from '@core/siteEdit'
 import { FontEntrySchema, normalizeFontTokenVariable } from '@core/fonts'
 import type { EditorStore } from '@site/store/types'
 import { getAgentStoreApi } from './storeRef'
@@ -44,18 +45,6 @@ const FontInstallResponseSchema = Type.Object({ font: FontEntrySchema })
 // ---------------------------------------------------------------------------
 // Runners
 // ---------------------------------------------------------------------------
-
-const SCALE_NOT_SAVED =
-  'The scale was not saved: the editor could not reach the collaboration server. Try again in a moment.'
-
-/** Build the `--<prefix>-<step>` variable list a scale group generates. */
-function generatedScaleVars(namingConvention: string, steps: string): string[] {
-  return steps
-    .split(',')
-    .map((s) => s.trim())
-    .filter(Boolean)
-    .map((step) => `--${namingConvention}-${step}`)
-}
 
 export function runSetColorTokens(rawInput: unknown): AiToolOutput {
   const input = parseValue(SetColorTokensInputSchema, rawInput)
@@ -181,48 +170,16 @@ export function runSetTypeScale(rawInput: unknown): AiToolOutput {
   const store = getStoreState()
   if (!store.site) return aiToolError('No active site.')
 
-  const groups = store.site.settings.framework?.typography?.groups ?? []
-  const groupAlias = input.groupId ? normalizeScaleGroupAlias(input.groupId, 'text') : null
-  const matchedGroup = input.groupId
-    ? groups.find((g) => g.id === input.groupId) ??
-      groups.find((g) => g.namingConvention === input.groupId)
-    : groups[0]
-  let groupId = matchedGroup?.id
-  if (input.groupId && !groupId && !groupAlias) {
-    return aiToolError(`Typography group not found: ${input.groupId}`)
-  }
-  let action: 'created' | 'updated' = 'updated'
-  if (!groupId) {
-    groupId = store.createFrameworkTypographyGroup().id
-    action = 'created'
-  }
-
-  store.updateFrameworkTypographyGroup(groupId, {
-    ...(input.namingConvention !== undefined
-      ? { namingConvention: input.namingConvention }
-      : action === 'created' && groupAlias
-        ? { namingConvention: groupAlias }
-        : {}),
-    ...(input.steps !== undefined ? { steps: input.steps } : {}),
-    ...(input.baseScaleIndex !== undefined ? { baseScaleIndex: input.baseScaleIndex } : {}),
-    ...(input.min ? { min: input.min } : {}),
-    ...(input.max ? { max: input.max } : {}),
+  const result = store.setFrameworkTypographyScale({
+    ...(input.groupId !== undefined ? { groupId: input.groupId } : {}),
+    patch: scalePatchFromToolInput<'typography'>(input),
   })
-
-  const group = getStoreState().site?.settings.framework?.typography?.groups.find(
-    (g) => g.id === groupId,
-  )
-  // Read back rather than trusting the write: a mutation the collab path
-  // refused leaves no group behind, and answering with the requested steps
-  // would report a scale the site does not have.
-  if (!group) return aiToolError(SCALE_NOT_SAVED)
-  const namingConvention = group?.namingConvention ?? input.namingConvention ?? 'text'
-  const steps = group?.steps ?? input.steps ?? ''
+  if (!result.ok) return aiToolError(result.message)
   return aiToolOk({
-    groupId,
-    action,
-    namingConvention,
-    generatedVars: generatedScaleVars(namingConvention, steps),
+    groupId: result.groupId,
+    action: result.action,
+    namingConvention: result.namingConvention,
+    generatedVars: generatedScaleVars(result.namingConvention, result.steps),
   })
 }
 
@@ -231,54 +188,15 @@ export function runSetSpacingScale(rawInput: unknown): AiToolOutput {
   const store = getStoreState()
   if (!store.site) return aiToolError('No active site.')
 
-  const groups = store.site.settings.framework?.spacing?.groups ?? []
-  const groupAlias = input.groupId ? normalizeScaleGroupAlias(input.groupId, 'space') : null
-  const matchedGroup = input.groupId
-    ? groups.find((g) => g.id === input.groupId) ??
-      groups.find((g) => g.namingConvention === input.groupId)
-    : groups[0]
-  let groupId = matchedGroup?.id
-  if (input.groupId && !groupId && !groupAlias) {
-    return aiToolError(`Spacing group not found: ${input.groupId}`)
-  }
-  let action: 'created' | 'updated' = 'updated'
-  if (!groupId) {
-    groupId = store.createFrameworkSpacingGroup().id
-    action = 'created'
-  }
-
-  store.updateFrameworkSpacingGroup(groupId, {
-    ...(input.namingConvention !== undefined
-      ? { namingConvention: input.namingConvention }
-      : action === 'created' && groupAlias
-        ? { namingConvention: groupAlias }
-        : {}),
-    ...(input.steps !== undefined ? { steps: input.steps } : {}),
-    ...(input.baseScaleIndex !== undefined ? { baseScaleIndex: input.baseScaleIndex } : {}),
-    ...(input.min ? { min: input.min } : {}),
-    ...(input.max ? { max: input.max } : {}),
+  const result = store.setFrameworkSpacingScale({
+    ...(input.groupId !== undefined ? { groupId: input.groupId } : {}),
+    patch: scalePatchFromToolInput<'spacing'>(input),
   })
-
-  const group = getStoreState().site?.settings.framework?.spacing?.groups.find(
-    (g) => g.id === groupId,
-  )
-  // See the matching read-back in `runSetTypeScale`.
-  if (!group) return aiToolError(SCALE_NOT_SAVED)
-  const namingConvention = group?.namingConvention ?? input.namingConvention ?? 'space'
-  const steps = group?.steps ?? input.steps ?? ''
+  if (!result.ok) return aiToolError(result.message)
   return aiToolOk({
-    groupId,
-    action,
-    namingConvention,
-    generatedVars: generatedScaleVars(namingConvention, steps),
+    groupId: result.groupId,
+    action: result.action,
+    namingConvention: result.namingConvention,
+    generatedVars: generatedScaleVars(result.namingConvention, result.steps),
   })
-}
-
-function normalizeScaleGroupAlias(value: string, fallback: 'text' | 'space'): string | null {
-  const normalized = value.trim().toLowerCase()
-  if (normalized === 'root') return fallback
-  if (normalized === fallback) return fallback
-  if (fallback === 'text' && normalized === 'typography') return 'text'
-  if (fallback === 'space' && normalized === 'spacing') return 'space'
-  return null
 }

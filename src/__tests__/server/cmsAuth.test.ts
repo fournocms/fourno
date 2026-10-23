@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   SESSION_COOKIE_NAME,
   createSessionToken,
@@ -24,6 +24,6 @@ describe('CMS auth primitives', () => {
   })
 
   it('uses a stable admin session cookie name', () => {
-    expect(SESSION_COOKIE_NAME).toBe('instatic_admin_session')
+    expect(SESSION_COOKIE_NAME).toBe('fourno_admin_session')
   })
 })

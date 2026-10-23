@@ -3,7 +3,7 @@
  * fails with `step_up_required`, that successful re-auth retries the
  * action, and that cancel rejects with the documented sentinel.
  */
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { useEffect, useRef } from 'react'
 import { StepUpCancelledMessage, StepUpProvider, useStepUp } from '@admin/shared/StepUp'
@@ -85,7 +85,7 @@ function RecoveryCodeCount() {
 
 describe('StepUpProvider', () => {
   beforeEach(() => {
-    globalThis.fetch = mock(async () => jsonResponse({ ok: true, stepUpExpiresAt: new Date().toISOString() })) as typeof fetch
+    globalThis.fetch = vi.fn(async () => jsonResponse({ ok: true, stepUpExpiresAt: new Date().toISOString() })) as typeof fetch
   })
 
   afterEach(() => {
@@ -95,7 +95,7 @@ describe('StepUpProvider', () => {
 
   it('runs the action directly and never shows the dialog when no step-up is required', async () => {
     let resolved: unknown = null
-    const action = mock(async () => 'ok')
+    const action = vi.fn(async () => 'ok')
 
     render(
       <StepUpProvider>
@@ -112,7 +112,7 @@ describe('StepUpProvider', () => {
 
   it('opens the dialog on step_up_required, retries the action after a successful re-auth, and resolves with the retry result', async () => {
     let attempt = 0
-    const action = mock(async () => {
+    const action = vi.fn(async () => {
       attempt += 1
       if (attempt === 1) throw new Error('step_up_required')
       return 'retried'
@@ -143,7 +143,7 @@ describe('StepUpProvider', () => {
   it('asks for an authentication code during step-up when the current user has MFA enabled', async () => {
     let attempt = 0
     let stepUpBody: Record<string, unknown> | null = null
-    const action = mock(async () => {
+    const action = vi.fn(async () => {
       attempt += 1
       if (attempt === 1) throw new Error('step_up_required')
       return 'retried'
@@ -154,7 +154,7 @@ describe('StepUpProvider', () => {
       mfaEnabledAt: now,
       mfaRecoveryCodesRemaining: 9,
     })
-    globalThis.fetch = mock(async (_input, init) => {
+    globalThis.fetch = vi.fn(async (_input, init) => {
       stepUpBody = JSON.parse(String(init?.body ?? '{}')) as Record<string, unknown>
       return jsonResponse({
         ok: true,
@@ -200,7 +200,7 @@ describe('StepUpProvider', () => {
   })
 
   it('rejects with step_up_cancelled when the user cancels', async () => {
-    const action = mock(async () => { throw new Error('step_up_required') })
+    const action = vi.fn(async () => { throw new Error('step_up_required') })
     let rejected: unknown = null
 
     render(
@@ -225,8 +225,8 @@ describe('StepUpProvider', () => {
   })
 
   it('shows an inline error and keeps the dialog open when the password is wrong', async () => {
-    const action = mock(async () => { throw new Error('step_up_required') })
-    globalThis.fetch = mock(async () => jsonResponse({ error: 'Invalid password' }, 401)) as typeof fetch
+    const action = vi.fn(async () => { throw new Error('step_up_required') })
+    globalThis.fetch = vi.fn(async () => jsonResponse({ error: 'Invalid password' }, 401)) as typeof fetch
 
     render(
       <StepUpProvider>

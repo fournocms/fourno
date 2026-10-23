@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { MediaCanvas } from '@admin/pages/media/components/MediaCanvas/MediaCanvas'
@@ -203,7 +203,7 @@ function workspace(overrides: Partial<UseMediaWorkspaceResult> = {}): UseMediaWo
 
 describe('Media workspace folder grid', () => {
   it('renders child folders as grid entries and opens them from the canvas', () => {
-    const setFolderSelection = mock((selection: FolderSelection) => { void selection })
+    const setFolderSelection = vi.fn((selection: FolderSelection) => { void selection })
     renderWithMediaSession(
       <MediaCanvas
         workspace={workspace({
@@ -229,7 +229,7 @@ describe('Media workspace folder grid', () => {
       name: 'screenshots',
       slug: 'screenshots',
     })
-    const setFolderSelection = mock((selection: FolderSelection) => { void selection })
+    const setFolderSelection = vi.fn((selection: FolderSelection) => { void selection })
 
     renderWithMediaSession(
       <MediaCanvas
@@ -249,7 +249,7 @@ describe('Media workspace folder grid', () => {
   })
 
   it('moves dragged assets into a grid folder', async () => {
-    const moveAssetsToFolder = mock(async (assetIds: string[], folderId: string | null) => {
+    const moveAssetsToFolder = vi.fn(async (assetIds: string[], folderId: string | null) => {
       void assetIds
       void folderId
     })
@@ -275,7 +275,7 @@ describe('Media workspace folder grid', () => {
   })
 
   it('moves dragged assets into a sidebar folder', async () => {
-    const moveAssetsToFolder = mock(async (assetIds: string[], folderId: string | null) => {
+    const moveAssetsToFolder = vi.fn(async (assetIds: string[], folderId: string | null) => {
       void assetIds
       void folderId
     })
@@ -339,7 +339,7 @@ describe('Media workspace folder grid', () => {
   })
 
   it('keeps foldered images visible in the All files image picker view', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input)
       if (url.endsWith('/media/folders')) {
         return new Response(JSON.stringify({ folders: [folder()] }), { status: 200 })
@@ -376,7 +376,7 @@ describe('Media workspace folder grid', () => {
   })
 
   it('returns multi-selected assets in selection order, not library order', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input)
       if (url.endsWith('/media/folders')) {
         return new Response(JSON.stringify({ folders: [] }), { status: 200 })

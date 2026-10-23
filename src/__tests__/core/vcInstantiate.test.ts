@@ -22,7 +22,7 @@
  *  IT-16 Slot outlet placeholder is _fromSlotContent = false
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { instantiateVCAtRef } from '@core/visualComponents'
 import type { VisualComponent, VCNode } from '@core/visualComponents'
 

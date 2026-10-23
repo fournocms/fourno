@@ -9,7 +9,7 @@
  *      finalizeWrite / abortWrite` commit dance and produce orphaned
  *      destination bytes on failure.
  *   2. Source bytes never cross the QuickJS sandbox boundary. The
- *      reader uses local fs OR Bun's native `fetch` against the
+ *      reader uses local fs OR Node's native `fetch` against the
  *      adapter-issued URL — never `__hostCall`, never the QuickJS
  *      bridge.
  *   3. Per-asset DB update lands BEFORE the source delete. Crashing
@@ -28,7 +28,7 @@
  *      decision, not a silent extension.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join, dirname } from 'node:path'
@@ -69,7 +69,7 @@ describe('media migration invariants', () => {
     expect(source).not.toMatch(/__hostCall|callHostApi|quickjsHost/)
     // The reader must use either local fs or a native-fetch path (never the
     // QuickJS bridge). The external path goes through `guardedFetch`, the
-    // SSRF-safe wrapper over Bun's `fetch` (a plugin controls that URL, so it
+    // SSRF-safe wrapper over undici's `fetch` (a plugin controls that URL, so it
     // must not reach internal addresses — GHSA-rmm7).
     expect(source).toContain('readFile(join(input.uploadsDir')
     expect(source).toMatch(/await\s+guardedFetch\(fetchUrl/)

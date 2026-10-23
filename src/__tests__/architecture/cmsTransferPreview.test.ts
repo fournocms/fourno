@@ -17,7 +17,7 @@
  * @see docs/plans/2026-05-19-site-transfer-ux.md
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
@@ -134,7 +134,7 @@ function bundleRowEntry(id: string, tableId: string, slug: string = ''): DataRow
 
 function makePreviewRequest(cookie: string, bundle: unknown): Request {
   // The `cookie` header is a forbidden header per WHATWG Fetch spec and is
-  // stripped by Bun's Request constructor in test mode. Set it after construction.
+  // stripped by the Request constructor in test mode. Set it after construction.
   const req = new Request('http://localhost/admin/api/cms/import/preview', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },

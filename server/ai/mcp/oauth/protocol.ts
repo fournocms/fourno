@@ -23,7 +23,7 @@ export const MCP_OAUTH_ISSUER_UNAVAILABLE_MESSAGE =
  * the configured public origin (`PUBLIC_ORIGIN`, or the Render / Railway
  * auto-detection) is authoritative. Without one, only a request addressed to
  * the machine itself (a loopback hostname) may use its own origin so local
- * development keeps working; Bun.serve builds `req.url` from the Host header,
+ * development keeps working; the server builds `req.url` from the Host header,
  * so checking the URL covers the header. Any other request has no trustworthy
  * issuer: callers answer with `mcpIssuerUnavailableResponse()` or skip the
  * OAuth path (personal access tokens never need an issuer).

@@ -15,7 +15,7 @@
  *
  *     "pixel-art-icons": "file:./vendor/pixel-art-icons"
  *
- * so `bun install` symlinks it into `node_modules/pixel-art-icons/` and every
+ * so `pnpm install` copies it into `node_modules/pixel-art-icons/` and every
  * existing import keeps resolving exactly the same way — no SSH key, no
  * private repo access, no source-code churn.
  *
@@ -34,14 +34,14 @@
  *
  * Internal devs run this when they add or remove an icon. CI runs the
  * matching architecture gate `vendor-icons-fresh.test.ts`, which fails loudly
- * with "run `bun run icons:sync`" if the vendored set drifts.
+ * with "run `pnpm icons:sync`" if the vendored set drifts.
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync, copyFileSync } from 'node:fs'
 import { dirname, extname, join, relative, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
-const ROOT = resolve(import.meta.dir, '..')
+const ROOT = resolve(import.meta.dirname, '..')
 const SRC_DIR = join(ROOT, 'src')
 const VENDOR_DIR = join(ROOT, 'vendor/pixel-art-icons')
 const VENDOR_ICONS_DIR = join(VENDOR_DIR, 'icons')
@@ -75,7 +75,7 @@ const ICON_NAME_RE = /^[a-z0-9][a-z0-9-]*$/
 interface SyncOptions {
   /**
    * When true, do not modify anything; just report what would change.
-   * Used by `bun run icons:check` in CI.
+   * Used by `pnpm icons:check` in CI.
    */
   check: boolean
 }
@@ -129,7 +129,7 @@ function copyFromUpstream(names: Set<string>, options: SyncOptions): void {
         `  ${UPSTREAM}\n\n` +
         `Clone the private repo as a sibling of this project, or set\n` +
         `PIXEL_ART_ICONS_SRC to point at your checkout, then re-run\n` +
-        `\`bun run icons:sync\`.`,
+        `\`pnpm icons:sync\`.`,
     )
   }
   if (!existsSync(UPSTREAM_TYPES_FILE)) {
@@ -276,7 +276,7 @@ function buildDist(options: SyncOptions): void {
   const tsc = join(ROOT, 'node_modules', '.bin', 'tsc')
   if (!existsSync(tsc)) {
     throw new Error(
-      `[sync-icons] tsc not found at ${tsc}. Run \`bun install\` first.`,
+      `[sync-icons] tsc not found at ${tsc}. Run \`pnpm install\` first.`,
     )
   }
 
@@ -358,7 +358,7 @@ function runCheck(): number {
     )
   }
   console.error(
-    `\n  Run \`bun run icons:sync\` to refresh vendor/pixel-art-icons/.\n`,
+    `\n  Run \`pnpm icons:sync\` to refresh vendor/pixel-art-icons/.\n`,
   )
   return 1
 }
@@ -402,17 +402,19 @@ function main(): number {
     `[sync-icons] vendor/pixel-art-icons/ is fresh — ${imported.size} icons + types.`,
   )
 
-  // Bun's `file:` deps are copied into node_modules at install time, so
+  // pnpm copies `file:` deps into node_modules at install time, so
   // re-running install after a sync is required for the new icons to be
-  // visible to dev/build/test. Do it for the developer.
+  // visible to dev/build/test. Do it for the developer. `npm_execpath` is
+  // the pnpm CLI that launched this script; spawning it through Node avoids
+  // the `.cmd` shim on Windows.
   console.error(`[sync-icons] refreshing node_modules/pixel-art-icons/ ...`)
-  const bunInstall = spawnSync('bun', ['install'], {
-    cwd: ROOT,
-    stdio: 'inherit',
-  })
-  if (bunInstall.status !== 0) {
+  const pnpmCli = process.env.npm_execpath
+  const pnpmInstall = pnpmCli
+    ? spawnSync(process.execPath, [pnpmCli, 'install'], { cwd: ROOT, stdio: 'inherit' })
+    : spawnSync('pnpm', ['install'], { cwd: ROOT, stdio: 'inherit' })
+  if (pnpmInstall.status !== 0) {
     throw new Error(
-      `[sync-icons] \`bun install\` failed (exit ${bunInstall.status}). Run it manually.`,
+      `[sync-icons] \`pnpm install\` failed (exit ${pnpmInstall.status}). Run it manually.`,
     )
   }
   return 0

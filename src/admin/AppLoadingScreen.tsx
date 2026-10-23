@@ -6,7 +6,7 @@ export function AppLoadingScreen() {
       className={styles.screen}
       role="status"
       aria-busy="true"
-      aria-label="Loading Instatic"
+      aria-label="Loading Fourno"
     >
       <BanterLoader />
     </div>

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mcpToolsForCapabilities } from './registry'
 
 const FULL: Parameters<typeof mcpToolsForCapabilities>[0] = [
@@ -26,12 +26,19 @@ describe('mcp registry', () => {
     expect(names).toContain('site_read_styles') // headless design-system read
     expect(names).toContain('site_publish') // explicit full-site deployment
     expect(names).toContain('content_list_collections')
-    // browser-execution editing (relayed via the editor bridge)
+    // editing tools: page, CSS and color/scale token edits run on the server, font tokens are still relayed via the editor bridge
     expect(names).toContain('site_insert_html')
     expect(names).toContain('site_delete_node')
     expect(names).toContain('site_apply_css')
-    expect(names).toContain('site_set_color_tokens')
+    expect(names).toContain('site_set_font_tokens')
     expect(tools.some((t) => t.execution === 'browser')).toBe(true)
+    // Page edits run on the server (PRD 8.6) and shadow the editor-bridged tool.
+    expect(tools.find((t) => t.name === 'site_insert_html')?.execution).toBe('server')
+    expect(tools.find((t) => t.name === 'site_apply_css')?.execution).toBe('server')
+    for (const name of ['site_set_color_tokens', 'site_set_type_scale', 'site_set_spacing_scale']) {
+      expect(tools.find((t) => t.name === name)?.execution).toBe('server')
+    }
+    expect(tools.find((t) => t.name === 'site_set_font_tokens')?.execution).toBe('browser')
   })
 
   it('does not expose the removed headless page-tree tools', () => {

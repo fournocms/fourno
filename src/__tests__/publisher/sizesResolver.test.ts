@@ -19,7 +19,7 @@
  *   - Per-viewport overrides emit `sizes` candidates using the configured
  *     media queries; tiers equal to the base value collapse away.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { resolveAutoSizes } from '@core/publisher'
 import { makePage, makeSite } from './helpers'
 import { classKindSelector, type StyleRule } from '@core/page-tree'

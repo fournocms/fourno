@@ -11,7 +11,7 @@ Use it for every internal admin navigation, including links rendered by the site
 - Components: `Router`, `MemoryRouter`, `Routes`, `Route`, `Navigate`, `Link`.
 - Hooks: `useLocation`, `useNavigate`, `useParams`, `useInRouterContext`.
 - Path matching: `matchPath(pattern, pathname)` (exported from the barrel) — supports static segments, `:param` placeholders, and `*` wildcard segments for catch-alls. No optional segments, no nested routes.
-- Navigation uses `history.pushState` + a custom `instatic:locationchange` event so multiple components stay in sync without re-renders ping-ponging.
+- Navigation uses `history.pushState` + a custom `fourno:locationchange` event so multiple components stay in sync without re-renders ping-ponging.
 - React 19 `startTransition` wraps every navigation so Suspense boundaries can switch smoothly without flashing.
 - Internal admin links use `<Link to="/admin/...">`; button-like admin navigation uses `useAdminNavigate()`.
 
@@ -40,7 +40,7 @@ Don't import from `react-router-dom`. It's removed from `package.json`.
 </Router>
 ```
 
-`Router` registers a global `popstate` listener and bridges `history.pushState` / `replaceState` into a `instatic:locationchange` event. `MemoryRouter` is for tests — same surface, no DOM history.
+`Router` registers a global `popstate` listener and bridges `history.pushState` / `replaceState` into a `fourno:locationchange` event. `MemoryRouter` is for tests — same surface, no DOM history.
 
 ---
 
@@ -243,14 +243,14 @@ If you need a wildcard, restructure the route tree — the admin shouldn't need 
 
 ## The `LOCATION_CHANGE_EVENT`
 
-`Router` listens on `window` for `popstate` and the custom `instatic:locationchange` event. The custom event fires whenever code calls `history.pushState` or `history.replaceState` via the router.
+`Router` listens on `window` for `popstate` and the custom `fourno:locationchange` event. The custom event fires whenever code calls `history.pushState` or `history.replaceState` via the router.
 
 This pattern lets multiple components subscribe to navigation without React owning the source of truth — `history` IS the source of truth, and the event tells subscribers to re-read.
 
 External code that wants to react to navigations can listen:
 
 ```ts
-window.addEventListener('instatic:locationchange', () => {
+window.addEventListener('fourno:locationchange', () => {
   // ... re-read location
 })
 ```
@@ -339,7 +339,7 @@ render(
 | Router imports from `src/core/`                                  | Gated.                                               |
 | Router imports from `src/modules/`                               | Gated.                                               |
 | `window.location.href = '...'` for navigation                    | `useNavigate()` / `useAdminNavigate()` — full reloads kill the SPA state |
-| `history.pushState` directly                                     | Use the router — it fires `instatic:locationchange` for you|
+| `history.pushState` directly                                     | Use the router — it fires `fourno:locationchange` for you|
 | Nested routes (`<Route path="/admin/site"><Route ...>...`)       | Flat route table only. Compose with workspace internal state. |
 | Optional URL segments / wildcards                                 | Restructure the route tree.                          |
 | Catch-all 404 route                                              | Keep the scoped `/admin/*` redirect last — invalid admin paths route to the dashboard/login flow. |
@@ -359,7 +359,7 @@ import { useInitialQueryParams, useUrlQuerySync } from '@admin/lib/urlState'
 | `useInitialQueryParams()` | Returns the query params present at first mount (stable, read-once). |
 | `useUrlQuerySync(params, opts?)` | Mirrors the given key→value map into the URL via `replaceState`. `null` values remove the key; unspecified keys are untouched. |
 
-These hooks operate on `window.history.replaceState` directly and deliberately do **not** dispatch `instatic:locationchange` — query-string updates for selection state must never trigger a route re-match. Three workspaces use them: the site editor (`useSiteEditorUrlSync`), the Content workspace, and the Data workspace.
+These hooks operate on `window.history.replaceState` directly and deliberately do **not** dispatch `fourno:locationchange` — query-string updates for selection state must never trigger a route re-match. Three workspaces use them: the site editor (`useSiteEditorUrlSync`), the Content workspace, and the Data workspace.
 
 Full contract and URL shapes are documented in [docs/editor.md](../editor.md) → "URL state and workspace deep links".
 

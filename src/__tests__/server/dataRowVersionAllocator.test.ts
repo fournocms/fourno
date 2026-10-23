@@ -5,7 +5,7 @@
  * (`server/publish/publishSite.ts`) — must route through it so the
  * "next = max(existing) + 1" invariant has exactly one home.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { nextDataRowVersionNumber } from '../../../server/repositories/data'

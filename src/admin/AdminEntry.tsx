@@ -31,7 +31,7 @@ const AuthenticatedAdmin = prewarmedLazy<{ section: AdminWorkspace; currentUser:
 
 // Speculative preload at module-evaluation time.
 //
-// `window.__instaticAuthed` is set by `server/static.ts` ONLY when the request
+// `window.__fournoAuthed` is set by `server/static.ts` ONLY when the request
 // carried a valid session cookie. The session cookie itself is HttpOnly
 // (XSS mitigation) so JS can't read it directly — the server tells us
 // "yes, this user is authenticated" via this flag.
@@ -42,7 +42,7 @@ const AuthenticatedAdmin = prewarmedLazy<{ section: AdminWorkspace; currentUser:
 // promise instantly — no penalty. main.tsx ALSO `await`s the import for
 // the same cookie-bearing path, which forces the post-Suspense render to
 // be flushSync-able and eliminates the concurrent-mode commit delay.
-if (typeof window !== 'undefined' && (window as unknown as { __instaticAuthed?: number }).__instaticAuthed === 1) {
+if (typeof window !== 'undefined' && (window as unknown as { __fournoAuthed?: number }).__fournoAuthed === 1) {
   void AuthenticatedAdmin.preload().catch(() => {
     // Best-effort. If the preload fails the cold-path render will retry
     // when React actually requests AuthenticatedAdmin via Suspense.

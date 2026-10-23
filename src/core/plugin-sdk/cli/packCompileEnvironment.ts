@@ -2,7 +2,7 @@
  * Pack-compile environment for the plugin CLI.
  *
  * `definePack({ layouts })` compiles clean HTML into layout snapshots via the
- * host's HTML-import pipeline, which needs two things Bun doesn't provide:
+ * host's HTML-import pipeline, which needs two things Node doesn't provide:
  *
  *   1. A DOM — `DOMParser` for the markup, `CSSStyleSheet` for the CSS.
  *      Installed from happy-dom, the same approach the server uses for
@@ -11,11 +11,11 @@
  *      `base.*` modules through `HTML_TO_MODULE_RULES`, which resolves
  *      defaults from the registry.
  *
- * The CLI evaluates the author's `instatic-plugin.config.ts` (where
+ * The CLI evaluates the author's `fourno-plugin.config.ts` (where
  * `definePack` runs), so it installs both first. Kept out of the SDK
  * builders themselves so happy-dom and the module bundle never reach a
  * browser bundle through the SDK barrel — only the CLI (which always runs
- * under Bun) imports this module.
+ * under Node) imports this module.
  */
 
 import { GlobalWindow } from 'happy-dom'

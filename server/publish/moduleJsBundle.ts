@@ -11,7 +11,7 @@
  *   `bumpPublishVersion()` / `registerVersionedCacheReset`) as
  *   `buildPublishedSiteCssBundle` in `siteCssBundle.ts`.
  * - `injectModuleScripts` is the post-render pipeline step: appends one
- *   `<script src="/_instatic/module-js/<id>.js?v=<version>" defer>` tag per
+ *   `<script src="/_fourno/module-js/<id>.js?v=<version>" defer>` tag per
  *   moduleId (sorted for determinism) before `</body>` and relaxes the page
  *   CSP `script-src` to `'self'` iff at least one tag was injected.
  *
@@ -75,12 +75,12 @@ export function injectModuleScripts(
   jsModuleIds: readonly string[],
   publishVersion: number,
 ): string {
-  if (jsModuleIds.length === 0 || html.includes('data-instatic-module-js=')) return html
+  if (jsModuleIds.length === 0 || html.includes('data-fourno-module-js=')) return html
   const ids = [...new Set(jsModuleIds)].sort()
   const tags = ids
     .map(
       (id) =>
-        `<script src="/_instatic/module-js/${encodeURIComponent(id)}.js?v=${publishVersion}" defer data-instatic-module-js="${escapeHtml(id)}"></script>`,
+        `<script src="/_fourno/module-js/${encodeURIComponent(id)}.js?v=${publishVersion}" defer data-fourno-module-js="${escapeHtml(id)}"></script>`,
     )
     .join('\n')
   const withScripts = html.includes('</body>')

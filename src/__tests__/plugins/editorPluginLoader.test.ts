@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { activateInstalledEditorPlugins } from '@core/plugins/editorPluginLoader'
 import { pluginRuntime } from '@core/plugins/runtime'
 import type { CmsPluginsPayload, PluginManifest } from '@core/plugin-sdk'

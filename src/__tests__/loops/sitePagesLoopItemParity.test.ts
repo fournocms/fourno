@@ -11,7 +11,7 @@
  * can never silently diverge the canvas preview from the published output.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { pageToLoopItem, filterPagesForLoop } from '@core/loops'
 import { SitePagesSource } from '@core/loops/sources/sitePages'
 import type { Page, SiteDocument } from '@core/page-tree'

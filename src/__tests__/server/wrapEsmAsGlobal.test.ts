@@ -14,7 +14,7 @@
  * (a plain object passed as the `globalThis` parameter, shadowing the real
  * global) and inspects what the shim attached.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { wrapEsmAsGlobal } from '../../../server/plugins/quickjs/esmShim'
 
 type Sandbox = Record<string, unknown>

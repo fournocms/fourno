@@ -14,7 +14,7 @@
  * AbortSignal.timeout) that previously had to be worked around in plugin
  * authoring.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createPluginVm, type PluginVmEnv } from '../../../server/plugins/quickjs/vm'
 
 interface RecorderEntry {
@@ -634,7 +634,7 @@ describe('plugin sandbox: schedule register → dispatch round-trip', () => {
 // crypto.subtle bridge — functional integration through the real sandbox.
 //
 // These tests run the same WebCrypto subset a storage / auth plugin would
-// (S3 Sigv4, JWT signing, OAuth) and verify the outputs match Bun's
+// (S3 Sigv4, JWT signing, OAuth) and verify the outputs match Node's
 // native crypto.subtle on the host. If the bridge regresses (wrong
 // algorithm, wrong base64 framing, key/data swapped, …) the test fails
 // loud with a hex mismatch, not a silent "signature rejected by AWS"
@@ -643,7 +643,7 @@ describe('plugin sandbox: schedule register → dispatch round-trip', () => {
 
 /**
  * Encode bytes to lowercase hex — used by the test to compare the
- * VM's signature output against Bun's native one. The plugin code
+ * VM's signature output against Node's native one. The plugin code
  * exercises the same helper inline (kept as a string-builder so it
  * doesn't depend on any polyfill).
  */
@@ -654,7 +654,7 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 /**
- * Host-side reference: run the same crypto operation via Bun's native
+ * Host-side reference: run the same crypto operation via Node's native
  * `crypto.subtle` so the test can assert byte-for-byte equality with
  * what the sandboxed VM produced.
  */
@@ -679,7 +679,7 @@ async function referenceSha256Hex(data: string): Promise<string> {
 
 /**
  * Build an env whose hostCall ACTUALLY services `crypto.digest` and
- * `crypto.signHmac` via Bun's native crypto.subtle — same code path
+ * `crypto.signHmac` via Node's native crypto.subtle — same code path
  * the production worker host uses. This lets the test verify the
  * sandbox's `globalThis.crypto.subtle` polyfill end-to-end without
  * spinning up a full Worker.

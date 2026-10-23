@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteDocument, SiteShell } from '@core/page-tree'
 import { normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import type { DbResult } from '../../../server/db'
@@ -424,7 +424,7 @@ describe('CMS publishing', () => {
     const published = await getPublishedPageBySlug(db, 'index')
 
     expect(state.runtimeAssets.length).toBeGreaterThan(0)
-    expect(String(state.runtimeAssets[0].public_path)).toContain('/_instatic/assets/')
+    expect(String(state.runtimeAssets[0].public_path)).toContain('/_fourno/assets/')
     expect(published?.runtimeAssets?.scripts).toHaveLength(1)
     expect(published?.runtimeAssets?.scripts[0].src).toBe(state.runtimeAssets[0].public_path)
   })

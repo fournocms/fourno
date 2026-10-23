@@ -9,7 +9,7 @@
  *   - editor.commands permission is required — missing it no-ops + warns
  */
 
-import { describe, it, expect, beforeEach, spyOn } from 'bun:test'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { pluginRuntime, createEditorPluginApi } from '@core/plugins/runtime'
 import { getPluginsCommands } from '../commands/plugins'
 import { getPluginPaletteSpotlightProviders } from '../commandRegistry'
@@ -206,7 +206,7 @@ describe('provider search error is caught — palette does not crash', () => {
       },
     })
 
-    const consoleErrorSpy = spyOn(console, 'error').mockImplementation(() => {})
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     const [provider] = getPluginPaletteSpotlightProviders()
     const results = await provider.search('q', {} as never, new AbortController().signal)
@@ -241,7 +241,7 @@ describe('provider search error is caught — palette does not crash', () => {
 
 describe('editor.commands permission is required', () => {
   it('palette.registerCommand is a no-op without the permission + warns', () => {
-    const consoleWarnSpy = spyOn(console, 'warn').mockImplementation(() => {})
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     const api = createEditorPluginApi(DENIED, noopFetch as never)
     api.editor.palette.registerCommand({
@@ -260,7 +260,7 @@ describe('editor.commands permission is required', () => {
   })
 
   it('palette.registerProvider is a no-op without the permission + warns', () => {
-    const consoleWarnSpy = spyOn(console, 'warn').mockImplementation(() => {})
+    const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     const api = createEditorPluginApi(DENIED, noopFetch as never)
     api.editor.palette.registerProvider({
@@ -306,7 +306,7 @@ describe('editor.commands permission is required', () => {
 
 describe('palette provider id must be namespaced under plugin id', () => {
   it('logs an error and skips registration for unnamespaced id', () => {
-    const consoleErrorSpy = spyOn(console, 'error').mockImplementation(() => {})
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     pluginRuntime.registerPaletteProvider('test.plugin', {
       id: 'wrong-namespace.search', // does not start with "test.plugin."

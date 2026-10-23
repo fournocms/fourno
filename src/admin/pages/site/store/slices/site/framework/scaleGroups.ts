@@ -4,188 +4,40 @@
  *
  * The two families have identical store-action shapes — toggle disabled,
  * create/update/duplicate/reset/delete a group, upsert a manual size, replace
- * the class-generator list. Only the underlying types and a handful of
- * factory functions differ.
- *
- * `createScaleGroupActions` is family-agnostic: callers from spacing.ts and
- * typography.ts pass family-specific types and helpers via `ScaleFamilyConfig`
- * and a `'typography' | 'spacing'` discriminator (used to read/write the right
- * branch of `site.settings.framework`).
+ * the class-generator list. The recipes and family lookups live in
+ * `@core/siteEdit` (shared with the server-side scale tools); this module only
+ * wraps them in `mutateSite`.
  */
 
 import { nanoid } from 'nanoid'
-import type { SiteDocument } from '@core/page-tree'
-import type {
-  FrameworkScaleManualSize,
-  FrameworkSpacingClassGenerator,
-  FrameworkSpacingGroup,
-  FrameworkSpacingSettings,
-  FrameworkTypographyClassGenerator,
-  FrameworkTypographyGroup,
-  FrameworkTypographySettings,
-} from '@core/framework-schema'
-import { reconcileFrameworkClasses } from './reconcile'
-import { nextOrderValue } from './shared'
-import type {
-  SiteSliceHelpers,
-  UpdateFrameworkSpacingGroupPatch,
-  UpdateFrameworkTypographyGroupPatch,
-} from '@site/store/slices/site/types'
+import {
+  applyScaleGroupPatch,
+  ensureScaleSettings,
+  nextOrderValue,
+  readScaleGroups,
+  readScaleSettings,
+  reconcileFrameworkClasses,
+  SCALE_FAMILY_FACTORIES,
+  setScaleGroup,
+  type CommonScaleGroupPatch,
+  type ScaleFamily,
+  type ScaleFamilyTypes,
+  type SetScaleGroupRequest,
+  type SetScaleGroupResult,
+} from '@core/siteEdit'
+import type { SiteSliceHelpers } from '@site/store/slices/site/types'
 
-// ---------------------------------------------------------------------------
-// Family parameterization
-// ---------------------------------------------------------------------------
-
-/**
- * Map a family discriminator to the four generic parameters that change per
- * family: the group type, the patch type, the settings branch type, and the
- * class-generator list type.
- */
-interface ScaleFamilyTypes {
-  typography: {
-    Group: FrameworkTypographyGroup
-    Patch: UpdateFrameworkTypographyGroupPatch
-    Settings: FrameworkTypographySettings
-    ClassGenerator: FrameworkTypographyClassGenerator
-  }
-  spacing: {
-    Group: FrameworkSpacingGroup
-    Patch: UpdateFrameworkSpacingGroupPatch
-    Settings: FrameworkSpacingSettings
-    ClassGenerator: FrameworkSpacingClassGenerator
-  }
-}
-
-interface ScaleFamilyConfig<F extends 'typography' | 'spacing'> {
-  family: F
-  buildDefault: (order: number) => ScaleFamilyTypes[F]['Group']
-  makeFresh: (
-    name: string,
-    varName: string,
-    order: number,
-  ) => ScaleFamilyTypes[F]['Group']
-  nextTabValues: (
-    groups: Array<ScaleFamilyTypes[F]['Group']>,
-  ) => { name: string; varName: string }
-}
-
-// ---------------------------------------------------------------------------
-// Internal helpers — shared by both families
-// ---------------------------------------------------------------------------
-
-/**
- * Lazily materialise `site.settings.framework[family]` and its `groups` /
- * `classes` arrays. The two family branches have structurally identical
- * shapes, so a single helper covers both.
- */
-function ensureScaleSettings<F extends 'typography' | 'spacing'>(
-  site: SiteDocument,
-  family: F,
-): ScaleFamilyTypes[F]['Settings'] {
-  if (!site.settings.framework) {
-    site.settings.framework = { colors: { tokens: [] } }
-  }
-  const framework = site.settings.framework
-  if (family === 'typography') {
-    if (!framework.typography) framework.typography = { groups: [], classes: [] }
-    framework.typography.groups ??= []
-    framework.typography.classes ??= []
-    return framework.typography as ScaleFamilyTypes[F]['Settings']
-  }
-  if (!framework.spacing) framework.spacing = { groups: [], classes: [] }
-  framework.spacing.groups ??= []
-  framework.spacing.classes ??= []
-  return framework.spacing as ScaleFamilyTypes[F]['Settings']
-}
-
-/** Read the family branch off a frozen (read-only) site without mutating. */
-function readScaleGroups<F extends 'typography' | 'spacing'>(
-  site: SiteDocument,
-  family: F,
-): Array<ScaleFamilyTypes[F]['Group']> {
-  const branch = readScaleSettings(site, family)
-  return (branch?.groups ?? []) as Array<ScaleFamilyTypes[F]['Group']>
-}
-
-/** Read the family branch off a frozen (read-only) site without mutating. */
-function readScaleSettings<F extends 'typography' | 'spacing'>(
-  site: SiteDocument,
-  family: F,
-): ScaleFamilyTypes[F]['Settings'] | null {
-  const branch =
-    family === 'typography'
-      ? site.settings.framework?.typography
-      : site.settings.framework?.spacing
-  return (branch ?? null) as ScaleFamilyTypes[F]['Settings'] | null
-}
-
-/**
- * Subset of `Update*GroupPatch` that the generic patch applier touches. Both
- * family patches structurally extend this shape (with their own `min`/`max`
- * config types narrowed at the call site).
- */
-type CommonScaleGroupPatch = Partial<{
-  name: string
-  namingConvention: string
-  steps: string
-  baseScaleIndex: number
-  mode: FrameworkTypographyGroup['mode']
-  isDisabled: boolean
-  min: Record<string, unknown>
-  max: Record<string, unknown>
-  manualSizes: FrameworkScaleManualSize[]
-}>
-
-/**
- * Merge a partial patch into a scale group. Both family Group types share the
- * exact set of fields touched here; the call site casts the patch down to the
- * common shape because TypeScript can't unify the two structural patch types
- * automatically.
- */
-function applyScaleGroupPatch(
-  group: FrameworkTypographyGroup | FrameworkSpacingGroup,
-  patch: CommonScaleGroupPatch,
-): boolean {
-  let changed = false
-  function assign<K extends keyof typeof group>(key: K, value: (typeof group)[K]): void {
-    if (Object.is(group[key], value)) return
-    group[key] = value
-    changed = true
-  }
-
-  if (patch.name !== undefined) assign('name', patch.name)
-  if (patch.namingConvention !== undefined) assign('namingConvention', patch.namingConvention)
-  if (patch.steps !== undefined) assign('steps', patch.steps)
-  if (patch.baseScaleIndex !== undefined) assign('baseScaleIndex', patch.baseScaleIndex)
-  if (patch.mode !== undefined) assign('mode', patch.mode)
-  if (patch.isDisabled !== undefined) assign('isDisabled', patch.isDisabled)
-  if (patch.min) {
-    const min = group.min as Record<string, unknown>
-    if (Object.entries(patch.min).some(([key, value]) => !Object.is(min[key], value))) {
-      Object.assign(min, patch.min)
-      changed = true
-    }
-  }
-  if (patch.max) {
-    const max = group.max as Record<string, unknown>
-    if (Object.entries(patch.max).some(([key, value]) => !Object.is(max[key], value))) {
-      Object.assign(max, patch.max)
-      changed = true
-    }
-  }
-  if (patch.manualSizes !== undefined) {
-    assign('manualSizes', patch.manualSizes)
-  }
-  if (changed) group.updatedAt = Date.now()
-  return changed
-}
+const SCALE_NOT_SAVED =
+  'The scale was not saved: the editor could not reach the collaboration server. Try again in a moment.'
 
 // ---------------------------------------------------------------------------
 // Action factory
 // ---------------------------------------------------------------------------
 
-interface ScaleGroupActions<F extends 'typography' | 'spacing'> {
+interface ScaleGroupActions<F extends ScaleFamily> {
   toggleDisabled: () => void
+  /** Create-or-update one group in ONE mutation; see `setScaleGroup`. */
+  setGroup: (request: SetScaleGroupRequest<F>) => SetScaleGroupResult
   createGroup: () => ScaleFamilyTypes[F]['Group']
   updateGroup: (groupId: string, patch: ScaleFamilyTypes[F]['Patch']) => void
   duplicateGroup: (groupId: string) => ScaleFamilyTypes[F]['Group'] | null
@@ -207,12 +59,12 @@ interface ScaleGroupActions<F extends 'typography' | 'spacing'> {
  * `typography.ts` re-exposes under family-specific names like
  * `createFrameworkSpacingGroup`.
  */
-export function createScaleGroupActions<F extends 'typography' | 'spacing'>(
+export function createScaleGroupActions<F extends ScaleFamily>(
   helpers: SiteSliceHelpers,
-  config: ScaleFamilyConfig<F>,
+  family: F,
 ): ScaleGroupActions<F> {
   const { get, mutateSite } = helpers
-  const { family, buildDefault, makeFresh, nextTabValues } = config
+  const { buildDefault, makeFresh, nextTabValues } = SCALE_FAMILY_FACTORIES[family]
 
   return {
     toggleDisabled: () => {
@@ -222,6 +74,19 @@ export function createScaleGroupActions<F extends 'typography' | 'spacing'>(
         reconcileFrameworkClasses(site)
         return true
       })
+    },
+
+    setGroup: (request) => {
+      const outcome: { value: SetScaleGroupResult | null } = { value: null }
+      const accepted = mutateSite((site) => {
+        outcome.value = setScaleGroup(site, family, request)
+        return outcome.value.ok
+      })
+      // A refusal from the recipe (unknown group) carries its own message; a
+      // recipe that succeeded but was not accepted means the collab write
+      // gate was closed.
+      if (outcome.value && !outcome.value.ok) return outcome.value
+      return accepted && outcome.value ? outcome.value : { ok: false, message: SCALE_NOT_SAVED }
     },
 
     createGroup: () => {

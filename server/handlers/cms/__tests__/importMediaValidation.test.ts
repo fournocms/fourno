@@ -9,7 +9,8 @@
  * index.html`) served same-origin as `/admin` → stored XSS / account takeover.
  * These tests prove the content gate and the destination gate close it.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
+import { runTypeScriptSnippet } from '../../../../src/__tests__/helpers/runTypeScriptSnippet'
 import { join } from 'node:path'
 import {
   ImportMediaValidationError,
@@ -57,14 +58,10 @@ describe('validateAndSanitizeMediaBytes — content gate', () => {
   })
 
   // SVG sanitisation goes through DOMPurify's SVG profile, which is only
-  // reliable on the jsdom runtime the server installs (happy-dom, the bun-test
-  // default DOM, mishandles the SVG walk), so run it in a clean process.
+  // reliable on the jsdom runtime the server installs (happy-dom, the test
+  // suite's default DOM, mishandles the SVG walk), so run it in a clean process.
   it('sanitizes a <script> payload out of an otherwise-valid SVG (jsdom runtime)', () => {
-    const result = Bun.spawnSync({
-      cmd: [
-        process.execPath,
-        '-e',
-        `
+    const result = runTypeScriptSnippet(`
           await import('./server/richtextSanitizer.ts')
           const { validateAndSanitizeMediaBytes } = await import('./server/handlers/cms/importMediaValidation.ts')
           const svg = new TextEncoder().encode('<svg viewBox="0 0 10 10"><script>alert(1)</script><rect width="10" height="10"/></svg>')
@@ -73,11 +70,7 @@ describe('validateAndSanitizeMediaBytes — content gate', () => {
           ).toLowerCase()
           if (clean.includes('<script')) throw new Error('script survived: ' + clean)
           if (!clean.includes('<rect')) throw new Error('geometry lost: ' + clean)
-        `,
-      ],
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
+        `)
     if (result.exitCode !== 0) {
       throw new Error(new TextDecoder().decode(result.stderr))
     }

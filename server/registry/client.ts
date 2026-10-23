@@ -103,7 +103,7 @@ export const TTL = {
  * Budgets, all covering the whole exchange including the body read: a stalled
  * body must not pin a single-flight key. Search and stats are small; a full
  * packument is megabytes, so browsing a big package gets longer, and an
- * install gets what `bun install` gets.
+ * install gets what `npm install` gets.
  */
 const TIMEOUT_MS = { small: 10_000, packument: 30_000, install: 60_000 } as const
 /**

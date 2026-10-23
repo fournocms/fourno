@@ -7,11 +7,11 @@
  * the docked style rail is not covered by platform scrollbars.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readFileSync } from 'fs'
 import { join } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 
 function readSource(relative: string): string {
   const path = join(SRC_ROOT, relative)

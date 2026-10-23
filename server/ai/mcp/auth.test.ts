@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { configurePublicOrigins, resetPublicOrigins } from '../../auth/security'
 import { createSqliteClient } from '../../db/sqlite'
 import { sqliteMigrations } from '../../db/migrations-sqlite'
@@ -38,10 +38,10 @@ const HOSTILE_HOST = 'attacker.example:18020'
 /**
  * happy-dom (loaded by the test setup) strips the Fetch-spec forbidden `Host`
  * header from the Request constructor's `headers` init, so it is set on the
- * Headers object afterwards, the same way a real Bun.serve request carries it.
+ * Headers object afterwards, the same way a real server request carries it.
  */
 function hostileRequest(headers: Record<string, string> = {}): Request {
-  const req = new Request(`http://${HOSTILE_HOST}/_instatic/mcp`, { headers })
+  const req = new Request(`http://${HOSTILE_HOST}/_fourno/mcp`, { headers })
   req.headers.set('host', HOSTILE_HOST)
   return req
 }
@@ -62,7 +62,7 @@ describe('mcp auth', () => {
       userId: 'u1', label: 'L',
       capabilities: ['ai.chat', 'content.manage'], tokenHash: await hashMcpSecret(token),
     })
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_fourno/mcp', { headers: { Authorization: `Bearer ${token}` } })
     const res = await resolveMcpAuth(req, db)
     expect(res.ok).toBe(true)
     if (res.ok) {
@@ -72,12 +72,12 @@ describe('mcp auth', () => {
   })
 
   it('rejects a missing token', async () => {
-    const res = await resolveMcpAuth(new Request('http://x/_instatic/mcp'), db)
+    const res = await resolveMcpAuth(new Request('http://x/_fourno/mcp'), db)
     expect(res.ok).toBe(false)
   })
 
   it('rejects an unknown token', async () => {
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: 'Bearer imcp_nope' } })
+    const req = new Request('http://x/_fourno/mcp', { headers: { Authorization: 'Bearer imcp_nope' } })
     expect((await resolveMcpAuth(req, db)).ok).toBe(false)
   })
 
@@ -87,7 +87,7 @@ describe('mcp auth', () => {
       userId: 'u1', label: 'L', capabilities: ['ai.chat'], tokenHash: await hashMcpSecret(token),
     })
     await db`update ai_mcp_connectors set revoked_at = ${nowIso()} where id = ${rec.id}`
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_fourno/mcp', { headers: { Authorization: `Bearer ${token}` } })
     expect((await resolveMcpAuth(req, db)).ok).toBe(false)
   })
 
@@ -101,7 +101,7 @@ describe('mcp auth', () => {
     })
     // Backdate expires_at to a past timestamp to simulate expiry.
     await db`update ai_mcp_connectors set expires_at = ${pastExpiry} where id = ${rec.id}`
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_fourno/mcp', { headers: { Authorization: `Bearer ${token}` } })
     expect((await resolveMcpAuth(req, db)).ok).toBe(false)
   })
 
@@ -112,7 +112,7 @@ describe('mcp auth', () => {
     })
     // Simulate a pre-migration 019 row with no expiry set.
     await db`update ai_mcp_connectors set expires_at = null where id = ${rec.id}`
-    const req = new Request('http://x/_instatic/mcp', { headers: { Authorization: `Bearer ${token}` } })
+    const req = new Request('http://x/_fourno/mcp', { headers: { Authorization: `Bearer ${token}` } })
     const res = await resolveMcpAuth(req, db)
     expect(res.ok).toBe(true)
   })
@@ -134,7 +134,7 @@ describe('mcp auth', () => {
         codeChallenge: await pkceChallengeForVerifier(verifier),
         codeChallengeMethod: 'S256',
         scope: 'mcp offline_access',
-        resource: 'http://x/_instatic/mcp',
+        resource: 'http://x/_fourno/mcp',
       },
     })
     const tokens = await exchangeAuthorizationCode(db, {
@@ -142,9 +142,9 @@ describe('mcp auth', () => {
       clientId: client.clientId,
       redirectUri: client.redirectUris[0]!,
       codeVerifier: verifier,
-      resource: 'http://x/_instatic/mcp',
+      resource: 'http://x/_fourno/mcp',
     })
-    const req = new Request('http://x/_instatic/mcp', {
+    const req = new Request('http://x/_fourno/mcp', {
       headers: { Authorization: `Bearer ${tokens!.accessToken}` },
     })
     const result = await resolveMcpAuth(req, db)
@@ -153,7 +153,7 @@ describe('mcp auth', () => {
   })
 
   it('builds a spec-correct 401 with a resource_metadata pointer', () => {
-    const r = unauthorizedResponse(new Request('http://x/_instatic/mcp'))
+    const r = unauthorizedResponse(new Request('http://x/_fourno/mcp'))
     expect(r.status).toBe(401)
     const wwwAuth = r.headers.get('WWW-Authenticate') ?? ''
     expect(wwwAuth).toContain('Bearer')
@@ -186,7 +186,7 @@ describe('mcp auth issuer trust', () => {
 
   it('keeps the resource_metadata pointer for loopback development without a configured origin', () => {
     resetPublicOrigins()
-    const wwwAuth = unauthorizedResponse(new Request('http://localhost:3001/_instatic/mcp'))
+    const wwwAuth = unauthorizedResponse(new Request('http://localhost:3001/_fourno/mcp'))
       .headers.get('WWW-Authenticate') ?? ''
     expect(wwwAuth).toContain(
       'resource_metadata="http://localhost:3001/.well-known/oauth-protected-resource"',
@@ -196,7 +196,7 @@ describe('mcp auth issuer trust', () => {
   it('skips the OAuth grant lookup without a trustworthy resource while personal tokens keep working', async () => {
     resetPublicOrigins()
     const verifier = 'q'.repeat(64)
-    const hostileResource = `http://${HOSTILE_HOST}/_instatic/mcp`
+    const hostileResource = `http://${HOSTILE_HOST}/_fourno/mcp`
     const client = await registerOAuthClient(db, {
       clientName: 'Claude',
       redirectUris: ['https://claude.ai/api/mcp/auth_callback'],

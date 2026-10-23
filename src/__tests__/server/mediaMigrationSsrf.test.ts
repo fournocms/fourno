@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { readMediaSourceBytes } from '../../../server/handlers/cms/mediaStorageReader'
 import { mediaStorageRegistry } from '@core/plugins/mediaStorageRegistry'
 import type { MediaStorageAdapter } from '@core/plugin-sdk'

@@ -1,5 +1,5 @@
 /**
- * Permission gating for `@instatic/host-hooks`.
+ * Permission gating for `@fourno/host-hooks`.
  *
  * Plugin React surfaces (editor panels, admin app pages, canvas overlays)
  * mount under a `PluginContext` carrying the operator-granted permission
@@ -8,7 +8,7 @@
  * never granted store access cannot subscribe to editor state just because
  * its code runs in the admin window.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { PluginEditorPanel } from '@site/panels/PluginEditorPanel'
 import { useEditorStore as useHostEditorStore } from '@site/store/store'
@@ -76,11 +76,10 @@ describe('useEditorStore permission gate', () => {
     render(<PluginEditorPanel panelId="acme.workflow.review" />)
 
     // No editor state leaked; the panel body shows the boundary fallback
-    // instead of the plugin subtree.
+    // instead of the plugin subtree. (Its wording differs between dev and
+    // production builds, so the fallback is located by its role + location.)
     expect(screen.queryByText('breakpoint:desktop')).toBeNull()
-    expect(
-      (document.body.textContent ?? '').includes('failed to load'),
-    ).toBe(true)
+    expect(screen.getByRole('alert').getAttribute('data-error-location')).toBe('plugin-editor-panel')
   })
 
   it('the thrown error names the plugin and the missing permission', () => {

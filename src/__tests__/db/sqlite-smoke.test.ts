@@ -1,7 +1,9 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 
-describe('SQLite adapter smoke test', () => {
+// SQLite-specific by design (0/1 booleans, integer counts); the Postgres adapter
+// is covered by `server/db/__tests__` and the dialect-neutral suites.
+describe.skipIf(process.env['DB'] === 'postgres')('SQLite adapter smoke test', () => {
   test('site → data_row draft round-trip with JSON columns', async () => {
     const { db, cleanup } = await createTestDb()
     try {
@@ -146,14 +148,14 @@ describe('SQLite adapter smoke test', () => {
       await db`
         insert into published_runtime_assets
           (id, data_row_version_id, asset_path, public_path, content_type, content_bytes)
-        values (${'a1'}, ${'drv1'}, ${'/main.js'}, ${'/_instatic/assets/drv1/main.js'}, ${'text/javascript'}, ${payload})`
+        values (${'a1'}, ${'drv1'}, ${'/main.js'}, ${'/_fourno/assets/drv1/main.js'}, ${'text/javascript'}, ${payload})`
 
       const { rows } = await db<{ content_bytes: Uint8Array }>`
         select content_bytes from published_runtime_assets where id = ${'a1'}`
       expect(rows).toHaveLength(1)
 
       const out = rows[0]!.content_bytes
-      // bun:sqlite returns BLOBs as Uint8Array (or Buffer, which extends Uint8Array).
+      // better-sqlite3 returns BLOBs as Buffer, which extends Uint8Array.
       expect(out).toBeInstanceOf(Uint8Array)
       expect(Array.from(out)).toEqual(Array.from(payload))
     } finally {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { act, cleanup, renderHook } from '@testing-library/react'
 import { useEditorStore } from '@site/store/store'
 import { registry } from '@core/module-engine'

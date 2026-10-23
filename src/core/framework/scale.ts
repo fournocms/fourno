@@ -2,7 +2,7 @@
  * Shared fluid-scale math used by both the typography and spacing modules.
  *
  * Ported verbatim from the Core Framework `getTypeScale` / `getCssForSingleTypeScale`
- * helpers so the instatic produces byte-identical clamp() values for the same
+ * helpers so the fourno produces byte-identical clamp() values for the same
  * inputs. The function names and ordering of operations are preserved on purpose
  * — making the side-by-side comparison in code review trivial.
  *

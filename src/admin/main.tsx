@@ -91,13 +91,13 @@ const root = createRoot(rootElement, {
 // frame drop. Subsequent renders still run in concurrent mode.
 // Authenticated visitors get a best-effort shell preload before React mounts,
 // but the mount itself must never wait on it. `server/static.ts` sets
-// `window.__instaticAuthed` from the presence of the HttpOnly session cookie,
+// `window.__fournoAuthed` from the presence of the HttpOnly session cookie,
 // not from a DB-validated session. If that cookie is stale or a network path
 // stalls this chunk request, blocking here leaves the raw HTML loader on
 // screen forever because React has not mounted yet.
 function preloadAuthenticatedShellChunk(): void {
   if (typeof window === 'undefined') return
-  if ((window as unknown as { __instaticAuthed?: number }).__instaticAuthed !== 1) return
+  if ((window as unknown as { __fournoAuthed?: number }).__fournoAuthed !== 1) return
 
   void import('./AuthenticatedAdmin').catch((err: unknown) => {
     console.warn('[admin-shell] Authenticated shell preload failed:', err)

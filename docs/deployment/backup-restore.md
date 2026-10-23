@@ -34,20 +34,20 @@ Dump Postgres:
 ```sh
 docker compose -f compose.prod.yml exec -T postgres \
   pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB" \
-  > "backups/instatic-$(date +%F).sql"
+  > "backups/fourno-$(date +%F).sql"
 ```
 
 Archive uploads:
 
 ```sh
 docker run --rm \
-  -v instatic-prod_uploads:/uploads:ro \
+  -v fourno-prod_uploads:/uploads:ro \
   -v "$PWD/backups:/backup" \
   alpine \
-  tar czf "/backup/instatic-uploads-$(date +%F).tgz" -C /uploads .
+  tar czf "/backup/fourno-uploads-$(date +%F).tgz" -C /uploads .
 ```
 
-If your Compose project name is not `instatic-prod`, find the actual uploads volume name with `docker volume ls | grep uploads`.
+If your Compose project name is not `fourno-prod`, find the actual uploads volume name with `docker volume ls | grep uploads`.
 
 ## Postgres mode — restore
 
@@ -64,7 +64,7 @@ set -a
 . ./.env
 set +a
 
-cat backups/instatic-YYYY-MM-DD.sql | docker compose -f compose.prod.yml exec -T postgres \
+cat backups/fourno-YYYY-MM-DD.sql | docker compose -f compose.prod.yml exec -T postgres \
   psql -U "$POSTGRES_USER" "$POSTGRES_DB"
 ```
 
@@ -72,10 +72,10 @@ Restore uploads:
 
 ```sh
 docker run --rm \
-  -v instatic-prod_uploads:/uploads \
+  -v fourno-prod_uploads:/uploads \
   -v "$PWD/backups:/backup" \
   alpine \
-  sh -lc "rm -rf /uploads/* && tar xzf /backup/instatic-uploads-YYYY-MM-DD.tgz -C /uploads"
+  sh -lc "rm -rf /uploads/* && tar xzf /backup/fourno-uploads-YYYY-MM-DD.tgz -C /uploads"
 ```
 
 Then start the full stack:
@@ -90,14 +90,14 @@ The `compose.sqlite.yml` override stores the SQLite database in the `data` named
 
 ### Ad-hoc snapshot (transactional, safe while the app is running)
 
-Use Bun (already in the app container) and SQLite's online backup API to capture a consistent snapshot without stopping the CMS:
+Use Node (already in the app container) with `better-sqlite3` and SQLite's `VACUUM INTO` to capture a consistent snapshot without stopping the CMS:
 
 ```sh
 docker compose -f compose.prod.yml -f compose.sqlite.yml exec app \
-  bun -e "import { Database } from 'bun:sqlite'; const src = new Database('/app/data/cms.db', { readonly: true }); src.exec(\"VACUUM INTO '/app/data/snapshot.db'\");"
+  node -e "const Database = require('better-sqlite3'); const src = new Database('/app/data/cms.db', { readonly: true }); src.exec(\"VACUUM INTO '/app/data/snapshot.db'\");"
 
 docker compose -f compose.prod.yml -f compose.sqlite.yml cp \
-  app:/app/data/snapshot.db "./backups/instatic-$(date +%F).db"
+  app:/app/data/snapshot.db "./backups/fourno-$(date +%F).db"
 
 docker compose -f compose.prod.yml -f compose.sqlite.yml exec app \
   rm /app/data/snapshot.db
@@ -143,7 +143,7 @@ With Litestream running, every write to `cms.db` is shipped to S3 within seconds
 
 ```sh
 docker run --rm \
-  -v instatic-prod_data:/data \
+  -v fourno-prod_data:/data \
   -e LITESTREAM_ACCESS_KEY_ID -e LITESTREAM_SECRET_ACCESS_KEY \
   -v "$PWD/litestream.yml:/etc/litestream.yml:ro" \
   litestream/litestream:latest \
@@ -165,7 +165,7 @@ docker compose -f compose.prod.yml -f compose.sqlite.yml run --rm --no-deps \
   --entrypoint "" app sh -lc "rm -f /app/data/cms.db /app/data/cms.db-wal /app/data/cms.db-shm"
 
 docker compose -f compose.prod.yml -f compose.sqlite.yml cp \
-  "./backups/instatic-YYYY-MM-DD.db" app:/app/data/cms.db
+  "./backups/fourno-YYYY-MM-DD.db" app:/app/data/cms.db
 
 # Start the app — the WAL/SHM sidecar files will be regenerated on next open.
 docker compose -f compose.prod.yml -f compose.sqlite.yml up -d
@@ -175,7 +175,7 @@ Restore uploads exactly as in Postgres mode.
 
 ## Hosted Provider Backups
 
-When Instatic runs on a provider that offers managed Postgres (Railway Postgres, RDS, Supabase, Render Postgres, Fly Postgres, etc.), the provider's snapshot, volume backup, or point-in-time tooling is the recommended first backup path. Keep an independent `pg_dump` schedule when you need provider-independent recovery.
+When Fourno runs on a provider that offers managed Postgres (Railway Postgres, RDS, Supabase, Render Postgres, Fly Postgres, etc.), the provider's snapshot, volume backup, or point-in-time tooling is the recommended first backup path. Keep an independent `pg_dump` schedule when you need provider-independent recovery.
 
 Railway-specific paths:
 

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readEntrySeoOverride, stripPostTypeBuiltInCells } from '../cells'
 
 describe('stripPostTypeBuiltInCells', () => {

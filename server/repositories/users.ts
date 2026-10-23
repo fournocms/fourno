@@ -163,7 +163,7 @@ function normalizeEmail(email: string): string {
 
 /**
  * SHA-256 hex of the normalized email. Gravatar accepts both MD5 and SHA-256
- * hashes; we use SHA-256 because Node/Bun ship it natively and it's the modern
+ * hashes; we use SHA-256 because Node ship it natively and it's the modern
  * default. The hash is recomputed on every read — there's no value in caching
  * it (cheap to derive, always tracks `email` mutations).
  *

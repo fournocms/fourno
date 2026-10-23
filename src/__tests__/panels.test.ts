@@ -5,7 +5,7 @@
  * dispatch table without mounting React components (no jsdom needed).
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // Store helpers

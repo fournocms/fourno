@@ -1,4 +1,4 @@
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'bun:test'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
 import {
   BRANCH_HEADER,
@@ -18,7 +18,6 @@ import {
 } from '../../../server/repositories/data'
 import { insertDataTableIfAbsent } from '../../../server/repositories/data/tables'
 import { getDraftSite, saveDraftSite } from '../../../server/repositories/site'
-import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { createSite } from '../../../server/repositories/setup'
 
 let testDb: TestDb

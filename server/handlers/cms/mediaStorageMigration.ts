@@ -12,7 +12,7 @@
  *
  * Concurrency control: an in-memory `Map<role, AbortController>` lock
  * prevents two simultaneous migrations of the same role. Cross-process
- * locking isn't necessary today (the CMS runs as a single Bun server);
+ * locking isn't necessary today (the CMS runs as a single Node server);
  * if multi-instance HA ever ships, a DB-level row lock on
  * `active_media_storage_adapter` would replace this Map.
  *

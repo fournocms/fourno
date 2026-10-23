@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import {
   DEV_ORIGIN_ALLOWLIST,
   clientIp,
@@ -17,9 +17,9 @@ import {
  * Build a Request whose headers contain Fetch-spec "forbidden header names"
  * (Origin, Host, Cookie, etc.) — happy-dom (loaded by the test setup) strips
  * these when set via the Request constructor's `headers` init, but they
- * absolutely DO arrive on the wire when the production Bun.serve receives a
+ * absolutely DO arrive on the wire when the production server receives a
  * real HTTP request. We mutate the Headers object after construction; both
- * happy-dom and Bun's native Request allow that path.
+ * happy-dom and the server adapter's Request allow that path.
  */
 function makeReq(url: string, init: { method?: string; headers?: Record<string, string> } = {}): Request {
   const req = new Request(url, { method: init.method ?? 'GET' })
@@ -229,7 +229,7 @@ describe('clientIp', () => {
     expect(clientIp(req)).toBe('192.0.2.5')
   })
 
-  it('falls back to the Bun socket-IP stamp when XFF is absent', () => {
+  it('falls back to the socket-IP stamp when XFF is absent', () => {
     const req = makeReq('http://localhost:3001/admin/api/cms/login', { method: 'POST' })
     stampSocketIp(req, '127.0.0.1')
     expect(clientIp(req)).toBe('127.0.0.1')
@@ -296,7 +296,7 @@ describe('stampSocketIp', () => {
     // passing the real value into stampSocketIp).
     const req = makeReq('http://localhost:3001/admin/api/cms/login', {
       method: 'POST',
-      headers: { 'x-bun-socket-ip': '198.51.100.1' },
+      headers: { 'x-fourno-socket-ip': '198.51.100.1' },
     })
     stampSocketIp(req, '127.0.0.1')
     expect(clientIp(req)).toBe('127.0.0.1')
@@ -305,7 +305,7 @@ describe('stampSocketIp', () => {
   it('strips any inbound spoof even when no real peer is available', () => {
     const req = makeReq('http://localhost:3001/admin/api/cms/login', {
       method: 'POST',
-      headers: { 'x-bun-socket-ip': '198.51.100.1' },
+      headers: { 'x-fourno-socket-ip': '198.51.100.1' },
     })
     stampSocketIp(req, null)
     expect(clientIp(req)).toBeNull()

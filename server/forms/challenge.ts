@@ -3,7 +3,7 @@ import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 const CHALLENGE_TTL_MS = 5 * 60 * 1000
 const MAX_PUBLIC_FORM_CHALLENGES = 2_000
 const fallbackSecret = randomBytes(32).toString('hex')
-const signingSecret = process.env.INSTATIC_FORM_SECRET ?? process.env.INSTATIC_SECRET_KEY ?? fallbackSecret
+const signingSecret = process.env.FOURNO_FORM_SECRET ?? process.env.FOURNO_SECRET_KEY ?? fallbackSecret
 
 type PublicFormChallengeRecord = {
   pageId: string

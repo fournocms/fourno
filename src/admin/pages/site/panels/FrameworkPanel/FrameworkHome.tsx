@@ -72,7 +72,7 @@ export function FrameworkHome() {
   const setTab = useEditorStore((s) => s.setFrameworkPanelTab)
   const setManagerOpen = useEditorStore((s) => s.setFrameworkManagerOpen)
 
-  useInstalledFontFaces(fontItems, 'instatic-framework-home-fonts')
+  useInstalledFontFaces(fontItems, 'fourno-framework-home-fonts')
 
   const swatches = colorTokens.slice(0, MAX_SWATCHES)
 

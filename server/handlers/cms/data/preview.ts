@@ -39,8 +39,8 @@ import { canReadDataRow, canReadTable } from '../../../auth/dataAccess'
 import type { RouteParams } from '../routeTable'
 import type { BranchScope } from '../../../branches/scope'
 
-const CSS_ASSET_BASE_URL = '/_instatic/css/'
-const LOOP_ENDPOINT_BASE_URL = '/_instatic/loop/'
+const CSS_ASSET_BASE_URL = '/_fourno/css/'
+const LOOP_ENDPOINT_BASE_URL = '/_fourno/loop/'
 
 // ---------------------------------------------------------------------------
 // Request schema

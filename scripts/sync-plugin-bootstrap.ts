@@ -10,7 +10,7 @@
  * This script bundles the two typed entrypoints —
  *   - `server/plugins/quickjs/bootstrap/src/pluginRuntime.ts`   (full plugin VM)
  *   - `server/plugins/quickjs/bootstrap/src/modulePackRuntime.ts` (module-pack VM)
- * each to a single self-contained IIFE string via `Bun.build`, and emits them
+ * each to a single self-contained IIFE string via esbuild, and emits them
  * as committed artifacts under `server/plugins/quickjs/bootstrap/generated/`.
  * The host reads those constants and evaluates them in the VM
  * (`vm.ts` for the full plugin, `modulePackVm.ts` for module packs).
@@ -18,26 +18,26 @@
  * Shared runtime helpers (`src/boundary.ts`) are inlined into each artifact by
  * the bundler — one source-level definition, no divergent inline copies.
  *
- * Internal devs run `bun run bootstrap:sync` after editing anything under
+ * Internal devs run `pnpm bootstrap:sync` after editing anything under
  * `bootstrap/src/`. CI runs the architecture gate
  * `src/__tests__/architecture/plugin-bootstrap-fresh.test.ts`, which rebuilds
- * in memory and fails loudly with "run `bun run bootstrap:sync`" if the
+ * in memory and fails loudly with "run `pnpm bootstrap:sync`" if the
  * committed artifact drifts from its source — mirroring `icons:sync` /
  * `vendor-icons-fresh.test.ts`.
  *
- * Bundler determinism: `Bun.build` output is stable within a Bun minor but is
- * NOT guaranteed bit-identical across minors, so a Bun upgrade can legitimately
- * change the bytes. The expected Bun is pinned by `engines.bun` in package.json
- * (`>=1.4.0 <1.5.0`) and by the `oven/bun:1.4` base image in the Dockerfile. On
- * a deliberate Bun-minor bump, regenerate (`bun run bootstrap:sync`) in the same
+ * Bundler determinism: esbuild output is stable for a given esbuild version
+ * but is NOT guaranteed bit-identical across versions, so an esbuild upgrade
+ * can legitimately change the bytes. The version is pinned by the lockfile; on
+ * a deliberate esbuild bump, regenerate (`pnpm bootstrap:sync`) in the same
  * change so the gate fails only on real source drift, never on a routine
  * upgrade.
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { build as esbuild } from 'esbuild'
 
-const ROOT = resolve(import.meta.dir, '..')
+const ROOT = resolve(import.meta.dirname, '..')
 const SRC_DIR = join(ROOT, 'server/plugins/quickjs/bootstrap/src')
 const GENERATED_DIR = join(ROOT, 'server/plugins/quickjs/bootstrap/generated')
 
@@ -64,28 +64,30 @@ const ARTIFACTS: BootstrapArtifact[] = [
 ]
 
 /**
- * Bundle one typed entrypoint to a single IIFE string. `target: 'browser'`
- * keeps the output free of any Node/Bun runtime shim — the QuickJS sandbox is
- * a bare JS engine. Minification is OFF so the committed artifact stays
- * diffable and the build stays deterministic across machines on a given Bun.
+ * Bundle one typed entrypoint to a single IIFE string. `platform: 'neutral'`
+ * keeps the output free of any Node runtime shim — the QuickJS sandbox is a
+ * bare JS engine. Minification is OFF so the committed artifact stays
+ * diffable and the build stays deterministic across machines on a given
+ * esbuild.
  */
 async function bundleEntry(entry: string): Promise<string> {
-  const result = await Bun.build({
-    entrypoints: [join(SRC_DIR, entry)],
+  const result = await esbuild({
+    entryPoints: [join(SRC_DIR, entry)],
+    bundle: true,
+    write: false,
     format: 'iife',
-    target: 'browser',
+    platform: 'neutral',
     minify: false,
+    logLevel: 'silent',
+  }).catch((err: unknown) => {
+    throw new Error(`[sync-plugin-bootstrap] bundling ${entry} failed`, { cause: err })
   })
-  if (!result.success) {
-    const messages = result.logs.map((l) => String(l)).join('\n')
-    throw new Error(`[sync-plugin-bootstrap] bundling ${entry} failed:\n${messages}`)
-  }
-  if (result.outputs.length !== 1) {
+  if (result.outputFiles.length !== 1) {
     throw new Error(
-      `[sync-plugin-bootstrap] expected exactly one output for ${entry}, got ${result.outputs.length}`,
+      `[sync-plugin-bootstrap] expected exactly one output for ${entry}, got ${result.outputFiles.length}`,
     )
   }
-  const text = await result.outputs[0].text()
+  const text = result.outputFiles[0].text
   // Normalize line endings so the emitted artifact (and the in-memory
   // comparison in the freshness gate) is identical on LF and CRLF checkouts.
   return text.replace(/\r\n/g, '\n')
@@ -102,7 +104,7 @@ function renderArtifactFile(constName: string, bundled: string): string {
     ` * GENERATED FILE — DO NOT EDIT.\n` +
     ` *\n` +
     ` * Bundled from server/plugins/quickjs/bootstrap/src/ by\n` +
-    ` * scripts/sync-plugin-bootstrap.ts. Regenerate with \`bun run bootstrap:sync\`.\n` +
+    ` * scripts/sync-plugin-bootstrap.ts. Regenerate with \`pnpm bootstrap:sync\`.\n` +
     ` * The freshness gate (plugin-bootstrap-fresh.test.ts) fails if this drifts.\n` +
     ` */\n\n` +
     `export const ${constName} = ${JSON.stringify(bundled)}\n`
@@ -147,7 +149,7 @@ async function main(): Promise<number> {
       console.error(
         `[bootstrap:check] generated bootstrap is stale:\n` +
           stale.map((f) => `    - generated/${f}`).join('\n') +
-          `\n\n  Run \`bun run bootstrap:sync\` to regenerate.\n`,
+          `\n\n  Run \`pnpm bootstrap:sync\` to regenerate.\n`,
       )
       return 1
     }

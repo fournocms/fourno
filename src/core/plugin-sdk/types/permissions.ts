@@ -88,7 +88,7 @@ export const PLUGIN_PERMISSION_VALUES = [
   // (head / head-end / body-start / body-end), rewrites the CSP based on
   // what's actually in the plan, and runs the `publish.html` filter once at
   // the dispatcher. No host-shipped scripts, no built-in trackers, no
-  // implicit `window.__instatic.*` — a plugin that wants `window.__instatic_analytics`
+  // implicit `window.__fourno.*` — a plugin that wants `window.__fourno_analytics`
   // ships the IIFE that installs it as one of its own assets.
   'frontend.assets',
   // Network — outbound HTTP from the sandbox.

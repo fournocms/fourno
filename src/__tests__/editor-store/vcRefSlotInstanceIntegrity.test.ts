@@ -19,7 +19,7 @@
  *   AND every VC tree. This test edits VC-B's slot set while editing VC-B and
  *   asserts VC-A's nested ref is reconciled.
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import type { BaseNode } from '@core/page-tree'
 import { makeSite, makePage, makeNode } from '../fixtures'

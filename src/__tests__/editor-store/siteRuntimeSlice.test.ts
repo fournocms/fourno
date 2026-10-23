@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { DEFAULT_SCRIPT_RUNTIME_CONFIG, normalizeSiteRuntimeConfig } from '@core/site-runtime'
 import { makeSite } from '../fixtures'

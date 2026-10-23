@@ -10,11 +10,6 @@
 
 import type { SiteDocument } from '@core/page-tree'
 import type { FrameworkTypographyGroup } from '@core/framework-schema'
-import {
-  buildDefaultTypographyGroup,
-  makeFreshTypographyGroup,
-  nextTypographyTabValues,
-} from '@core/framework'
 import { createScaleGroupActions } from './scaleGroups'
 import type { SiteSlice, SiteSliceHelpers } from '@site/store/slices/site/types'
 
@@ -50,6 +45,7 @@ export function applyTypographyGroupPatchPreview(
 type FrameworkTypographyActions = Pick<
   SiteSlice,
   | 'toggleFrameworkTypographyDisabled'
+  | 'setFrameworkTypographyScale'
   | 'createFrameworkTypographyGroup'
   | 'updateFrameworkTypographyGroup'
   | 'duplicateFrameworkTypographyGroup'
@@ -62,15 +58,11 @@ type FrameworkTypographyActions = Pick<
 export function createFrameworkTypographyActions(
   helpers: SiteSliceHelpers,
 ): FrameworkTypographyActions {
-  const inner = createScaleGroupActions(helpers, {
-    family: 'typography',
-    buildDefault: buildDefaultTypographyGroup,
-    makeFresh: makeFreshTypographyGroup,
-    nextTabValues: nextTypographyTabValues,
-  })
+  const inner = createScaleGroupActions(helpers, 'typography')
 
   return {
     toggleFrameworkTypographyDisabled: inner.toggleDisabled,
+    setFrameworkTypographyScale: inner.setGroup,
     createFrameworkTypographyGroup: inner.createGroup,
     updateFrameworkTypographyGroup: inner.updateGroup,
     duplicateFrameworkTypographyGroup: inner.duplicateGroup,

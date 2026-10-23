@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   htmlAttributeRowsFromValue,
   htmlAttributesKey,
@@ -29,7 +29,7 @@ describe('html attributes panel model', () => {
       'data-z': 'last',
       'aria-label': 'Hero',
       'data-a': 'first',
-      'data-instatic-node': 'reserved',
+      'data-fourno-node': 'reserved',
       'data-number': 123,
       class: 'ignored',
       onclick: 'ignored',

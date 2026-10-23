@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
-import { bunCommand, bunRunCommand, viteCommand } from '../../scripts/lib/bunCommand'
+import { tscCommand, tsxCommand, viteCommand } from '../../scripts/lib/nodeCommand'
 
 const root = new URL('../../', import.meta.url)
 
@@ -9,25 +9,25 @@ function readSiteFile(path: string) {
 }
 
 describe('development workflow', () => {
-  it('`bun run dev` is the one-command launcher for cms + vite', () => {
+  it('`pnpm dev` is the one-command launcher for cms + vite', () => {
     const pkg = JSON.parse(readSiteFile('package.json')) as {
       scripts: Record<string, string>
     }
 
-    expect(pkg.scripts['dev']).toBe('bun run scripts/dev.ts')
-    expect(pkg.scripts['dev:agent']).toBe('bun run dev:server')
-    expect(pkg.scripts['dev:server']).toBe('bun --watch server/index.ts')
-    expect(pkg.scripts['dev:vite']).toBe('bun run scripts/vite.ts')
-    expect(pkg.scripts['build']).toBe('tsc -b && bun run scripts/vite.ts build')
-    expect(pkg.scripts['preview']).toBe('bun run scripts/vite.ts preview')
+    expect(pkg.scripts['dev']).toBe('tsx scripts/dev.ts')
+    expect(pkg.scripts['dev:agent']).toBe('pnpm run dev:server')
+    expect(pkg.scripts['dev:server']).toBe('tsx watch server/index.ts')
+    expect(pkg.scripts['dev:vite']).toBe('vite')
+    expect(pkg.scripts['build']).toBe('tsc -b && vite build')
+    expect(pkg.scripts['preview']).toBe('vite preview')
+    expect(pkg.scripts['serve']).toBe('node --import tsx server/index.ts')
     expect(pkg.scripts['dev:all']).toBeUndefined()
     expect(existsSync(new URL('scripts/dev.ts', root))).toBe(true)
-    expect(existsSync(new URL('scripts/vite.ts', root))).toBe(true)
     expect(existsSync(new URL('scripts/dev-all.ts', root))).toBe(false)
 
     const script = readSiteFile('scripts/dev.ts')
-    // Spawns cms + vite without a recursive `bun run dev` call.
-    expect(script).toContain("bunCommand('--watch', 'server/index.ts')")
+    // Spawns cms + vite without a recursive `pnpm dev` call.
+    expect(script).toContain("tsxCommand('watch', 'server/index.ts')")
     expect(script).toContain("viteCommand('--host', '127.0.0.1'")
     expect(script).not.toContain('command: `vite')
     expect(script).not.toContain('command.split')
@@ -43,47 +43,44 @@ describe('development workflow', () => {
     expect(script).toContain('SIGTERM')
   })
 
-  it('development launchers route local Vite binaries through Bun on Windows', () => {
+  it('development launchers run local tool entrypoints through the running Node', () => {
     const devScript = readSiteFile('scripts/dev.ts')
     const e2eScript = readSiteFile('scripts/e2e-dev.ts')
     const startScript = readSiteFile('scripts/start.ts')
-    const viteScript = readSiteFile('scripts/vite.ts')
 
-    expect(bunCommand('--watch', 'server/index.ts')).toEqual([
-      process.execPath,
-      '--watch',
-      'server/index.ts',
-    ])
-    const viteDevCommand = viteCommand('--host', '127.0.0.1')
-    expect(viteDevCommand[0]).toBe(process.execPath)
-    expect(viteDevCommand[1].replaceAll('\\', '/')).toEndWith('/node_modules/vite/bin/vite.js')
-    expect(viteDevCommand.slice(2)).toEqual(['--host', '127.0.0.1'])
-    expect(existsSync(viteDevCommand[1])).toBe(true)
+    // Spawning `tsx` / `vite` / `tsc` by name fails on Windows, where the bins
+    // are `.cmd` shims; `[node, <entry>.js, ...]` works everywhere.
+    for (const [command, entry] of [
+      [tsxCommand('watch', 'server/index.ts'), '/node_modules/tsx/dist/cli.mjs'],
+      [viteCommand('--host', '127.0.0.1'), '/node_modules/vite/bin/vite.js'],
+      [tscCommand('-b'), '/node_modules/typescript/bin/tsc'],
+    ] as const) {
+      expect(command[0]).toBe(process.execPath)
+      expect(command[1].replaceAll('\\', '/').endsWith(entry)).toBe(true)
+      expect(existsSync(command[1])).toBe(true)
+    }
+    expect(viteCommand('--host', '127.0.0.1').slice(2)).toEqual(['--host', '127.0.0.1'])
 
-    expect(devScript).toContain("viteCommand('--host', '127.0.0.1'")
-    expect(devScript).not.toContain("bunRunCommand('dev:vite'")
-    expect(devScript).not.toContain("bunRunCommand('vite'")
-    expect(devScript).not.toContain('command: `vite')
-    expect(devScript).not.toContain('command.split')
-    expect(e2eScript).toContain("viteCommand('--host', '127.0.0.1'")
-    expect(e2eScript).not.toContain("bunRunCommand('dev:vite'")
-    expect(e2eScript).not.toContain("bunRunCommand('vite'")
-    expect(e2eScript).not.toContain("['vite'")
-    expect(e2eScript).not.toContain("['bun'")
-    expect(viteScript).toContain('viteCommand(...Bun.argv.slice(2))')
-    expect(viteScript).not.toContain("['vite'")
-    expect(startScript).toContain("bunRunCommand('build')")
-    expect(startScript).toContain("bunRunCommand('server/index.ts')")
+    for (const script of [devScript, e2eScript]) {
+      expect(script).toContain("viteCommand('--host', '127.0.0.1'")
+      expect(script).not.toContain("['vite'")
+      expect(script).not.toContain("['tsx'")
+      expect(script).not.toContain("['bun'")
+    }
+    expect(e2eScript).toContain("tsxCommand('server/index.ts')")
+    expect(startScript).toContain("tscCommand('-b')")
+    expect(startScript).toContain("viteCommand('build')")
+    expect(startScript).toContain("[process.execPath, '--import', 'tsx', 'server/index.ts']")
     expect(startScript).not.toContain("['bun'")
   })
 
-  it('Vite proxies CMS API and uploaded media to the local Bun server', () => {
+  it('Vite proxies CMS API and uploaded media to the local CMS server', () => {
     const viteConfig = readSiteFile('vite.config.ts')
 
     // `/admin/api` covers both the CMS endpoints (`/admin/api/cms/...`) and
     // the agent endpoints (`/admin/api/agent`, `/admin/api/agent/tool-result`).
     // The shared `/admin/` prefix is required so the session cookie (scoped
-    // to `Path=/admin`) is sent on every request to the Bun backend.
+    // to `Path=/admin`) is sent on every request to the CMS backend.
     expect(viteConfig).toContain("'/admin/api'")
     expect(viteConfig).toContain("'/uploads'")
     expect(viteConfig).toContain("const CMS_DEV_SERVER_ORIGIN = `http://localhost:${process.env.PORT ?? '3001'}`")
@@ -95,9 +92,9 @@ describe('development workflow', () => {
     const viteConfig = readSiteFile('vite.config.ts')
     const devScript = readSiteFile('scripts/dev.ts')
 
-    // Since Bun 1.4.1 the node:http client emits 'upgrade', so the collab
-    // socket rides the same proxy as every other /admin/api request and the
-    // dev server is same-origin like production. No port is dialled directly.
+    // The collab socket rides the same proxy as every other /admin/api
+    // request, so the dev server is same-origin like production. No port is
+    // dialled directly.
     expect(viteConfig).toMatch(/^\s*ws:\s*true/m)
     expect(viteConfig).not.toContain('VITE_CMS_DEV_PORT')
 
@@ -120,7 +117,7 @@ describe('development workflow', () => {
   it('Vite forwards published runtime assets to the CMS server in local dev', () => {
     const viteConfig = readSiteFile('vite.config.ts')
 
-    expect(viteConfig).toContain("pathname.startsWith('/_instatic/assets/')")
+    expect(viteConfig).toContain("pathname.startsWith('/_fourno/assets/')")
   })
 
   it('Docker Postgres uses a non-default host port for local dev', () => {
@@ -135,21 +132,12 @@ describe('development workflow', () => {
   })
 })
 
-describe('Bun version guard wiring', () => {
-  // The guard is worthless unless every launcher actually calls it, and the
-  // server must only warn: a direct install must keep serving on an old Bun.
-  it('both dev launchers refuse an old Bun before starting anything', () => {
-    for (const script of ['scripts/dev.ts', 'scripts/e2e-dev.ts']) {
-      const src = readSiteFile(script)
-      expect(src).toContain("from '../server/bunVersion'")
-      expect(src).toContain('devStackBunError(Bun.version)')
-    }
-  })
-
-  it('the server logs the unsupported-Bun warning and boots anyway', () => {
+describe('Node version guard wiring', () => {
+  // The guard is worthless unless the server actually calls it, and it must
+  // only warn: a direct install must keep serving on an unsupported Node.
+  it('the server logs the unsupported-Node warning and boots anyway', () => {
     const src = readSiteFile('server/index.ts')
-    expect(src).toContain('unsupportedBunWarning(Bun.version)')
-    expect(src).toContain('console.warn(bunWarning)')
-    expect(src).not.toContain('devStackBunError')
+    expect(src).toContain('unsupportedNodeWarning(process.versions.node)')
+    expect(src).toContain('console.warn(nodeWarning)')
   })
 })

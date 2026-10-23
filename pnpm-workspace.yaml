@@ -1,0 +1,23 @@
+# pnpm settings (single-package repo; no workspace packages).
+
+# Native/install-script packages allowed to run their build step. Everything
+# else is blocked (pnpm's default), so a compromised transitive dependency
+# cannot execute code at install time.
+onlyBuiltDependencies:
+  - esbuild
+
+# Refuse to resolve versions published less than a week ago — a cheap guard
+# against a freshly hijacked release landing through a caret range.
+minimumReleaseAge: 10080
+
+# `pnpm run dev` / `pnpm test` reinstall first when node_modules is out of
+# date with the lockfile, so a pull never leaves a stale install behind.
+verifyDepsBeforeRun: install
+
+# Optional native accelerator (msgpackr, via a dev tool); the JS fallback is fine.
+ignoredBuiltDependencies:
+  - msgpackr-extract
+  # Ships prebuilt binaries per platform (prebuilds/); pnpm would otherwise
+  # run `node-gyp rebuild` because of the binding.gyp, which needs a toolchain
+  # (python, make, g++) that slim images do not have.
+  - better-sqlite3

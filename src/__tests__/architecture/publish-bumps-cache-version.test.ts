@@ -14,11 +14,11 @@
  * A simple text scan is sufficient — no AST parsing needed. The check matches
  * the pattern used by other architecture tests in this directory.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 
-const ROOT = resolve(import.meta.dir, '../../..')
+const ROOT = resolve(import.meta.dirname, '../../..')
 
 function read(relative: string): string {
   return readFileSync(join(ROOT, relative), 'utf-8')

@@ -23,18 +23,18 @@
  * Scoped (allowed under one prefix only):
  *   - `@modelcontextprotocol/*`         — the official split v2 packages are
  *                                         allowed ONLY under `server/ai/mcp/`,
- *                                         where Instatic implements an MCP
+ *                                         where Fourno implements an MCP
  *                                         *server* (a real wire protocol — a
  *                                         legitimate SDK use). Still banned in
  *                                         the drivers and the browser, which
  *                                         must never speak MCP.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const SCAN_DIRS = ['src', 'server']
 
 interface PackageRule {

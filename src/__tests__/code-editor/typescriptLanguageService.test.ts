@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { readFileSync } from 'node:fs'
@@ -129,12 +129,21 @@ class FakeWorker {
 }
 
 describe('TypeScriptLanguageClient', () => {
-  it('does not treat Bun\'s process-global Worker as a browser worker', () => {
+  it('does not treat a process-global Worker as a browser worker', () => {
+    // Server runtimes such as Bun and Deno expose a global Worker with no
+    // browser window behind it; Node does not, so the test installs one.
     const originalWindowWorker = window.Worker
+    const hadGlobalWorker = 'Worker' in globalThis
+    const originalGlobalWorker = (globalThis as { Worker?: unknown }).Worker
     Object.defineProperty(window, 'Worker', {
       configurable: true,
       writable: true,
       value: undefined,
+    })
+    Object.defineProperty(globalThis, 'Worker', {
+      configurable: true,
+      writable: true,
+      value: class ProcessWorker {},
     })
 
     try {
@@ -146,6 +155,15 @@ describe('TypeScriptLanguageClient', () => {
         writable: true,
         value: originalWindowWorker,
       })
+      if (hadGlobalWorker) {
+        Object.defineProperty(globalThis, 'Worker', {
+          configurable: true,
+          writable: true,
+          value: originalGlobalWorker,
+        })
+      } else {
+        delete (globalThis as { Worker?: unknown }).Worker
+      }
     }
   })
 

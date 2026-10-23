@@ -42,7 +42,7 @@ html body {
       await expect(visitor.locator('[data-testid="canvas-root"]')).toHaveCount(0)
       await expect(visitor.locator('body')).toHaveCSS('background-color', background)
       await expect(
-        visitor.locator('link[rel="stylesheet"][href*="/_instatic/css/userStyles-"]'),
+        visitor.locator('link[rel="stylesheet"][href*="/_fourno/css/userStyles-"]'),
       ).toHaveCount(1)
     } finally {
       await context.close()

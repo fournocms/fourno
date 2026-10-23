@@ -2,7 +2,7 @@
  * pageRef.test.ts — internal page-reference helpers.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { makePageRef, isPageRef, parsePageRef, resolvePageRef } from '@core/page-tree'
 
 const PAGES = [

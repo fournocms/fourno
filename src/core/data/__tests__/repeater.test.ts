@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import { readRepeaterCell } from '../cells'
 import {

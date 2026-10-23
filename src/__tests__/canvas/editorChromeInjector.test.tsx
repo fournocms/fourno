@@ -8,7 +8,7 @@
  * content with editor token values instead of the site's configured ones.
  * Editor chrome must ride chrome-namespaced variables instead.
  */
-import { describe, expect, it, afterEach } from 'bun:test'
+import { describe, expect, it, afterEach } from 'vitest'
 import { render, cleanup } from '@testing-library/react'
 import { EditorChromeInjector } from '@site/canvas/EditorChromeInjector'
 
@@ -29,7 +29,7 @@ describe('EditorChromeInjector font isolation', () => {
     const target = document.implementation.createHTMLDocument('iframe')
     render(<EditorChromeInjector targetDocument={target} parentDocument={makeParentDoc()} />)
 
-    const css = target.getElementById('instatic-editor-chrome')?.textContent ?? ''
+    const css = target.getElementById('fourno-editor-chrome')?.textContent ?? ''
     expect(css).not.toBe('')
 
     // The chrome font is exposed as a namespaced var carrying the editor font…
@@ -82,7 +82,7 @@ describe('EditorChromeInjector token namespace', () => {
 
     const target = document.implementation.createHTMLDocument('iframe')
     render(<EditorChromeInjector targetDocument={target} parentDocument={document} />)
-    const css = target.getElementById('instatic-editor-chrome')?.textContent ?? ''
+    const css = target.getElementById('fourno-editor-chrome')?.textContent ?? ''
 
     const declared = Array.from(css.matchAll(/(--[\w-]+)\s*:/g), (m) => m[1])
     const read = Array.from(css.matchAll(/var\(\s*(--[\w-]+)/g), (m) => m[1])

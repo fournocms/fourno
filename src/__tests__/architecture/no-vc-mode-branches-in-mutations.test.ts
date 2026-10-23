@@ -24,11 +24,11 @@
  *   - Code contract: CLAUDE.md §"Mutation API"
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const ROOT = join(import.meta.dir, '../../../')
+const ROOT = join(import.meta.dirname, '../../../')
 
 function src(relPath: string): string {
   return readFileSync(join(ROOT, relPath), 'utf8')

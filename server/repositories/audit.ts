@@ -32,6 +32,8 @@ const AuditActionSchema = Type.Union([
   Type.Literal('data.row.move'),
   Type.Literal('data.author.assign'),
   Type.Literal('publish'),
+  // Server-side page edits by an agent — see `docs/features/mcp-connectors.md`.
+  Type.Literal('site.edit'),
   // Branches — see `docs/features/branches.md`.
   Type.Literal('branch.create'),
   Type.Literal('branch.rename'),

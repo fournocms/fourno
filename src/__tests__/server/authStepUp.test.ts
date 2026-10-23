@@ -5,7 +5,7 @@
  * endpoints it gates (DELETE users/:id, DELETE auth/sessions/:id,
  * POST auth/logout-all) against a real SQLite test DB.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { findUserByEmail } from '../../../server/repositories/users'

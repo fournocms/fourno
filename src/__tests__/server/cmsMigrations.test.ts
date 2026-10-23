@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'bun:test'
-import { Database } from 'bun:sqlite'
+import { describe, expect, it } from 'vitest'
+import Database from 'better-sqlite3'
 import { pgMigrations } from '../../../server/db/migrations-pg'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
 import { SYSTEM_ROLES } from '../../../server/auth/capabilities'
@@ -92,9 +92,9 @@ describe('CMS migrations', () => {
       expect(migration).toBeDefined()
       db.exec(migration!.sql)
 
-      const rows = db.query<{ id: string; capabilities_json: string }, []>(
-        'select id, capabilities_json from roles order by id',
-      ).all()
+      const rows = db
+        .prepare<[], { id: string; capabilities_json: string }>('select id, capabilities_json from roles order by id')
+        .all()
       const capabilities = new Map(
         rows.map((row) => [row.id, JSON.parse(row.capabilities_json) as string[]]),
       )

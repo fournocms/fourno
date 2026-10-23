@@ -72,7 +72,7 @@ export function createEditorBridgeStream(
   scope: EditorBridgeScope,
   signal: AbortSignal,
   options: {
-    /** The branch the workspace has open (its `X-Instatic-Branch`); main when absent. */
+    /** The branch the workspace has open (its `X-Fourno-Branch`); main when absent. */
     branchId?: string
     /** Test seam: the idle lease shrinks to milliseconds in unit tests. */
     idleLeaseMs?: number
@@ -166,8 +166,8 @@ export function createEditorBridgeStream(
       else signal.addEventListener('abort', cleanup, { once: true })
     },
     cancel() {
-      // Bun cancels the response body when the browser tab/context closes, but
-      // that transport cancellation does not abort the server Request signal.
+      // The runtime cancels the response body when the browser tab/context closes, but
+      // that transport cancellation need not abort the server Request signal.
       // Tear down the heartbeat + registry entry from either lifecycle signal.
       closeStream?.()
       closeStream = null

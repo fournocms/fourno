@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ProvidersTab } from '@admin/pages/ai/tabs/ProvidersTab'
 
@@ -12,7 +12,7 @@ function json(body: unknown, status = 200): Response {
 }
 
 function mockEmptyCredentials() {
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     if (url.endsWith('/admin/api/ai/credentials')) return json({ credentials: [] })
     throw new Error(`Unexpected fetch: ${url}`)
@@ -55,7 +55,7 @@ describe('ProvidersTab', () => {
   })
 
   it('opens configured credentials in the detail inspector', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return json({

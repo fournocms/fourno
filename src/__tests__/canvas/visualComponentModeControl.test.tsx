@@ -10,7 +10,7 @@
  * Uses @testing-library/react with happy-dom (preloaded via bunfig.toml).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import { useEditorStore } from '@site/store/store'
 import VisualComponentModeControl from '@site/canvas/VisualComponentModeControl'

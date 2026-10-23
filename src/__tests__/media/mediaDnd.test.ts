@@ -1,4 +1,4 @@
-import { describe, expect, it, mock } from 'bun:test'
+import { describe, expect, it, vi } from 'vitest'
 import {
   canAcceptDrop,
   canMoveFolderTo,
@@ -33,8 +33,8 @@ function makeTarget(): MediaDndTarget & {
   return {
     folders,
     folderById: new Map(folders.map((f) => [f.id, f])),
-    moveAssetsToFolder: mock(async () => {}),
-    moveFolder: mock(async () => null),
+    moveAssetsToFolder: vi.fn(async () => {}),
+    moveFolder: vi.fn(async () => null),
   }
 }
 

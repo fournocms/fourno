@@ -2,36 +2,24 @@
  * Disposable local server for automated browser E2E tests.
  *
  * This wrapper owns only the `.tmp/e2e-*` data used by Playwright. It resets
- * that data, then runs the same Vite + Bun CMS stack a developer uses — with one
+ * that data, then runs the same Vite + Node CMS stack a developer uses — with one
  * deliberate difference: the CMS runs WITHOUT `--watch`.
  *
- * Why no watch: under `bun --watch`, the publish pipeline writing baked HTML into
+ * Why no watch: under `tsx watch`, the publish pipeline writing baked HTML into
  * the uploads dir (and the SQLite DB churning) can trigger a server reload mid
  * test, which drops in-memory state and tears the stack down. A regression suite
  * needs a stable server, so E2E pins one. Vite is additionally told to ignore the
  * runtime-written paths (see `vite.config.ts`), so publishing never reloads the
  * admin app mid-test either.
  */
+import type { ChildProcess } from 'node:child_process'
 import { mkdir, rm } from 'node:fs/promises'
-import { bunCommand, viteCommand } from './lib/bunCommand'
-import { ensureDependencies } from './lib/ensureDependencies'
-import { devStackBunError } from '../server/bunVersion'
+import { childExited, startChild, tsxCommand, viteCommand } from './lib/nodeCommand'
 
 const DATABASE_PATH = './.tmp/e2e-agent.db'
 const UPLOADS_DIR = './.tmp/e2e-uploads'
 const CMS_PORT = process.env.E2E_CMS_PORT ?? '3002'
 const VITE_PORT = process.env.E2E_VITE_PORT ?? '5174'
-
-// Same guard as `bun run dev`: Playwright starts this stack right after a
-// `git pull`, and a stale node_modules would otherwise surface as a CMS crash
-// on its first import instead of a missing install.
-const bunError = devStackBunError(Bun.version)
-if (bunError) {
-  console.error(`[e2e-dev] ${bunError}`)
-  process.exit(1)
-}
-
-await ensureDependencies((msg) => console.error(`[e2e-dev] ${msg}`))
 
 await mkdir('./.tmp', { recursive: true })
 await rm(DATABASE_PATH, { force: true })
@@ -53,7 +41,7 @@ const sharedEnv = {
   TZ: 'Europe/Prague',
 }
 
-const children: Bun.Subprocess[] = []
+const children: ChildProcess[] = []
 let shuttingDown = false
 
 function stopChildren(signal: NodeJS.Signals = 'SIGTERM'): void {
@@ -64,17 +52,12 @@ function stopChildren(signal: NodeJS.Signals = 'SIGTERM'): void {
 }
 
 for (const command of [
-  bunCommand('server/index.ts'),
+  tsxCommand('server/index.ts'),
   viteCommand('--host', '127.0.0.1', '--port', VITE_PORT, '--strictPort'),
 ]) {
-  const child = Bun.spawn(command, {
-    env: sharedEnv,
-    stdin: 'inherit',
-    stdout: 'inherit',
-    stderr: 'inherit',
-  })
+  const child = startChild(command, sharedEnv)
   children.push(child)
-  void child.exited.then((code) => {
+  void childExited(child).then((code) => {
     if (shuttingDown) return
     // One half of the stack died on its own — bring the other down and exit so
     // Playwright sees the failure instead of half a stack.

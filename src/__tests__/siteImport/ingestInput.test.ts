@@ -5,7 +5,7 @@
  * and all five error cases.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { zipSync } from 'fflate'
 import {
   ingestInput,

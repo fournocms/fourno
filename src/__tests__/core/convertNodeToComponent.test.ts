@@ -18,7 +18,7 @@
  *   CNC-B — throws when activeDocument is a VC (cannot convert from inside a VC)
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { create } from 'mutative'
 import type { SiteDocument, PageNode, StyleRule } from '@core/page-tree'

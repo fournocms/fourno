@@ -19,8 +19,8 @@ interface PointerPanOptions {
 type CanvasSpacePanSource = 'parentDocument' | 'iframe'
 
 const CANVAS_SPACE_PAN_DATA_KEYS: Record<CanvasSpacePanSource, string> = {
-  parentDocument: 'instaticCanvasParentSpacePan',
-  iframe: 'instaticCanvasIframeSpacePan',
+  parentDocument: 'fournoCanvasParentSpacePan',
+  iframe: 'fournoCanvasIframeSpacePan',
 }
 
 const PRIMARY_MOUSE_BUTTON = 0

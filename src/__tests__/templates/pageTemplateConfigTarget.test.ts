@@ -7,7 +7,7 @@
  * - `parsePageTemplate` (via validateSite) rejects a malformed target.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeSite, makePage, makeNode } from '../fixtures'
 import { validateSite, validatePages } from '@core/persistence/validate'
 import { resolveTemplateChain } from '@core/templates'

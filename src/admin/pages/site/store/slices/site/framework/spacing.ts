@@ -10,11 +10,6 @@
 
 import type { SiteDocument } from '@core/page-tree'
 import type { FrameworkSpacingGroup } from '@core/framework-schema'
-import {
-  buildDefaultSpacingGroup,
-  makeFreshSpacingGroup,
-  nextSpacingTabValues,
-} from '@core/framework'
 import { createScaleGroupActions } from './scaleGroups'
 import type { SiteSlice, SiteSliceHelpers } from '@site/store/slices/site/types'
 
@@ -50,6 +45,7 @@ export function applySpacingGroupPatchPreview(
 type FrameworkSpacingActions = Pick<
   SiteSlice,
   | 'toggleFrameworkSpacingDisabled'
+  | 'setFrameworkSpacingScale'
   | 'createFrameworkSpacingGroup'
   | 'updateFrameworkSpacingGroup'
   | 'duplicateFrameworkSpacingGroup'
@@ -62,15 +58,11 @@ type FrameworkSpacingActions = Pick<
 export function createFrameworkSpacingActions(
   helpers: SiteSliceHelpers,
 ): FrameworkSpacingActions {
-  const inner = createScaleGroupActions(helpers, {
-    family: 'spacing',
-    buildDefault: buildDefaultSpacingGroup,
-    makeFresh: makeFreshSpacingGroup,
-    nextTabValues: nextSpacingTabValues,
-  })
+  const inner = createScaleGroupActions(helpers, 'spacing')
 
   return {
     toggleFrameworkSpacingDisabled: inner.toggleDisabled,
+    setFrameworkSpacingScale: inner.setGroup,
     createFrameworkSpacingGroup: inner.createGroup,
     updateFrameworkSpacingGroup: inner.updateGroup,
     duplicateFrameworkSpacingGroup: inner.duplicateGroup,

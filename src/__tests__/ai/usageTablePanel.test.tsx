@@ -5,7 +5,7 @@
  * rendered through the real formatNumber/formatCost helpers, and a single
  * colSpan-spanning empty row when there are no rows.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import { UsageTablePanel, type UsageTableColumn } from '@admin/pages/ai/tabs/UsageTablePanel'
 import { formatCost, formatNumber } from '@admin/ai/usageFormat'

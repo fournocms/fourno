@@ -40,7 +40,7 @@ async function shot(page: Page, name: string): Promise<void> {
 async function api<T>(page: Page, path: string, init: { method?: string; body?: unknown; branch?: string } = {}): Promise<{ status: number; body: T }> {
   return page.evaluate(async ({ path, init }) => {
     const headers: Record<string, string> = { 'content-type': 'application/json' }
-    if (init.branch) headers['x-instatic-branch'] = init.branch
+    if (init.branch) headers['x-fourno-branch'] = init.branch
     const res = await fetch(path, {
       method: init.method ?? 'GET',
       credentials: 'include',

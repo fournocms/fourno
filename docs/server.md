@@ -1,22 +1,22 @@
 # Server
 
-Deep dive on the server-side of Instatic — the Bun process, the router, the handlers, the auth model, the DB adapter, and how a request becomes a response.
+Deep dive on the server-side of Fourno — the Node process, the router, the handlers, the auth model, the DB adapter, and how a request becomes a response.
 
-The server is a single `Bun.serve` process that boots the DB, runs migrations, activates installed plugins, then accepts HTTP requests and dispatches them through an ordered route table. There are no separate service processes or message queues. The runtime entrypoint is `server/index.ts`; CPU-heavy image variants and plugin server code run in `Bun.Worker`s owned by this process.
+The server is a single Node process (`srvx` for HTTP, `ws` for WebSockets, behind the adapter in `server/runtime/httpServer.ts`) that boots the DB, runs migrations, activates installed plugins, then accepts HTTP requests and dispatches them through an ordered route table. There are no separate service processes or message queues. The runtime entrypoint is `server/index.ts`; CPU-heavy image variants and plugin server code run in `worker_threads` workers owned by this process.
 
 ---
 
 ## TL;DR
 
-- **Entrypoint:** `server/index.ts` (boots DB → migrations → role sync → plugin activation → `Bun.serve`). Its first act is `unsupportedBunWarning(Bun.version)` from `server/bunVersion.ts`: when the runtime is outside `SUPPORTED_BUN_RANGE` (a constant mirroring `engines.bun`, gated by `bunVersion.test.ts`) it logs one `[server]` warning and boots anyway. The dev launchers use the same module's `devStackBunError` and refuse a Bun older than 1.4.1.
+- **Entrypoint:** `server/index.ts` (boots DB → migrations → role sync → plugin activation → `startHttpServer`). Its first import is `server/runtime/cssModuleStub.ts` (the module registry pulls in editor components that import `*.module.css`, which Node cannot load); its first act is `unsupportedNodeWarning(process.versions.node)` from `server/nodeVersion.ts`: when the runtime is outside `SUPPORTED_NODE_RANGE` (a constant mirroring `engines.node`, gated by `nodeVersion.test.ts`) it logs one `[server]` warning and boots anyway.
 - **Router:** `server/router.ts` — ordered route table, first-match wins. Each route is a `tryServeX(req, runtime, url, pathname)` function returning `Response | null`.
 - **CMS API:** every `/admin/api/cms/*` request goes through `server/handlers/cms/index.ts`, which runs a CSRF origin check and dispatches to per-resource handler groups.
 - **Auth:** session cookie (`SESSION_COOKIE_NAME`) → `findUserBySessionHash` → `requireCapability(req, db, 'site.read')`. Every state-changing handler starts with one of these guards.
-- **DB:** one `DbClient` interface (`server/db/client.ts`) — tagged-template callable returning `{ rows, rowCount }`. Two adapters: `postgres.ts` (via `Bun.sql`) and `sqlite.ts` (via `bun:sqlite`). Selected by `DATABASE_URL`.
+- **DB:** one `DbClient` interface (`server/db/client.ts`) — tagged-template callable returning `{ rows, rowCount }`. Two adapters: `postgres.ts` (via `postgres`, porsager) and `sqlite.ts` (via `better-sqlite3`). Selected by `DATABASE_URL`.
 - **Repositories** (`server/repositories/`) hold all SQL. Handlers never write SQL directly.
 - **Registry** (`server/registry/`) is the only code that talks to the npm registry, npm's downloads API and OSV: a TTL-cached client behind `handlers/cms/registry.ts` (browse) and `publish/runtime/dependencyResolver.ts` (install). `NPM_REGISTRY_URL` selects the registry for both. See [`features/dependencies.md`](features/dependencies.md).
 - **Write policy** (`server/writePolicy/`) — pure per-capability diff validators (`validateSiteWriteDiff`, `validatePageWriteDiff`) shared by BOTH write transports: the HTTP save handler (`server/handlers/cms/siteDocument.ts`) and the collab relay's CRDT update guard (`server/collab/updateGuard.ts`). No DB, no HTTP — plain data in, verdict out.
-- **Plugins:** `server/plugins/runtime.ts` activates installed plugins at boot. Server entrypoints run in per-plugin Bun workers that host QuickJS-WASM (`server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts`, `server/plugins/quickjs/vm.ts`); module packs use `server/plugins/modulePackVm.ts` for server-side evaluation.
+- **Plugins:** `server/plugins/runtime.ts` activates installed plugins at boot. Server entrypoints run in per-plugin worker threads that host QuickJS-WASM (`server/plugins/pluginWorker.ts`, `server/plugins/host/workerPool.ts`, `server/plugins/quickjs/vm.ts`); module packs use `server/plugins/modulePackVm.ts` for server-side evaluation.
 - **Published pages and content rows** are served by `tryServePublicRoute`, which delegates resolution + render to `server/publish/publicRouter.ts`. A warm Layer B cache entry is served before any DB work; on a miss the live render reads the published `SiteDocument` from `site_snapshots` (stored once per publish, referenced by `data_row_versions.site_snapshot_id`, memoised per publish version). Uploads + admin SPA assets are served from disk by `tryServeUpload` and `tryServeStaticAsset`.
 
 ---
@@ -27,7 +27,7 @@ The server is a single `Bun.serve` process that boots the DB, runs migrations, a
 server/index.ts
     │
     ├─→ readServerConfig()                   ← env vars: PORT, DATABASE_URL, UPLOADS_DIR, STATIC_DIR, PUBLIC_ORIGIN, TRUSTED_PROXY_CIDRS, NPM_REGISTRY_URL
-    ├─→ configureNpmRegistryUrl(...)         ← server/registry/config.ts: one registry for browsing, resolving and bun install
+    ├─→ configureNpmRegistryUrl(...)         ← server/registry/config.ts: one registry for browsing, resolving and npm install
     │
     ├─→ createDbClient(DATABASE_URL)         ← server/db/index.ts
     │     │
@@ -45,13 +45,13 @@ server/index.ts
     │                                           debounced persistence, reset protocol
     ├─→ createCollabSocketLayer(relay)       ← server/collab/socket.ts: multiplexed
     │                                           y-protocols wire + awareness
-    ├─→ Bun.serve({ fetch: req => handleServerRequest(req, runtime),
-    │               websocket: collabSocket.handlers })
+    ├─→ startHttpServer({ fetch: (req, ctx) => handleServerRequest(req, runtime),
+    │                     realtime: collabSocket.handlers })
     │     (the co-editing socket `/admin/api/cms/site-socket` upgrades at this
     │      boundary — see server/collab/socket.ts; everything else goes
     │      through the router)
     │
-    └─→ collabSocket.setPublisher(server)    ← wire the collab fan-out to Bun pub/sub
+    └─→ collabSocket.setPublisher(server)    ← wire the collab fan-out to the adapter's topic pub/sub
 ```
 
 Boot is sequential and fail-fast. If migrations fail, the process exits. If a plugin's `activate` throws, the host logs `[plugin:<id>]` and continues — one bad plugin doesn't bring the server down.
@@ -71,10 +71,10 @@ It walks an ordered `routes` array of `RouteHandler` functions. Each handler ret
 **`HEAD` is normalised to `GET` before dispatch.** RFC 9110 §9.3.2 defines `HEAD` as identical to `GET` except that the server must not send content, so `handleServerRequest` rewrites the method once and hands the same request to the table. That means:
 
 - Route handlers gate on `GET` only — never write `req.method !== 'GET' && req.method !== 'HEAD'`. The dispatcher already guarantees a `HEAD` arrives as a `GET`.
-- Dropping the body is `Bun.serve`'s job. A `HEAD` response ships the headers a `GET` would have produced, `content-length` included, with no content — handlers stay body-agnostic.
+- Dropping the body is the HTTP adapter's job. A `HEAD` response ships the headers a `GET` would have produced, `content-length` included, with no content — handlers stay body-agnostic.
 - A method a route genuinely doesn't support still gets its `405`; only `HEAD` is folded into `GET`.
 
-Before this normalisation existed, `HEAD` matched no `GET`-gated route and fell through to the terminal JSON `404`, so uptime monitors and link checkers — which probe with `HEAD` by convention — reported healthy published pages as missing ([#306](https://github.com/CoreBunch/Instatic/issues/306)).
+Before this normalisation existed, `HEAD` matched no `GET`-gated route and fell through to the terminal JSON `404`, so uptime monitors and link checkers — which probe with `HEAD` by convention — reported healthy published pages as missing ([#306](https://github.com/fourno/fourno/issues/306)).
 
 ### The route table
 
@@ -83,18 +83,18 @@ const routes: readonly RouteHandler[] = [
   tryServeHealth,                  // /health
   tryServeAi,                      // /admin/api/ai/*         → server/ai/handlers/
   tryServeCmsApi,                  // /admin/api/cms/*        → handlers/cms/index.ts
-  tryServeBranchPreviewLink,       // /_instatic/preview/<token> | /exit → publish/publicRoutes.ts
+  tryServeBranchPreviewLink,       // /_fourno/preview/<token> | /exit → publish/publicRoutes.ts
                                    //   sets / clears the branch preview cookie
-  tryServeLoopRuntimeAsset,        // /_instatic/loop-runtime.js (fixed CMS asset)
-  tryServeLoop,                    // /_instatic/loop/*       → handlers/cms/loop.ts
-  tryServeHoleRuntimeAsset,        // /_instatic/hole-runtime.js (fixed CMS asset)
-  tryServeHole,                    // /_instatic/hole/*       → handlers/cms/hole.ts
-  tryServeModuleJsAsset,           // /_instatic/module-js/*  → handlers/cms/moduleJs.ts
-  tryServePublicForm,              // /_instatic/form/*       → forms/handler.ts
-  tryServeRuntimeAsset,            // /_instatic/assets/*     → published runtime assets
-  tryServeRuntimePackageNamespace, // /_instatic/runtime/cache/<hash>/<...> → bun install workspace
-  tryServeSiteCssNamespace,        // /_instatic/css/*        → hashed CSS bundles
-  tryServeMediaRedirect,           // /_instatic/media/<adapterId>/<path> → 302 to signed read URL
+  tryServeLoopRuntimeAsset,        // /_fourno/loop-runtime.js (fixed CMS asset)
+  tryServeLoop,                    // /_fourno/loop/*       → handlers/cms/loop.ts
+  tryServeHoleRuntimeAsset,        // /_fourno/hole-runtime.js (fixed CMS asset)
+  tryServeHole,                    // /_fourno/hole/*       → handlers/cms/hole.ts
+  tryServeModuleJsAsset,           // /_fourno/module-js/*  → handlers/cms/moduleJs.ts
+  tryServePublicForm,              // /_fourno/form/*       → forms/handler.ts
+  tryServeRuntimeAsset,            // /_fourno/assets/*     → published runtime assets
+  tryServeRuntimePackageNamespace, // /_fourno/runtime/cache/<hash>/<...> → npm install workspace
+  tryServeSiteCssNamespace,        // /_fourno/css/*        → hashed CSS bundles
+  tryServeMediaRedirect,           // /_fourno/media/<adapterId>/<path> → 302 to signed read URL
   tryServeStaticAsset,             // /assets/* → dist/ (admin app)
   tryServeUpload,                  // /uploads/* → uploadsDir (with nosniff hardening)
   tryServeAdminApp,                // /admin/* → dist/index.html (SPA fallback)
@@ -122,21 +122,21 @@ Adding a new endpoint is a one-line edit to `routes` plus a focused `tryServeX` 
 
 Several handlers own an entire prefix and 404 internally rather than falling through:
 
-- `/_instatic/runtime/cache/*` — never falls through to the public-slug renderer
-- `/_instatic/css/*` — never falls through
-- `/_instatic/media/*` — never falls through
+- `/_fourno/runtime/cache/*` — never falls through to the public-slug renderer
+- `/_fourno/css/*` — never falls through
+- `/_fourno/media/*` — never falls through
 
 This prevents an unknown path under a known namespace from accidentally matching a later handler.
 
 ### Cross-cutting middleware
 
-`Bun.serve.fetch` in `server/index.ts` wraps every request with:
+The fetch handler in `server/index.ts` wraps every request with:
 
 1. **CORS preflight** — `OPTIONS` returns 204 immediately with `corsHeaders(origin)`. ACAO is only set when the request's `Origin` is in `DEV_ORIGIN_ALLOWLIST` (production is same-origin behind Caddy, so no ACAO is needed).
 2. **Socket IP stamping** — `stampSocketIp(req, ...)` writes the actual socket peer address onto the request so downstream `clientIp(req)` can ignore spoofed forwarding headers on direct requests. `X-Forwarded-For` is used only when the socket peer matches `TRUSTED_PROXY_CIDRS`; the chain is walked from right to left and the nearest untrusted IP becomes the client IP.
 3. **Top-level error catch** — any error that escapes `handleServerRequest` is logged with `console.error('[server] Unhandled request error:', err)` and responded to with a generic `500 Internal server error`. The raw error message is **never** echoed to the client (it can leak SQL fragments, absolute paths, etc.).
 
-`idleTimeout: 0` is set explicitly: the agent endpoint streams NDJSON over Claude's thinking gaps, which can easily exceed Bun's 10s default.
+`requestTimeout: 0` is set explicitly on the Node server: the agent endpoint streams NDJSON over Claude's thinking gaps, and admin uploads can run for minutes, both well past Node's default request timeout. Header reads stay bounded by `headersTimeout`, and WebSockets get a 30 s ping so a vanished client releases its relay docs.
 
 ---
 
@@ -146,7 +146,7 @@ This prevents an unknown path under a known namespace from accidentally matching
 
 1. **CSRF defense in depth.** State-changing methods (`POST/PUT/PATCH/DELETE`) must come from an `Origin` matching a configured public origin (`PUBLIC_ORIGIN`, auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN`), or a dev allowlist entry. With nothing configured the check falls back to the inbound `Host` header. Forwarded headers (`X-Forwarded-Host` / `X-Forwarded-Proto`) are never consulted, so `TRUSTED_PROXY_CIDRS` has no bearing on CSRF. `SameSite=Lax` already covers most CSRF; this catches the same-site-different-subdomain edge.
 
-2. **Branch scope.** `resolveBranchScope(req, db)` (`server/branches/scope.ts`) turns the `X-Instatic-Branch` header into a `BranchScope` — `MAIN_SCOPE` when absent, `400` for a malformed id, `404 { code: 'branch_not_found' }` for an unknown one. Content handlers receive it and pass it to every repository call; see [`features/branches.md`](features/branches.md).
+2. **Branch scope.** `resolveBranchScope(req, db)` (`server/branches/scope.ts`) turns the `X-Fourno-Branch` header into a `BranchScope` — `MAIN_SCOPE` when absent, `400` for a malformed id, `404 { code: 'branch_not_found' }` for an unknown one. Content handlers receive it and pass it to every repository call; see [`features/branches.md`](features/branches.md).
 
 3. **Group dispatch.** The handler walks an ordered chain of route-group handlers, each owning a resource:
 
@@ -316,7 +316,7 @@ Use `binaryResponse` whenever a route handler returns binary content (runtime as
 ### The session flow
 
 ```text
-Cookie: instatic_admin_session=<token>
+Cookie: fourno_admin_session=<token>
     │
     ▼
 hashSessionToken(token)
@@ -455,8 +455,8 @@ Same code, both engines.
 
 ### The two adapters
 
-- **`server/db/postgres.ts`** wraps `Bun.sql` (native Bun Postgres client). `rowCount` is read from `result.count` (Bun's CommandComplete affected-row count) rather than `result.length`, which is always 0 for non-RETURNING writes.
-- **`server/db/sqlite.ts`** wraps `bun:sqlite`, with five custom behaviors:
+- **`server/db/postgres.ts`** wraps `postgres` (porsager / postgres.js). `rowCount` is read from `result.count` (the CommandComplete affected-row count) rather than `result.length`, which is always 0 for non-RETURNING writes.
+- **`server/db/sqlite.ts`** wraps `better-sqlite3`, with five custom behaviors (plus a prepared-statement cache keyed by SQL text):
   1. `toBindable(value)` converts JS values (objects, dates, booleans, `Uint8Array`) to SQLite-bindable types.
   2. On read, any column ending in `_json` whose value is a non-empty string is auto-`JSON.parse`d.
   3. On read, any column ending in `_at` holding SQLite's `YYYY-MM-DD HH:MM:SS` stamp is rewritten to ISO 8601 UTC. Repositories bind `nowIso()` rather than stamping with `current_timestamp`, so only three legacy DDL defaults can still write that shape; V8 would otherwise parse it as local time.
@@ -495,9 +495,9 @@ The lock is **released between ticks**, so a crashed leader hands off naturally 
 
 Three-layer model: **static-by-default, dynamic-by-auto-detection**.
 
-- **Layer A — static-to-disk.** **Every** page is baked at publish time. A fully-static page (no dynamic modules, no request-dependent bindings/loop sources, no VC refs to dynamic VCs) bakes a complete document; a page with dynamic nodes bakes its static **shell** with `<instatic-hole>` placeholders (the dynamic nodes are Layer C holes). HTML is written to `uploads/published/current/<route>.html`, and the CSS bundles (`/_instatic/css/…`) and runtime JS (`/_instatic/assets/…`) are baked into the same slot. The visitor router reads all of these directly off disk (`readArtefact` / `readStaticAsset`) — **a published page never touches the DB for HTML, CSS, or JS.** TTFB ≤ 1.5 ms.
+- **Layer A — static-to-disk.** **Every** page is baked at publish time. A fully-static page (no dynamic modules, no request-dependent bindings/loop sources, no VC refs to dynamic VCs) bakes a complete document; a page with dynamic nodes bakes its static **shell** with `<fourno-hole>` placeholders (the dynamic nodes are Layer C holes). HTML is written to `uploads/published/current/<route>.html`, and the CSS bundles (`/_fourno/css/…`) and runtime JS (`/_fourno/assets/…`) are baked into the same slot. The visitor router reads all of these directly off disk (`readArtefact` / `readStaticAsset`) — **a published page never touches the DB for HTML, CSS, or JS.** TTFB ≤ 1.5 ms.
 - **Layer B — in-memory LRU.** Requests with real loop-pagination query params (`loop_<nodeId>_page`) bypass the disk fast-path and render live, memoised by `(urlPath, canonicalQuery)`. Junk params collapse to the empty canonical query and still hit Layer A. Single-flight. Every publish bumps `publishVersion` so the entire cache evicts lazily. The version is captured at render start — if a publish lands before the factory resolves, the result is returned to the caller but not stored; the next request re-renders against the fresh snapshot.
-- **Layer C — server islands ("holes").** When `findDynamicNodeIds(...)` classifies a node as dynamic (module flagged `dynamic: true`, or its bindings/loop source declare `requestDependent: true` / `perVisitor: true`, or it's a VC ref to a dynamic VC), the publisher emits a `<instatic-hole>` placeholder with an optional `staticPlaceholder(props)` skeleton. A ~1.1 KB `IntersectionObserver` runtime fetches `/_instatic/hole/<nodeId>?v=<publishVersion>&u=<page-url>` lazily as the placeholder enters the viewport, forwarding the originating page path/query into the fragment render. **The hole fragment is the only request that reads the DB for an otherwise-static page.** Shared hole responses are cached via Layer B's LRU; per-visitor holes bypass it with `Cache-Control: no-store`.
+- **Layer C — server islands ("holes").** When `findDynamicNodeIds(...)` classifies a node as dynamic (module flagged `dynamic: true`, or its bindings/loop source declare `requestDependent: true` / `perVisitor: true`, or it's a VC ref to a dynamic VC), the publisher emits a `<fourno-hole>` placeholder with an optional `staticPlaceholder(props)` skeleton. A ~1.1 KB `IntersectionObserver` runtime fetches `/_fourno/hole/<nodeId>?v=<publishVersion>&u=<page-url>` lazily as the placeholder enters the viewport, forwarding the originating page path/query into the fragment render. **The hole fragment is the only request that reads the DB for an otherwise-static page.** Shared hole responses are cached via Layer B's LRU; per-visitor holes bypass it with `Cache-Control: no-store`.
 
 Authors don't toggle anything. `src/core/publisher/dynamicDetection.ts:findDynamicNodeIds` is backed by the single walker that powers Layer A's shell-vs-complete bake and Layer C's placeholder emission. The rules live in exactly one file.
 
@@ -508,7 +508,7 @@ Authors don't toggle anything. `src/core/publisher/dynamicDetection.ts:findDynam
                                 │
               ├── write SiteDocument once → site_snapshots
               │     (page versions reference it via site_snapshot_id)
-              ├── for each page (complete doc, or static shell with <instatic-hole>):
+              ├── for each page (complete doc, or static shell with <fourno-hole>):
               │     publishPage + applyPublishedHtmlPipeline
               │     writeArtefact(inactiveSlot, urlPath, html)
               ├── bake every published data-row route into the same slot
@@ -526,7 +526,7 @@ Authors don't toggle anything. `src/core/publisher/dynamicDetection.ts:findDynam
        ┌────────────────────────┼────────────────────────────┐
        ▼                        ▼                            ▼
   Layer A disk           resolvePublicRoute             (page contains holes)
-  readArtefact            page / row / redirect          /_instatic/hole/<id>?v=<ver>&u=<url>
+  readArtefact            page / row / redirect          /_fourno/hole/<id>?v=<ver>&u=<url>
   (only if no ?           / not-found                    handled by
   query string)                  │                       server/handlers/cms/hole.ts
        │                  ┌──────┴───────┐                     │
@@ -543,7 +543,7 @@ Server-side publishing helpers live in `server/publish/`:
 | `publicRouter.ts`                 | Visitor URL → resolution → Response. Composes Layer A disk-read + Layer B cache. Single entry for every visitor HTML request. |
 | `staticArtefact.ts`               | Layer A. Two-slot symlink swap (`current → slot-{a,b}`), atomic per-file `tmp + rename`, slot-aware read/write/purge. |
 | `renderCache.ts`                  | Layer B. Bounded LRU keyed by `(urlPath, canonicalQuery)`, entries versioned. Single-flight on cache miss. `bumpPublishVersion()` invalidates lazily; version captured at render start so mid-flight publishes discard without caching stale HTML. |
-| `holeRuntime.ts`                  | Layer C client-side runtime (~1.1 KB). Exports `runInstaticHoleRuntime` (TS source) and `HOLE_RUNTIME_JS` (IIFE-serialized for browser delivery). |
+| `holeRuntime.ts`                  | Layer C client-side runtime (~1.1 KB). Exports `runFournoHoleRuntime` (TS source) and `HOLE_RUNTIME_JS` (IIFE-serialized for browser delivery). |
 | `publishSite.ts`                  | Full-site publish orchestrator (`publishDraftSite`): phase-1 builds, the short `persistSitePublish` transaction, Layer A bake + slot swap, Layer B bump. |
 | `publishRow.ts`                   | Per-row publish orchestrator (`publishDataRow`) + `removeDataRowArtefact`: persist via the data repository, in-place artefact update, Layer B bump. |
 | `publicRenderer.ts`               | `renderPublishedSnapshot`, `renderPublishedDataRowTemplate` — snapshot-aware wrappers around `publishPage`. |
@@ -554,11 +554,11 @@ Server-side publishing helpers live in `server/publish/`:
 | `frontendInjections.ts`           | Plugin-contributed frontend scripts injected into published HTML.   |
 | `mediaPresentation.ts`            | `<picture>` / `<img srcset>` materialization at publish time.       |
 | `mediaPrefetch.ts`, `loopPrefetch.ts` | Pre-warm caches needed by published pages.                      |
-| `runtime/packageServer.ts`        | Serve per-site `bun install` workspace under `/_instatic/runtime/cache/`. |
+| `runtime/packageServer.ts`        | Serve per-site `npm install` workspace under `/_fourno/runtime/cache/`. |
 
-Plus the hole endpoint at `server/handlers/cms/hole.ts` — registered in the router BEFORE `tryServePublicRoute` so `/_instatic/hole/*` requests never fall through to slug resolution.
+Plus the hole endpoint at `server/handlers/cms/hole.ts` — registered in the router BEFORE `tryServePublicRoute` so `/_fourno/hole/*` requests never fall through to slug resolution.
 
-Published pages are HTML plus up to four hashed CSS bundles (`reset`, `framework`, `style`, `userStyles`). The ONLY first-party client script for ordinary static pages is the Layer C hole runtime, and it's injected ONLY on pages that contain at least one `<instatic-hole>`. Fully-static pages ship zero first-party JS from us. Plugins and modules can inject explicit frontend assets through the documented runtime channels.
+Published pages are HTML plus up to four hashed CSS bundles (`reset`, `framework`, `style`, `userStyles`). The ONLY first-party client script for ordinary static pages is the Layer C hole runtime, and it's injected ONLY on pages that contain at least one `<fourno-hole>`. Fully-static pages ship zero first-party JS from us. Plugins and modules can inject explicit frontend assets through the documented runtime channels.
 
 For the full design including invariants, atomic-publish protocol, and the auto-detection rules, see [docs/features/publisher.md](features/publisher.md).
 
@@ -600,7 +600,7 @@ Three static handlers, in order:
 - **Plugin bundles** (`/uploads/plugins/*`) get `Access-Control-Allow-Origin: *` because the editor preview iframe loads them from an opaque origin (`sandbox="allow-scripts"` without `allow-same-origin`).
 - **Admin shell path-specific serving** (`serveAdminApp`): the two visitor paths inject different content into the shell HTML to minimize perceived load time:
   - **Unauthenticated** (no session cookie): injects a styled login skeleton into `<div id="root">` and a `BOOT_API_KICKOFF` inline script that fires `setupStatus`, `/me`, and `publicSite` fetches at HTML-parse time. FCP shifts from ~400 ms (React mount) to ~DCL (~50 ms), and `useAdminBoot` finds pre-resolved promises instead of waiting for `useEffect`.
-  - **Authenticated**: keeps the existing spinner shell, but injects `BOOT_API_KICKOFF`, an `__instaticAuthed = 1` flag (lets `main.tsx` skip the post-Suspense concurrent re-render delay), and `<link rel="modulepreload">` hints for the authenticated shell chunk (`AuthenticatedAdmin-*.js`). Only the shell chunk is preloaded here; workspace-page pre-warming is handled in `AuthenticatedAdmin` via `requestIdleCallback` after first paint.
+  - **Authenticated**: keeps the existing spinner shell, but injects `BOOT_API_KICKOFF`, an `__fournoAuthed = 1` flag (lets `main.tsx` skip the post-Suspense concurrent re-render delay), and `<link rel="modulepreload">` hints for the authenticated shell chunk (`AuthenticatedAdmin-*.js`). Only the shell chunk is preloaded here; workspace-page pre-warming is handled in `AuthenticatedAdmin` via `requestIdleCallback` after first paint.
 
 ---
 
@@ -608,13 +608,13 @@ Three static handlers, in order:
 
 1. **Pick the right layer.**
    - CMS resource (e.g. `/admin/api/cms/feature`) → new handler file such as `server/handlers/cms/<feature>.ts`, register in `server/handlers/cms/index.ts`.
-   - Top-level (e.g. `/_instatic/something`) → new `tryServeX` in `server/router.ts`, add to the `routes` array in the right order.
+   - Top-level (e.g. `/_fourno/something`) → new `tryServeX` in `server/router.ts`, add to the `routes` array in the right order.
 
 2. **Write the handler.** Require capability → validate body → call repository → return `jsonResponse`. One function per route. Add a `Route` entry to the group's `ROUTES` table; path matching and 404/405 discrimination are handled by `runRouteTable` — do not hand-roll `if (url.pathname !== ...)` or `return methodNotAllowed()` in the handler itself. Parameterised paths use a `RegExp` with named capture groups; the dispatcher decodes each captured value once.
 
 3. **If new SQL is needed,** add the function to the matching `server/repositories/<resource>.ts`. Do not write SQL inside the handler.
 
-4. **If new persisted shape is involved,** add the migration to both `migrations-pg.ts` and `migrations-sqlite.ts` with the same ID. JSON columns end in `_json`. Run `bun test src/__tests__/architecture/migration-parity.test.ts` and `db-json-column-naming.test.ts` to confirm.
+4. **If new persisted shape is involved,** add the migration to both `migrations-pg.ts` and `migrations-sqlite.ts` with the same ID. JSON columns end in `_json`. Run `pnpm test src/__tests__/architecture/migration-parity.test.ts` and `db-json-column-naming.test.ts` to confirm.
 
 5. **If client-side calls the endpoint,** add a TypeBox response schema (in `src/core/persistence/responseSchemas.ts` for CMS endpoints, or alongside the caller) and fetch via the canonical `apiRequest(path, { schema })` from `@core/http`. Persistence-layer functions that inject their own `fetch` validate via `readEnvelope`.
 

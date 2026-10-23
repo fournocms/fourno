@@ -13,7 +13,7 @@
  * set-equality gate would skip this one!), insert, and delete must still
  * propagate to consumer slot-instances exactly as before.
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { makeNode, makePage, makeSite, makeVC, makeVCNode, makeVCTree } from '../fixtures'
 import '@modules/base/index'

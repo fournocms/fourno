@@ -29,7 +29,7 @@ import { Type, type Static } from '@core/utils/typeboxHelpers'
 import { StyleRuleSchema, PageNodeSchema } from '@core/page-tree'
 import { safeParseJson } from '@core/utils/jsonValidate'
 
-export const CLIPBOARD_STORAGE_KEY = 'instatic-clipboard-v1'
+export const CLIPBOARD_STORAGE_KEY = 'fourno-clipboard-v1'
 export const CLIPBOARD_VERSION = 2
 
 const ClipboardPayloadSchema = Type.Object({

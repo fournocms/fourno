@@ -28,8 +28,8 @@ data/*.db-shm
 data/*.db-wal
 
 # Generated audit reports
-/instatic-audit-report.html
-/instatic-audit-report.json
+/fourno-audit-report.html
+/fourno-audit-report.json
 
 # Environment variable files — never commit secrets
 # *.local already covers .env.local / .env.development.local etc.
@@ -56,8 +56,8 @@ data/*.db-wal
 !.agents/skills/agent-browser/**
 !.agents/skills/skill-creator/
 !.agents/skills/skill-creator/**
-!.agents/skills/instatic-user-e2e/
-!.agents/skills/instatic-user-e2e/**
+!.agents/skills/fourno-user-e2e/
+!.agents/skills/fourno-user-e2e/**
 .skills/
 
 # User uploads — runtime data, never commit

@@ -25,7 +25,7 @@
  * @see src/core/data/bundleSchema.ts
  */
 
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test'
+import { describe, test, expect, beforeAll, afterAll } from 'vitest'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { runMigrations } from '../../../server/db/runMigrations'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
@@ -627,8 +627,8 @@ describe('full-site round-trip — folders, membership, redirects', () => {
   let redirectTargetRowId: string
 
   beforeAll(async () => {
-    sourceDir = await mkdtemp(join(tmpdir(), 'instatic-export-src-'))
-    targetDir = await mkdtemp(join(tmpdir(), 'instatic-export-tgt-'))
+    sourceDir = await mkdtemp(join(tmpdir(), 'fourno-export-src-'))
+    targetDir = await mkdtemp(join(tmpdir(), 'fourno-export-tgt-'))
 
     // --- Source: seed a folder, an asset assigned to it, and a redirect ---
     const sourceDb = createSqliteClient(':memory:')
@@ -744,8 +744,8 @@ describe('full-site round-trip — folders, membership, redirects', () => {
 })
 
 describe('archive import validation', () => {
-  test('rejects an Instatic archive that omits manifest-declared media', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-import-missing-media-'))
+  test('rejects an Fourno archive that omits manifest-declared media', async () => {
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-import-missing-media-'))
     try {
       const db = createSqliteClient(':memory:')
       await runMigrations(db, sqliteMigrations)
@@ -796,7 +796,7 @@ describe('archive import validation', () => {
   })
 
   test('rejects malformed replace archives before mutating existing data', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-import-atomic-media-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-import-atomic-media-'))
     try {
       const db = createSqliteClient(':memory:')
       await runMigrations(db, sqliteMigrations)
@@ -851,7 +851,7 @@ describe('archive import validation', () => {
   })
 
   test('merge-add archive import skips rows whose slug is already used locally', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-import-slug-conflict-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-import-slug-conflict-'))
     try {
       const db = createSqliteClient(':memory:')
       await runMigrations(db, sqliteMigrations)
@@ -914,7 +914,7 @@ describe('archive import validation', () => {
   })
 
   test('skips unselected media entries while streaming a selected archive import', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-import-skip-media-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-import-skip-media-'))
     try {
       const db = createSqliteClient(':memory:')
       await runMigrations(db, sqliteMigrations)

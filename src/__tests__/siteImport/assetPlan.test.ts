@@ -2,7 +2,7 @@
  * Unit tests for assetPlan — asset collection and URL normalisation.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 // Self-registers all base modules with the global registry so importHtml works
 import '@modules/base'
 import { buildAssetPlan, makeHtmlPagePlan, cssToStyleRules } from '@core/siteImport'

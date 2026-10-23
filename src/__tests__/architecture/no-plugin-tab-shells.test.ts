@@ -2,7 +2,7 @@
  * Architecture Source-Scan — Tab-Shell Regression Gate
  *
  * Host admin/editor code must use the Tabs compound component from
- * @instatic/host-ui (src/ui/components/Tabs/) for any tab UI. Rolling a
+ * @fourno/host-ui (src/ui/components/Tabs/) for any tab UI. Rolling a
  * custom `role="tablist"` div is banned outside the primitive itself and a
  * small set of pre-existing §T-allowlisted files.
  *
@@ -26,17 +26,17 @@
  *         the §T.3 icon-only segmented-pill pattern.
  *
  * Any new file outside the allowlist that introduces role="tablist" fails this
- * test. Fix: use <Tabs> / <TabList> from @instatic/host-ui instead of a
+ * test. Fix: use <Tabs> / <TabList> from @fourno/host-ui instead of a
  * hand-rolled tablist.
  *
  * @see src/ui/components/Tabs/Tabs.tsx — the compound component to use
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const SRC_ROOT = join(PROJECT_ROOT, 'src')
 
 // ---------------------------------------------------------------------------
@@ -170,7 +170,7 @@ describe('No-plugin-tab-shells — role="tablist" must come from the Tabs primit
 
     throw new Error(
       `[no-plugin-tab-shells] ${violations.length} file(s) contain role="tablist" outside the allowlist.\n` +
-        `Use <Tabs> / <TabList> from @instatic/host-ui instead of a hand-rolled tablist.\n\n` +
+        `Use <Tabs> / <TabList> from @fourno/host-ui instead of a hand-rolled tablist.\n\n` +
         `Violations:\n` +
         lines.join('\n') +
         `\n\n§T-allowlisted files (role="tablist" is acceptable there):\n` +

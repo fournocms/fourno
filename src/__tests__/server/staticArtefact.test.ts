@@ -5,7 +5,7 @@
  * actual rename(2) / symlink / readlink syscall semantics are exercised.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { lstat, readFile, rm, stat, symlink, writeFile } from 'node:fs/promises'
 import { mkdtemp } from 'node:fs/promises'
 import { tmpdir } from 'node:os'

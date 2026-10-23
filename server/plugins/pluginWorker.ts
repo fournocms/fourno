@@ -1,23 +1,23 @@
 /**
- * Plugin worker entry — runs INSIDE a Bun `Worker` spawned by
- * `pluginWorkerHost`. The worker's job:
+ * Plugin worker entry — runs INSIDE a worker thread spawned by
+ * `host/workerPool.ts`. The worker's job:
  *
  *   1. Read the plugin's bundled server entrypoint from disk.
  *   2. Spawn a QuickJS-WASM context (see `quickjsHost.ts`) that runs the
  *      bundle in a kernel-independent, capability-isolated sandbox. The
- *      plugin code has NO ambient access to Bun/Node APIs — its only
+ *      plugin code has NO ambient access to Node APIs — its only
  *      way to interact with the host is the in-VM `__hostCall(target, args)`
  *      function, which routes through the existing api-call protocol.
  *   3. Bridge between the host (postMessage / api-reply) and the VM
  *      (PluginVm interface from quickjsHost.ts).
  *
- * The Bun.Worker keeps its previous responsibilities — crash isolation and
+ * The worker thread keeps its previous responsibilities — crash isolation and
  * keeping plugin CPU off the host's main event loop. The trust boundary
  * has moved inward to QuickJS.
  *
  * Communication (unchanged):
- *   - Inbound:  `MainToWorkerMessage` from `self.onmessage`.
- *   - Outbound: `WorkerToMainMessage` via `self.postMessage`.
+ *   - Inbound:  `MainToWorkerMessage` via `onHostMessage`.
+ *   - Outbound: `WorkerToMainMessage` via `postToHost`.
  *
  * Correlation IDs:
  *   - For requests originating in main (`load-plugin`, `run-lifecycle`,
@@ -28,6 +28,7 @@
  */
 
 import { nanoid } from 'nanoid'
+import { onHostMessage, postToHost } from '../runtime/workerPort'
 import { readFile } from 'node:fs/promises'
 import type {
   ApiCall,
@@ -64,7 +65,7 @@ const vmsByPluginId = new Map<string, PluginVm>()
 // ---------------------------------------------------------------------------
 
 function send(msg: WorkerToMainMessage): void {
-  ;(self as unknown as { postMessage: (m: unknown) => void }).postMessage(msg)
+  postToHost(msg)
 }
 
 /**
@@ -504,8 +505,8 @@ async function handleRunMediaUrlTransformer(msg: RunMediaUrlTransformerRequest):
 // Worker bootstrap
 // ---------------------------------------------------------------------------
 
-;(self as unknown as { onmessage: (e: MessageEvent) => void }).onmessage = (event: MessageEvent) => {
-  const msg = event.data as MainToWorkerMessage
+onHostMessage((message) => {
+  const msg = message as MainToWorkerMessage
   switch (msg.kind) {
     case 'load-plugin':
       void handleLoadPlugin(msg)
@@ -550,4 +551,4 @@ async function handleRunMediaUrlTransformer(msg: RunMediaUrlTransformerRequest):
       handleApiReply(msg)
       return
   }
-}
+})

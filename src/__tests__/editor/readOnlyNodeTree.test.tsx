@@ -12,7 +12,7 @@
  * outlet preview).
  */
 
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, render } from '@testing-library/react'
 import type { BaseNode } from '@core/page-tree'

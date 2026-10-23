@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { classKindSelector, type Page, type StyleRule, type SiteShell } from '@core/page-tree'
 import { pageFromRow } from '@core/data/pageFromRow'
 import type { DataRow } from '@core/data/schemas'

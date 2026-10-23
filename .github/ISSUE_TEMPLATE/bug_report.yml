@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem in Instatic.
+description: Report a reproducible problem in Fourno.
 title: "[Bug]: "
 labels:
   - bug
@@ -21,7 +21,7 @@ body:
       label: Steps to reproduce
       description: List the smallest sequence that reproduces the issue.
       placeholder: |
-        1. Start Instatic with ...
+        1. Start Fourno with ...
         2. Open ...
         3. Click ...
     validations:
@@ -50,7 +50,7 @@ body:
     attributes:
       label: Deployment mode
       options:
-        - Local dev with Bun
+        - Local dev (Node + pnpm)
         - Docker Compose with SQLite
         - Docker Compose with Postgres
         - Railway

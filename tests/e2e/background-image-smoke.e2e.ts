@@ -264,7 +264,7 @@ async function publicStylesheetText(page: Page): Promise<string> {
   const hrefs = await page.locator('link[rel="stylesheet"]').evaluateAll((nodes) =>
     nodes
       .map((node) => node instanceof HTMLLinkElement ? node.href : '')
-      .filter((href) => href.includes('/_instatic/css/')),
+      .filter((href) => href.includes('/_fourno/css/')),
   )
   const bodies = await page.evaluate(async (urls) => {
     return Promise.all(urls.map(async (url) => {

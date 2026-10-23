@@ -3,7 +3,7 @@
  * data layer. Split out of `visualComponentsSlice.ts` (which owns the store
  * actions) so the page-tree surgery — VC-ref collection, cascade removal,
  * subtree cloning for componentization — lives in one focused module, the
- * same pattern as `vcSlotReconcile.ts`.
+ * same pattern as `@core/siteEdit`'s slot reconcile.
  */
 
 import { nanoid } from 'nanoid'

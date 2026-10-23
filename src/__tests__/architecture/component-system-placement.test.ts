@@ -23,7 +23,7 @@
  * G5 — No placement file may call addNodeToVc with 'base.visual-component-ref' directly.
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 
@@ -31,7 +31,7 @@ import { resolve } from 'path'
 // File paths
 // ---------------------------------------------------------------------------
 
-const PROJECT_ROOT = resolve(import.meta.dir, '../../..')
+const PROJECT_ROOT = resolve(import.meta.dirname, '../../..')
 
 const PICKER_PATH = resolve(
   PROJECT_ROOT,

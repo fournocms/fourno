@@ -58,7 +58,7 @@ interface StyleRule {
 
 `parseStyleRule` reads only the current `contextStyles` shape. Obsolete per-rule context fields are ignored rather than migrated.
 
-`origin` is stamped by Site Import (`buildAssetPlan`) on every rule parsed from a stylesheet: the source FileMap key (`styles/main.css`, or `index.html::inline` for a `<style>` block) and the rule's ordinal within it. It is the identity a re-import reconciles against — same origin **and** same selector means "this rule arriving again", which replaces the existing rule in place (id and `order` kept) instead of adding a duplicate. See `findReimportedStyleRule` in `src/admin/pages/site/store/slices/site/importLinking.ts`. User-authored rules have no `origin` and are never matched.
+`origin` is stamped by Site Import (`buildAssetPlan`) on every rule parsed from a stylesheet: the source FileMap key (`styles/main.css`, or `index.html::inline` for a `<style>` block) and the rule's ordinal within it. It is the identity a re-import reconciles against — same origin **and** same selector means "this rule arriving again", which replaces the existing rule in place (id and `order` kept) instead of adding a duplicate. See `findReimportedStyleRule` in `src/core/siteEdit/importLinking.ts`. User-authored rules have no `origin` and are never matched.
 
 `styles` and `contextStyles` are typed `Record<string, unknown>` at the persistence boundary — narrowing happens at the publisher's `bagToCSS` (`classCss.ts`). The WRITE API (class slice, framework generators) uses the typed `CSSPropertyBag` shape from `src/core/page-tree/cssPropertyBag.ts`.
 
@@ -220,9 +220,9 @@ A scoped rule is **owned by one node**. Its scope object pins it to that node's 
 ```ts
 {
   id:    'class-abc',
-  name:  '__instatic_scope_<nodeId>',          // generated, never user-facing
+  name:  '__fourno_scope_<nodeId>',          // generated, never user-facing
   kind:  'class',
-  selector: '.__instatic_scope_<nodeId>',
+  selector: '.__fourno_scope_<nodeId>',
   order: 0,
   scope: { type: 'node', nodeId: 'node-xyz', role: 'module-style' },
   styles: { 'border-radius': '12px' },
@@ -232,7 +232,7 @@ A scoped rule is **owned by one node**. Its scope object pins it to that node's 
 When the publisher emits the selector, it generates a uniquely-prefixed name so it can't be applied accidentally elsewhere:
 
 ```css
-[data-node-id="node-xyz"].__instatic_scope_node-xyz {
+[data-node-id="node-xyz"].__fourno_scope_node-xyz {
   border-radius: 12px;
 }
 ```
@@ -344,7 +344,7 @@ The publisher wraps each viewport context block in that context's configured med
 The Properties Panel's "Custom" tab generates a scoped rule automatically when the user sets a property only on that node. Internally:
 
 ```ts
-const name = `__instatic_scope_${nodeId}`
+const name = `__fourno_scope_${nodeId}`
 const scoped: StyleRule = {
   id:       nanoid(),
   name,
@@ -358,7 +358,7 @@ useEditorStore.getState().createClass(scoped)
 useEditorStore.getState().setNodeClassIds(nodeId, [...existing, scoped.id])
 ```
 
-The user never sees `__instatic_scope_<nodeId>` — the panel shows it as "Custom styles".
+The user never sees `__fourno_scope_<nodeId>` — the panel shows it as "Custom styles".
 
 ### Rename a class rule
 
@@ -387,7 +387,7 @@ Nodes that reference the rule by id keep working — only the rendered CSS outpu
 | Looking up a rule by name                                           | Look up by id — names can be renamed                     |
 | Hand-emitting CSS in module `render`                                 | Add a rule to the registry — modules emit shared CSS, not per-instance overrides |
 | Forgetting to clone scoped rules on duplicate / paste              | `cloneScopedClassesForNodeMap` — called by mutations     |
-| Naming a user class `__instatic_scope_*`                                   | Internal scoped rules use this prefix; keep user-created names free of it (the class-kind validator does not reject the prefix — it's a convention, not a gate) |
+| Naming a user class `__fourno_scope_*`                                   | Internal scoped rules use this prefix; keep user-created names free of it (the class-kind validator does not reject the prefix — it's a convention, not a gate) |
 | Mixing user rules and framework rules in the same `classIds` array without intent | The order matters — later wins. Framework rules are usually last (override semantics). |
 | Reading `rule.styles` as `CSSPropertyBag` without narrowing         | The persistence boundary stores `Record<string, unknown>` — narrow via `bagToCSS` or `parseStylesBag` |
 | Hard-failing the editor on a corrupt rule entry                     | `parseStyleRuleRegistry` is tolerant — invalid entries drop silently |

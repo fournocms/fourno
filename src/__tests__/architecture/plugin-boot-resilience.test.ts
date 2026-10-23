@@ -22,17 +22,17 @@
  *      - No single top-level try/catch wraps the whole plugin iteration loop
  *        (which would be the band-aid pattern).
  *
- * These tests run as part of `bun test` under the SQLite adapter.
+ * These tests run as part of `pnpm test` under the SQLite adapter.
  * No real DB, no worker, no filesystem I/O required for the functional layer.
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { listInstalledPlugins, setPluginLifecycleStatus } from '../../../server/repositories/plugins'
 import type { DbClient, DbResult } from '../../../server/db'
 
-const ROOT = join(import.meta.dir, '..', '..', '..')
+const ROOT = join(import.meta.dirname, '..', '..', '..')
 
 // ---------------------------------------------------------------------------
 // Minimal fake DB — only the queries used by repository functions under test.

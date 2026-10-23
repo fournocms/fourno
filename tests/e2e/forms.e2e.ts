@@ -192,7 +192,7 @@ async function submitPublicForm(
 ): Promise<void> {
   const context = await browser.newContext()
   const visitor = await context.newPage()
-  const assetResponses = recordPublicInstaticAssetResponses(visitor)
+  const assetResponses = recordPublicFournoAssetResponses(visitor)
   try {
     await visitor.goto(`${PUBLIC_BASE_URL}/${slug}`)
     await expectPublishedFormAssets(visitor, assetResponses)
@@ -214,7 +214,7 @@ async function submitTimedPublicFormOnMobile(
 ): Promise<void> {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } })
   const visitor = await context.newPage()
-  const assetResponses = recordPublicInstaticAssetResponses(visitor)
+  const assetResponses = recordPublicFournoAssetResponses(visitor)
   try {
     await visitor.goto(`${PUBLIC_BASE_URL}/${slug}`)
     await expectPublishedFormAssets(visitor, assetResponses)
@@ -243,11 +243,11 @@ type PublicAssetResponse = {
   contentType: string
 }
 
-function recordPublicInstaticAssetResponses(page: Page): PublicAssetResponse[] {
+function recordPublicFournoAssetResponses(page: Page): PublicAssetResponse[] {
   const responses: PublicAssetResponse[] = []
   page.on('response', (response) => {
     const url = new URL(response.url())
-    if (!url.pathname.startsWith('/_instatic/')) return
+    if (!url.pathname.startsWith('/_fourno/')) return
     responses.push({
       path: url.pathname,
       status: response.status(),
@@ -262,13 +262,13 @@ async function expectPublishedFormAssets(
   responses: PublicAssetResponse[],
 ): Promise<void> {
   await expect(
-    page.locator('link[rel="stylesheet"][href*="/_instatic/css/reset-"]'),
+    page.locator('link[rel="stylesheet"][href*="/_fourno/css/reset-"]'),
   ).toHaveCount(1)
-  await expect(page.locator('script[src*="/_instatic/module-js/base.form.js"]')).toHaveCount(1)
-  await expectPublicAssetResponse(responses, /^\/_instatic\/css\/.+\.css$/, 'text/css')
+  await expect(page.locator('script[src*="/_fourno/module-js/base.form.js"]')).toHaveCount(1)
+  await expectPublicAssetResponse(responses, /^\/_fourno\/css\/.+\.css$/, 'text/css')
   await expectPublicAssetResponse(
     responses,
-    /^\/_instatic\/module-js\/base\.form\.js$/,
+    /^\/_fourno\/module-js\/base\.form\.js$/,
     'javascript',
   )
 }

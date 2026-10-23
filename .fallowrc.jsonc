@@ -76,7 +76,7 @@
     },
 
     // Plugin SDK public surface — consumed by external plugin authors via
-    // `@instatic/plugin-sdk`. Fallow can't see those consumers.
+    // `@fourno/plugin-sdk`. Fallow can't see those consumers.
     {
       "file": "src/core/plugin-sdk/builders/index.ts",
       "exports": [
@@ -114,7 +114,7 @@
     },
 
     // Plugin host-ui / host-hooks barrels — the entire named surface of these
-    // two modules IS the `@instatic/host-ui` + `@instatic/host-hooks`
+    // two modules IS the `@fourno/host-ui` + `@fourno/host-hooks`
     // plugin contract. Plugins consume them via a dynamic
     // `import('@admin/plugin-host-ui')` namespace in
     // `src/admin/pluginRuntimeBootstrap.ts` (member access, which fallow can't

@@ -67,7 +67,7 @@ export function applyIframeBodyReset(
   interaction: IframeInteraction,
 ): void {
   iframeDoc.body.setAttribute('data-breakpoint-id', breakpointId)
-  iframeDoc.body.dataset.instaticIframeInteraction = interaction
+  iframeDoc.body.dataset.fournoIframeInteraction = interaction
   // Live frames render the page exactly as published: html/body keep the
   // `:where(html, body) { height: 100% }` reset (the iframe is the scroll
   // viewport, short pages still fill it), and the canvas-chrome CSS
@@ -86,10 +86,10 @@ export function applyIframeBodyReset(
   // or because authored CSS sets html/body overflow.
   iframeDoc.documentElement.style.overflow = 'hidden'
   iframeDoc.body.style.overflow = 'hidden'
-  let chrome = iframeDoc.head.querySelector('style[data-instatic-canvas-chrome]')
+  let chrome = iframeDoc.head.querySelector('style[data-fourno-canvas-chrome]')
   if (!chrome) {
     chrome = iframeDoc.createElement('style')
-    chrome.setAttribute('data-instatic-canvas-chrome', '')
+    chrome.setAttribute('data-fourno-canvas-chrome', '')
     chrome.textContent = CANVAS_CHROME_CSS
     iframeDoc.head.appendChild(chrome)
   }

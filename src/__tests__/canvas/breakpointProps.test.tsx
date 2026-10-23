@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'bun:test'
+import { describe, expect, it, beforeEach } from 'vitest'
 import React from 'react'
 import { act, fireEvent, render, cleanup, waitFor } from '@testing-library/react'
 import { readFileSync } from 'fs'

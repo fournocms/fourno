@@ -4,7 +4,7 @@
  * The agent reads (and writes) the site as HTML + CSS — pages come back as HTML
  * (`site_read_document`), and `site_read_styles` returns the design system as a CSS
  * stylesheet: design tokens (CSS custom properties) plus every class and
- * ambient rule. It is the exact CSS you write back with `site_apply_css`, so Instatic
+ * ambient rule. It is the exact CSS you write back with `site_apply_css`, so Fourno
  * just parses it back and forth. `site_list_breakpoints` returns the configured
  * viewport ids so `site_render_snapshot` can target one deliberately.
  *

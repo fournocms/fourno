@@ -7,7 +7,7 @@
  * canUndo/canRedo stay accurate, coalescing folds a typing burst into one
  * step, and undo-then-modify clears the redo branch.
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 // `startInlineEdit` resolves its `inlineTextEdit` spec from the module registry.
 import '@modules/base/text'

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { configurePublicOrigins, resetPublicOrigins } from '../../../auth/security'
 import type { DbClient } from '../../../db/client'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'
@@ -40,7 +40,7 @@ function request(path: string, init?: RequestInit): Request {
  * A request whose own URL and `Host` header name a host the operator never
  * configured. happy-dom (loaded by the test setup) strips the Fetch-spec
  * forbidden `Host` header from the constructor init, so it is set afterwards,
- * the same way a real Bun.serve request carries it.
+ * the same way a real server request carries it.
  */
 function hostileRequest(path: string, init?: RequestInit): Request {
   const req = new Request(`http://${HOSTILE_HOST}${path}`, init)
@@ -65,11 +65,11 @@ afterEach(() => {
 
 describe('MCP OAuth protocol endpoints', () => {
   it('only marks non-local HTTPS endpoints as ready for hosted clients', () => {
-    expect(isRemoteMcpEndpoint('https://cms.example.com/_instatic/mcp')).toBe(true)
-    expect(isRemoteMcpEndpoint('http://cms.example.com/_instatic/mcp')).toBe(false)
-    expect(isRemoteMcpEndpoint('https://localhost:3000/_instatic/mcp')).toBe(false)
-    expect(isRemoteMcpEndpoint('https://192.168.1.5/_instatic/mcp')).toBe(false)
-    expect(isRemoteMcpEndpoint('https://instatic.internal/_instatic/mcp')).toBe(false)
+    expect(isRemoteMcpEndpoint('https://cms.example.com/_fourno/mcp')).toBe(true)
+    expect(isRemoteMcpEndpoint('http://cms.example.com/_fourno/mcp')).toBe(false)
+    expect(isRemoteMcpEndpoint('https://localhost:3000/_fourno/mcp')).toBe(false)
+    expect(isRemoteMcpEndpoint('https://192.168.1.5/_fourno/mcp')).toBe(false)
+    expect(isRemoteMcpEndpoint('https://fourno.internal/_fourno/mcp')).toBe(false)
   })
 
   it('advertises protected-resource and authorization-server metadata', async () => {
@@ -77,14 +77,14 @@ describe('MCP OAuth protocol endpoints', () => {
     expect(protectedResource.status).toBe(200)
     expect(protectedResource.headers.get('Cache-Control')).toContain('max-age=300')
     const resourceBody = await protectedResource.json() as Record<string, unknown>
-    expect(resourceBody.resource).toBe('https://cms.example.com/_instatic/mcp')
+    expect(resourceBody.resource).toBe('https://cms.example.com/_fourno/mcp')
     expect(resourceBody.authorization_servers).toEqual(['https://cms.example.com'])
 
     const authorizationServer = await handle(request(MCP_AUTHORIZATION_SERVER_METADATA_PATH), db)
     const serverBody = await authorizationServer.json() as Record<string, unknown>
     expect(serverBody.authorization_endpoint).toBe('https://cms.example.com/admin/ai/oauth/authorize')
-    expect(serverBody.token_endpoint).toBe('https://cms.example.com/_instatic/oauth/token')
-    expect(serverBody.registration_endpoint).toBe('https://cms.example.com/_instatic/oauth/register')
+    expect(serverBody.token_endpoint).toBe('https://cms.example.com/_fourno/oauth/token')
+    expect(serverBody.registration_endpoint).toBe('https://cms.example.com/_fourno/oauth/register')
     expect(serverBody.code_challenge_methods_supported).toEqual(['S256'])
     expect(serverBody.token_endpoint_auth_methods_supported).toEqual(['none'])
   })
@@ -125,7 +125,7 @@ describe('MCP OAuth protocol endpoints', () => {
   it('exchanges a form-encoded authorization code without exposing cacheable credentials', async () => {
     const verifier = 'k'.repeat(64)
     const callback = 'https://claude.ai/api/mcp/auth_callback'
-    const resource = 'https://cms.example.com/_instatic/mcp'
+    const resource = 'https://cms.example.com/_fourno/mcp'
     const client = await registerOAuthClient(db, {
       clientName: 'Claude',
       redirectUris: [callback],
@@ -202,7 +202,7 @@ describe('MCP OAuth issuer trust', () => {
         grant_type: 'refresh_token',
         refresh_token: 'imcp_rt_nope',
         client_id: 'imcp_client_nope',
-        resource: `http://${HOSTILE_HOST}/_instatic/mcp`,
+        resource: `http://${HOSTILE_HOST}/_fourno/mcp`,
       }),
     }), db)
     const tokenText = await token.text()
@@ -221,7 +221,7 @@ describe('MCP OAuth issuer trust', () => {
     const protectedResource = await handle(local(MCP_PROTECTED_RESOURCE_METADATA_PATH), db)
     expect(protectedResource.status).toBe(200)
     expect(await protectedResource.json()).toMatchObject({
-      resource: 'http://localhost:3001/_instatic/mcp',
+      resource: 'http://localhost:3001/_fourno/mcp',
       authorization_servers: ['http://localhost:3001'],
     })
 
@@ -229,7 +229,7 @@ describe('MCP OAuth issuer trust', () => {
     expect(authorizationServer.status).toBe(200)
     expect(await authorizationServer.json()).toMatchObject({
       issuer: 'http://localhost:3001',
-      token_endpoint: 'http://localhost:3001/_instatic/oauth/token',
+      token_endpoint: 'http://localhost:3001/_fourno/oauth/token',
     })
   })
 
@@ -239,7 +239,7 @@ describe('MCP OAuth issuer trust', () => {
     const resourceText = await protectedResource.text()
     expect(resourceText).not.toContain('attacker.example')
     expect(JSON.parse(resourceText)).toMatchObject({
-      resource: `${PUBLIC_ORIGIN}/_instatic/mcp`,
+      resource: `${PUBLIC_ORIGIN}/_fourno/mcp`,
       authorization_servers: [PUBLIC_ORIGIN],
     })
 

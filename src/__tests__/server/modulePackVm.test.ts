@@ -1,12 +1,12 @@
 /**
  * Regression tests for the QuickJS module-pack source shim.
  *
- * The shim converts the ESM-shaped bundle Bun emits into a
+ * The shim converts the ESM-shaped bundle esbuild emits into a
  * `globalThis.__module_pack = …` assignment that the bootstrap can read
  * inside QuickJS. Both export forms below have been seen in real plugin
  * bundles (module-pack plugins such as `acme.forms`) and must work.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createModulePackVm } from '../../../server/plugins/modulePackVm'
 import {
   DEFAULT_EVAL_TIMEOUT_MS,
@@ -51,7 +51,7 @@ describe('modulePackVm — source shim', () => {
   })
 
   it('accepts `export { X as default }` bundles (multi-line block)', async () => {
-    // The exact shape Bun's bundler produces for a re-export facade.
+    // The exact shape esbuild produces for a re-export facade.
     const source = `${PACK_BODY}\nexport {\n  __modules_facade_default as default\n};\n`
     const vm = await createModulePackVm({ pluginId: 'acme.canvas', packSource: source })
     try {

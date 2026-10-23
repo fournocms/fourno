@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import React, { useRef, useState } from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ContextMenu, ContextMenuItem } from '@ui/components/ContextMenu'
@@ -61,8 +61,8 @@ describe('ContextMenu', () => {
   })
 
   it('lets the first outside click close a point menu and activate the clicked target', () => {
-    const onClose = mock(() => {})
-    const onTargetClick = mock(() => {})
+    const onClose = vi.fn(() => {})
+    const onTargetClick = vi.fn(() => {})
 
     render(
       <PointContextMenuHarness
@@ -84,8 +84,8 @@ describe('ContextMenu', () => {
   })
 
   it('defers close behind an exit animation when animateExit is set', async () => {
-    const onClose = mock(() => {})
-    const onTargetClick = mock(() => {})
+    const onClose = vi.fn(() => {})
+    const onTargetClick = vi.fn(() => {})
 
     render(
       <PointContextMenuHarness
@@ -302,7 +302,7 @@ describe('ContextMenu', () => {
       )
     }
 
-    const onClose = mock(() => {})
+    const onClose = vi.fn(() => {})
     const { container } = render(<IframeDismissHarness onClose={onClose} />)
 
     const iframe = container.querySelector('iframe') as HTMLIFrameElement

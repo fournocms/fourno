@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { createTestDb } from '../helpers/createTestDb'
 import { createDataRow } from '../../../server/repositories/data/rows/mutations'
 import { getDataRow } from '../../../server/repositories/data/rows/read'

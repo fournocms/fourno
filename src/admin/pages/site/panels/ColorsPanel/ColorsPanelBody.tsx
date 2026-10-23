@@ -7,7 +7,7 @@
 import { useState, type MouseEvent } from 'react'
 import { useEditorStore } from '@site/store/store'
 import type { FrameworkColorToken } from '@core/framework-schema'
-import type { UpdateFrameworkColorTokenPatch } from '@site/store/slices/site/types'
+import type { UpdateFrameworkColorTokenPatch } from '@core/siteEdit'
 import { Button } from '@ui/components/Button'
 import { EmptyState } from '@ui/components/EmptyState'
 import { FilterBar, type FilterBarItem } from '@ui/components/FilterBar'

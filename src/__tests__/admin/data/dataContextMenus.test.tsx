@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import React from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { AdminContextMenuGuard } from '@admin/shared/AdminContextMenuGuard'
@@ -84,12 +84,12 @@ function rowElement(label: string): HTMLElement {
 describe('Data row context menu', () => {
   it('opens page rows with site-editor, status, export, and delete actions', async () => {
     const row = makeRow()
-    const onSelectRow = mock()
-    const onOpenInSiteEditor = mock()
-    const onDuplicateRow = mock()
-    const onSetRowStatus = mock(async () => row)
-    const onExportRows = mock()
-    const onDeleteRow = mock()
+    const onSelectRow = vi.fn()
+    const onOpenInSiteEditor = vi.fn()
+    const onDuplicateRow = vi.fn()
+    const onSetRowStatus = vi.fn(async () => row)
+    const onExportRows = vi.fn()
+    const onDeleteRow = vi.fn()
 
     render(
       <DataGrid
@@ -135,7 +135,7 @@ describe('Data row context menu', () => {
 
   it('uses the row inspector action for plain data tables and omits publish actions', () => {
     const row = makeRow({ tableId: 'table-products', cells: { title: 'Product A' }, slug: '' })
-    const onOpenRow = mock()
+    const onOpenRow = vi.fn()
 
     render(
       <DataGrid
@@ -235,8 +235,8 @@ describe('Data table context menu', () => {
       system: false,
       rowCount: 0,
     })
-    const onOpenTableSettings = mock()
-    const onDeleteTable = mock()
+    const onOpenTableSettings = vi.fn()
+    const onDeleteTable = vi.fn()
 
     render(
       <DataSidebar

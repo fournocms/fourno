@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { classKindSelector, classifySelectorCreateInput, type PageNode, type StyleRule } from '@core/page-tree'
 import { deriveSelectorPickerModel } from '@site/panels/PropertiesPanel/selectorPickerModel'
 

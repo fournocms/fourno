@@ -54,7 +54,7 @@ const openaiAdapter = createResponsesAdapter({
   },
   promptCacheKey(req) {
     const toolNames = req.tools.map((t) => t.name).sort().join(',')
-    return `instatic:${req.toolContextBase.scope}:${stableHash(toolNames)}`
+    return `fourno:${req.toolContextBase.scope}:${stableHash(toolNames)}`
   },
 })
 

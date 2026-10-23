@@ -196,7 +196,7 @@ export function pluginModuleToHostModule(
         return { html: out.html, css: out.css, js: out.js }
       } catch (err) {
         console.error(`[plugin-module:${definition.id}] render() threw:`, err)
-        return { html: `<!-- instatic: plugin module "${definition.id}" render failed -->` }
+        return { html: `<!-- fourno: plugin module "${definition.id}" render failed -->` }
       }
     },
   }

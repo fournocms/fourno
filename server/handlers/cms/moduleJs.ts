@@ -1,9 +1,9 @@
 /**
- * `/_instatic/module-js/<moduleId>.js` — per-module published-JS assets.
+ * `/_fourno/module-js/<moduleId>.js` — per-module published-JS assets.
  *
  * Modules may return `js` from `render()` (see `RenderOutput`); the publisher
  * dedupes it per moduleId and pages reference it via
- * `<script src="/_instatic/module-js/<id>.js?v=<publishVersion>" defer>` tags
+ * `<script src="/_fourno/module-js/<id>.js?v=<publishVersion>" defer>` tags
  * injected by `injectModuleScripts`. This endpoint serves the body from the
  * site-wide module-JS map, memoised per publish version through the same
  * versioned single-flight the hole endpoint uses (`?v=` is a pure
@@ -20,7 +20,7 @@ import { getLatestPublishedSiteSnapshot } from '../../repositories/publish'
 import { buildPublishedSiteModuleJsMap } from '../../publish/moduleJsBundle'
 import { createVersionedSingleFlight, getPublishVersion } from '../../publish/publishState'
 
-const MODULE_JS_PATH_PREFIX = '/_instatic/module-js/'
+const MODULE_JS_PATH_PREFIX = '/_fourno/module-js/'
 
 /**
  * Namespaced module id grammar: `<namespace>.<name>[.<name>…]`, lowercase
@@ -62,7 +62,7 @@ function plainResponse(body: string, status: number): Response {
   })
 }
 
-/** GET `/_instatic/module-js/<moduleId>.js?v=<publishVersion>` → JS body. */
+/** GET `/_fourno/module-js/<moduleId>.js?v=<publishVersion>` → JS body. */
 export async function handleModuleJsAssetRequest(
   req: Request,
   url: URL,

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { AiProvider, AiStreamRequest } from '../../../server/ai/drivers/types'
 import type { AiStreamEvent } from '../../../server/ai/runtime/types'
 import { createConversationsPersister, runChat } from '../../../server/ai/runtime'

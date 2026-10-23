@@ -12,7 +12,7 @@
  * standing +250 wherever it applies, which outranks the +150 recency boost
  * and pins it to the top of an empty palette forever.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { rankCommands } from '@admin/spotlight/matcher'
 import type { Command, CommandContext } from '@admin/spotlight/types'
 

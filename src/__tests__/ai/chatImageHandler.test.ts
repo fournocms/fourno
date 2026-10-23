@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import sharp from 'sharp'
 import { AI_CHAT_MAX_REQUEST_BYTES, AI_USER_IMAGE_MAX_PER_MESSAGE } from '@core/ai'
 import { createCapabilityTestHarness, type CapabilityTestHarness } from '../helpers/capabilityHarness'
@@ -162,7 +162,7 @@ describe('AI chat user-image boundary', () => {
     const persistedImages = messages[0]?.content.filter((block) => block.kind === 'image') ?? []
     expect(persistedImages).toHaveLength(2)
     expect(providerRequest.match(/data:image\/jpeg;base64,/g)).toHaveLength(2)
-    expect((JSON.parse(providerRequest) as { tools?: unknown }).tools).toBeArray()
+    expect((JSON.parse(providerRequest) as { tools?: unknown }).tools).toBeInstanceOf(Array)
   })
 
   it('allows only one concurrent writer', async () => {

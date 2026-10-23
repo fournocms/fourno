@@ -2,7 +2,7 @@
  * Tests for the auto-resolve hook that keeps `siteRuntime.dependencyLock`
  * in lockstep with `packageJson.dependencies`.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import { useAutoResolveDependencies } from '@site/hooks/useAutoResolveDependencies'
 import { useEditorStore } from '@site/store/store'
@@ -13,8 +13,8 @@ const originalFetch = globalThis.fetch
 const CONFETTI_IMPORTMAP = {
   lockHash: 'test-lock',
   imports: {
-    'canvas-confetti': '/_instatic/runtime/cache/test-lock/canvas-confetti/dist/confetti.module.mjs',
-    'canvas-confetti/': '/_instatic/runtime/cache/test-lock/canvas-confetti/',
+    'canvas-confetti': '/_fourno/runtime/cache/test-lock/canvas-confetti/dist/confetti.module.mjs',
+    'canvas-confetti/': '/_fourno/runtime/cache/test-lock/canvas-confetti/',
   },
 }
 
@@ -103,8 +103,8 @@ describe('useAutoResolveDependencies', () => {
       packageImportmap: {
         lockHash: 'in-sync-hash',
         imports: {
-          'canvas-confetti': '/_instatic/runtime/cache/in-sync-hash/canvas-confetti/dist/confetti.module.mjs',
-          'canvas-confetti/': '/_instatic/runtime/cache/in-sync-hash/canvas-confetti/',
+          'canvas-confetti': '/_fourno/runtime/cache/in-sync-hash/canvas-confetti/dist/confetti.module.mjs',
+          'canvas-confetti/': '/_fourno/runtime/cache/in-sync-hash/canvas-confetti/',
         },
       },
     })
@@ -152,12 +152,12 @@ describe('useAutoResolveDependencies', () => {
         packageImportmap: {
           lockHash: 'test-lock-burst',
           imports: {
-            'canvas-confetti': '/_instatic/runtime/cache/test-lock-burst/canvas-confetti/dist/confetti.module.mjs',
-            'canvas-confetti/': '/_instatic/runtime/cache/test-lock-burst/canvas-confetti/',
-            three: '/_instatic/runtime/cache/test-lock-burst/three/build/three.module.js',
-            'three/': '/_instatic/runtime/cache/test-lock-burst/three/',
-            motion: '/_instatic/runtime/cache/test-lock-burst/motion/dist/index.mjs',
-            'motion/': '/_instatic/runtime/cache/test-lock-burst/motion/',
+            'canvas-confetti': '/_fourno/runtime/cache/test-lock-burst/canvas-confetti/dist/confetti.module.mjs',
+            'canvas-confetti/': '/_fourno/runtime/cache/test-lock-burst/canvas-confetti/',
+            three: '/_fourno/runtime/cache/test-lock-burst/three/build/three.module.js',
+            'three/': '/_fourno/runtime/cache/test-lock-burst/three/',
+            motion: '/_fourno/runtime/cache/test-lock-burst/motion/dist/index.mjs',
+            'motion/': '/_fourno/runtime/cache/test-lock-burst/motion/',
           },
         },
       }), { status: 200 })

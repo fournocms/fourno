@@ -12,7 +12,7 @@
     background: var(--bg-surface-3);
 }
 
-.frame[data-instatic-upload-status='failed'] {
+.frame[data-fourno-upload-status='failed'] {
     border-color: var(--danger);
 }
 

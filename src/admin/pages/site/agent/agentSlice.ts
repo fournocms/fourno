@@ -2,7 +2,7 @@
  * Agent store slice — drives the AI Assistant panel.
  *
  * The browser opens a streaming NDJSON request against `/admin/api/ai/chat/
- * ${scope}`. The Bun server selects the configured provider credential and
+ * ${scope}`. The Node server selects the configured provider credential and
  * model, then streams through the provider-agnostic direct-HTTP runtime.
  * The NDJSON wire protocol and its per-event handling live in `streamEvents.ts`;
  * conversation bootstrap lives in `agentApi.ts`; shared tool-result POSTs live
@@ -615,7 +615,7 @@ export function createAgentSlice(
 
         if (!res.ok) {
           const fallback = res.status === 502
-            ? 'AI server is not running. Start it with: bun run dev'
+            ? 'AI server is not running. Start it with: pnpm dev'
             : `Agent request failed: ${res.status} ${res.statusText}`
           throw new ApiError(await responseErrorMessage(res, fallback), res.status)
         }

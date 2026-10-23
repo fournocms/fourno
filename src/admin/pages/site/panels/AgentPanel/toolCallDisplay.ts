@@ -187,7 +187,7 @@ export function extractColorSwatches(actionType: string, params: unknown): Color
 // (historical names like `insertHtml`) down to snake_case.
 function normalizeToolName(actionType: string): string {
   return actionType
-    .replace(/^mcp__instatic__/, '')
+    .replace(/^mcp__fourno__/, '')
     .replace(/^(site|content)_/, '')
     .replace(/([a-z0-9])([A-Z])/g, '$1_$2')
     .toLowerCase()

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { extname, join, relative } from 'node:path'
 
@@ -12,7 +12,7 @@ import { extname, join, relative } from 'node:path'
  * the empty-message case `getErrorMessage` handles. Use `getErrorMessage`.
  */
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 const SCAN_ROOTS = [join(SRC_ROOT, 'admin')]
 
 // `<var> instanceof Error ? <var>.message` — the extraction half of the ternary.

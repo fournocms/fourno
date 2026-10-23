@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { makeSite } from '../fixtures'
 import { validateSite, validatePages } from '@core/persistence/validate'
 import { useEditorStore } from '@site/store/store'

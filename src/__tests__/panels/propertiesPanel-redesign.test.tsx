@@ -22,7 +22,7 @@
  *   PP-16 No inline styles, no Tailwind, no !important in new source files (static gate)
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 import { render, screen, cleanup, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -34,7 +34,7 @@ import { useEditorStore } from '@site/store/store'
 import { makeSite, makePage, makeNode } from '../fixtures'
 import '@modules/base/index'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 const PP_DIR = join(SRC_ROOT, 'admin/pages/site/panels/PropertiesPanel')
 
 afterEach(cleanup)
@@ -303,7 +303,7 @@ describe('ClassPicker — suggestion hover preview', () => {
   })
 
   it('does not preview suggestion hovers when the preference is disabled', () => {
-    localStorage.setItem('instatic-editor-prefs', JSON.stringify({ hoverPreview: false }))
+    localStorage.setItem('fourno-editor-prefs', JSON.stringify({ hoverPreview: false }))
     const { nodeId } = loadSiteWithHeading()
     useEditorStore.getState().createClass('no-preview')
     selectNode(nodeId)

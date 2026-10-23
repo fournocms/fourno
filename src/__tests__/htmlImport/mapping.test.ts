@@ -15,7 +15,7 @@
  * No round-trip pipeline, no fixtures — pure per-rule unit assertions.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 // Self-registers all base modules with the global registry singleton.
 // walkAndMap calls registry.getOrThrow(moduleId) — without this import it throws.
 import '@modules/base'
@@ -1017,7 +1017,7 @@ describe('HTML attribute preservation — props.htmlAttributes for ordinary base
 
   it('skips class, module-owned attributes, and reserved editor attributes', () => {
     const result = imported(`
-      <div class="kept-as-class" data-bg-src="assets/images/shape/heroShape1_1.png" data-instatic-node="reserved">
+      <div class="kept-as-class" data-bg-src="assets/images/shape/heroShape1_1.png" data-fourno-node="reserved">
         <a href="#target" target="_blank" rel="nofollow" data-track="jump">Jump</a>
         <img src="/logo.png" alt="Logo" data-lazy="logo">
       </div>
@@ -1288,22 +1288,22 @@ describe('walkAndMap + parseHtml as independent pipeline steps', () => {
 })
 
 // ---------------------------------------------------------------------------
-// base.outlet — <instatic-outlet> custom element
+// base.outlet — <fourno-outlet> custom element
 // ---------------------------------------------------------------------------
 
-describe('base.outlet — <instatic-outlet>', () => {
-  it('maps <instatic-outlet> to a childless base.outlet node', () => {
-    const node = single('<instatic-outlet></instatic-outlet>')
+describe('base.outlet — <fourno-outlet>', () => {
+  it('maps <fourno-outlet> to a childless base.outlet node', () => {
+    const node = single('<fourno-outlet></fourno-outlet>')
     expect(node.moduleId).toBe('base.outlet')
     expect(node.children ?? []).toHaveLength(0)
   })
 
   it('preserves built-in and custom outlet semantics', () => {
-    const builtIn = single('<instatic-outlet data-tag="div"></instatic-outlet>')
+    const builtIn = single('<fourno-outlet data-tag="div"></fourno-outlet>')
     expect(builtIn.props).toMatchObject({ tag: 'div' })
 
     const custom = single(
-      '<instatic-outlet data-custom-tag="section-heading"></instatic-outlet>',
+      '<fourno-outlet data-custom-tag="section-heading"></fourno-outlet>',
     )
     expect(custom.props).toMatchObject({
       tag: 'custom',
@@ -1313,7 +1313,7 @@ describe('base.outlet — <instatic-outlet>', () => {
 
   it('survives import alongside sibling chrome, producing one outlet node', () => {
     const result = importHtml(
-      '<header>Top</header><instatic-outlet></instatic-outlet><footer>Bottom</footer>',
+      '<header>Top</header><fourno-outlet></fourno-outlet><footer>Bottom</footer>',
     )
     const outlets = Object.values(result.nodes).filter((n) => n.moduleId === 'base.outlet')
     expect(outlets).toHaveLength(1)
@@ -1321,13 +1321,13 @@ describe('base.outlet — <instatic-outlet>', () => {
 })
 
 // ---------------------------------------------------------------------------
-// base.loop — <instatic-loop> custom element
+// base.loop — <fourno-loop> custom element
 // ---------------------------------------------------------------------------
 
-describe('base.loop — <instatic-loop>', () => {
-  it('maps <instatic-loop> to a configured base.loop node with child variants', () => {
+describe('base.loop — <fourno-loop>', () => {
+  it('maps <fourno-loop> to a configured base.loop node with child variants', () => {
     const result = importHtml(`
-      <instatic-loop
+      <fourno-loop
         class="cards"
         data-source-id="data.rows"
         data-table-id="tbl_posts"
@@ -1339,7 +1339,7 @@ describe('base.loop — <instatic-loop>', () => {
         data-page-size="2"
       >
         <article><h2>{currentEntry.title}</h2></article>
-      </instatic-loop>
+      </fourno-loop>
     `)
 
     expect(result.rootIds).toHaveLength(1)

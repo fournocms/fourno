@@ -6,7 +6,7 @@
  * suite at that level instead of locking exact helper names in source files.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { join, extname } from 'path'
 import { useEditorStore } from '@site/store/store'

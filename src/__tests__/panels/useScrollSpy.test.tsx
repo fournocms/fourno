@@ -9,7 +9,7 @@
  * real layout.
  */
 
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { act, cleanup, renderHook } from '@testing-library/react'
 import type { RefObject } from 'react'
 import { useScrollSpy } from '@site/panels/PropertiesPanel/useScrollSpy'

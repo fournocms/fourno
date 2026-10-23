@@ -11,7 +11,7 @@
  * Reference: Guideline #307 Hot Path 2 (Performance Engineer Contribution #422)
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { renderCache } from '@site/canvas/renderCache'
 import type { RenderOutput } from '@core/module-engine'
 

@@ -6,7 +6,7 @@
  * no privilege escalation) — same model as Math/JSON exposure. Inputs are
  * size-bounded by the protocol schema.
  *
- * Uses Bun's native `crypto.subtle` (the WHATWG Web Crypto API) — no
+ * Uses Node's native `crypto.subtle` (the WHATWG Web Crypto API) — no
  * vendored npm crypto library.
  */
 

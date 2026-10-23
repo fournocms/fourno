@@ -9,7 +9,7 @@
  * `visualComponentsSlice.convertNodeToComponent`.
  */
 
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import '@modules/base/index'
 

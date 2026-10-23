@@ -1,14 +1,16 @@
 /**
  * Collab socket — upgrade gating (session + Origin + write capability) for
  * the co-editing WebSocket. The full two-client convergence round-trip runs
- * in collabRelayIntegration.test.ts against a real Bun.serve.
+ * in collabRelayIntegration.test.ts against the real server adapter. A plain
+ * (non-upgrade) request on the socket path is answered 426 by the HTTP router
+ * in server/index.ts, before this gate is consulted.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import * as encoding from 'lib0/encoding'
 import { SITE_SOCKET_PATH } from '@core/collab'
 import { createCollabRelay, type CollabRelay } from '../../../server/collab/relay'
 import {
-  handleCollabSocketUpgrade,
+  authorizeCollabSocket,
   reviewAwarenessUpdate,
   type CollabSocketData,
 } from '../../../server/collab/socket'
@@ -40,47 +42,33 @@ function socketRequest(headers: Record<string, string>): Request {
   return req
 }
 
-function fakeServer(upgradeResult: boolean): {
-  upgrade: (req: Request, options: { data: CollabSocketData }) => boolean
-  data: () => CollabSocketData | null
-} {
-  let captured: CollabSocketData | null = null
-  return {
-    upgrade: (_req, options) => {
-      captured = options.data
-      return upgradeResult
-    },
-    data: () => captured,
-  }
+/** The accepted connection data, or a failure naming the rejection status. */
+function acceptedData(verdict: { accept: CollabSocketData } | Response): CollabSocketData {
+  if (verdict instanceof Response) throw new Error(`handshake rejected with ${verdict.status}`)
+  return verdict.accept
 }
 
 describe('collab socket — upgrade gating', () => {
   it('rejects an unauthenticated handshake with 401 before upgrading', async () => {
     const { harness } = await setup()
-    const server = fakeServer(true)
-    const res = await handleCollabSocketUpgrade(socketRequest({}), harness.db, server)
-    expect(res?.status).toBe(401)
-    expect(server.data()).toBeNull()
+    const verdict = await authorizeCollabSocket(socketRequest({}), harness.db)
+    expect(verdict instanceof Response && verdict.status).toBe(401)
   })
 
   it('rejects a cross-origin handshake with 403 (CSWSH defense) even with a valid session', async () => {
     const { harness, cookie } = await setup()
-    const server = fakeServer(true)
-    const res = await handleCollabSocketUpgrade(
+    const verdict = await authorizeCollabSocket(
       socketRequest({ cookie, origin: 'https://evil.example' }),
       harness.db,
-      server,
     )
-    expect(res?.status).toBe(403)
-    expect(server.data()).toBeNull()
+    expect(verdict instanceof Response && verdict.status).toBe(403)
   })
 
-  it('upgrades an authenticated same-origin handshake with fullSiteWriter resolved from capabilities', async () => {
+  it('accepts an authenticated same-origin handshake with fullSiteWriter resolved from capabilities', async () => {
     const { harness, cookie } = await setup()
-    const server = fakeServer(true)
-    expect(await handleCollabSocketUpgrade(socketRequest({ cookie }), harness.db, server)).toBeNull()
     // The owner holds every site-write cap, so it skips the per-update guard.
-    expect(server.data()?.fullSiteWriter).toBe(true)
+    const ownerData = acceptedData(await authorizeCollabSocket(socketRequest({ cookie }), harness.db))
+    expect(ownerData.fullSiteWriter).toBe(true)
 
     // A partial writer (one category) is NOT a full writer — its frames run
     // through the guard, same path a read-only viewer takes.
@@ -89,36 +77,20 @@ describe('collab socket — upgrade gating', () => {
       slug: 'site-content-only',
       capabilities: ['site.read', 'site.content.edit'],
     })
-    const contentServer = fakeServer(true)
-    expect(
-      await handleCollabSocketUpgrade(
-        socketRequest({ cookie: contentOnly.cookie }),
-        harness.db,
-        contentServer,
-      ),
-    ).toBeNull()
-    expect(contentServer.data()?.fullSiteWriter).toBe(false)
+    const contentOnlyData = acceptedData(
+      await authorizeCollabSocket(socketRequest({ cookie: contentOnly.cookie }), harness.db),
+    )
+    expect(contentOnlyData.fullSiteWriter).toBe(false)
 
     const readOnly = await harness.createRoleUser({
       name: 'Site Viewer',
       slug: 'site-viewer-only',
       capabilities: ['site.read'],
     })
-    const readOnlyServer = fakeServer(true)
-    expect(
-      await handleCollabSocketUpgrade(
-        socketRequest({ cookie: readOnly.cookie }),
-        harness.db,
-        readOnlyServer,
-      ),
-    ).toBeNull()
-    expect(readOnlyServer.data()?.fullSiteWriter).toBe(false)
-  })
-
-  it('returns 426 when the request is not an upgradable WebSocket handshake', async () => {
-    const { harness, cookie } = await setup()
-    const res = await handleCollabSocketUpgrade(socketRequest({ cookie }), harness.db, fakeServer(false))
-    expect(res?.status).toBe(426)
+    const readOnlyData = acceptedData(
+      await authorizeCollabSocket(socketRequest({ cookie: readOnly.cookie }), harness.db),
+    )
+    expect(readOnlyData.fullSiteWriter).toBe(false)
   })
 })
 

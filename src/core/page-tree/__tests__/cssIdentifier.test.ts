@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { escapeCssIdentifier } from '../cssIdentifier'
 
 const ch = (code: number) => String.fromCharCode(code)

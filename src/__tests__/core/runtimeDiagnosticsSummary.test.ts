@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { fileDiagnostics, summarizeRuntimeDiagnostics } from '@core/site-runtime'
 import type { SiteRuntimeDiagnostic } from '@core/site-runtime'
 

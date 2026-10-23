@@ -6,7 +6,7 @@
  * cross-user revoke guard, the current-session pin, and the cookie-survives
  * behaviour of "logout all other devices".
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { findUserByEmail } from '../../../server/repositories/users'

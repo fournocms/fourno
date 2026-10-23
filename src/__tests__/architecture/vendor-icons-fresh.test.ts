@@ -14,9 +14,9 @@
  *   "pixel-art-icons": "file:./vendor/pixel-art-icons"
  *
  * This gate prevents that vendored set from drifting out of sync with what
- * the source actually imports. It runs as part of `bun test`, so a missing
+ * the source actually imports. It runs as part of `pnpm test`, so a missing
  * or orphan vendored icon fails CI loudly with a single fix instruction:
- * run `bun run icons:sync`.
+ * run `pnpm icons:sync`.
  *
  * It deliberately does NOT need access to the upstream private repo — it
  * only compares imports vs. the vendored output already committed to the CMS
@@ -25,12 +25,12 @@
  * catalog locally.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { spawnSync } from 'child_process'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const SRC_DIR = join(PROJECT_ROOT, 'src')
 const VENDOR_ICONS_DIR = join(PROJECT_ROOT, 'vendor/pixel-art-icons/icons')
 const VENDOR_DIST_ICONS_DIR = join(
@@ -112,7 +112,7 @@ function assertNotIgnoredByGit(path: string): void {
 }
 
 const FIX_HINT =
-  '\n  Fix: run `bun run icons:sync` to refresh vendor/pixel-art-icons/.'
+  '\n  Fix: run `pnpm icons:sync` to refresh vendor/pixel-art-icons/.'
 
 describe('vendor/pixel-art-icons — freshness gate', () => {
   it('vendor package skeleton exists', () => {

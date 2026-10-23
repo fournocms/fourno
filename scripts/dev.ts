@@ -1,7 +1,7 @@
 /**
  * One-command dev server.
  *
- * `bun run dev` is the only thing a developer should need.
+ * `pnpm dev` is the only thing a developer should need.
  *
  * Default behaviour (no DATABASE_URL in the environment): the script uses
  * SQLite at ./.tmp/dev.db — no Docker or any other external services required.
@@ -18,21 +18,29 @@
  *
  * Either way, the script then:
  *
- *   - Runs `bun install --frozen-lockfile` so a checkout pulled after a
- *     dependency change does not start a CMS that dies on its first import.
  *   - Pre-checks ports 3001 (cms) and 5173 (vite) and prints an
  *     actionable message if either is held by something we don't own.
- *   - Spawns the cms (`bun --watch server/index.ts`) and vite
- *     (`bun node_modules/vite/bin/vite.js --host 127.0.0.1`) as children, forwarding their output
+ *   - Spawns the cms (`tsx watch server/index.ts`) and vite
+ *     (`node node_modules/vite/bin/vite.js --host 127.0.0.1`) as children, forwarding their output
  *     and signals so Ctrl+C cleanly kills both.
+ *
+ * Dependencies are kept in sync by pnpm itself: `verifyDepsBeforeRun` in
+ * pnpm-workspace.yaml reinstalls before `pnpm dev` when node_modules is out
+ * of date with the lockfile.
  */
 
 import { mkdir } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { isSqliteUrl } from '../server/db'
-import { devStackBunError } from '../server/bunVersion'
-import { bunCommand, viteCommand } from './lib/bunCommand'
-import { ensureDependencies } from './lib/ensureDependencies'
+import type { ChildProcess } from 'node:child_process'
+import {
+  captureCommandSync,
+  childExited,
+  runCommandSync,
+  startChild,
+  tsxCommand,
+  viteCommand,
+} from './lib/nodeCommand'
 import { ensurePortFree } from './lib/freePort'
 
 const CMS_PORT = Number(process.env.PORT ?? '3001')
@@ -40,8 +48,6 @@ const VITE_PORT = Number(process.env.VITE_PORT ?? '5173')
 const POSTGRES_HOST = '127.0.0.1'
 const POSTGRES_PORT = 5433
 const DATABASE_URL = process.env.DATABASE_URL ?? 'sqlite:./.tmp/dev.db'
-
-const decoder = new TextDecoder()
 
 function log(msg: string): void {
   console.error(`[dev] ${msg}`)
@@ -55,19 +61,11 @@ function fail(msg: string): never {
 // --- docker helpers -------------------------------------------------------
 
 function dockerInstalled(): boolean {
-  const result = Bun.spawnSync(['docker', '--version'], {
-    stdout: 'ignore',
-    stderr: 'ignore',
-  })
-  return result.exitCode === 0
+  return runCommandSync(['docker', '--version']) === 0
 }
 
 function dockerDaemonRunning(): boolean {
-  const result = Bun.spawnSync(['docker', 'info'], {
-    stdout: 'ignore',
-    stderr: 'ignore',
-  })
-  return result.exitCode === 0
+  return runCommandSync(['docker', 'info']) === 0
 }
 
 interface ComposeServiceState {
@@ -80,13 +78,10 @@ interface ComposeServiceState {
  * versions; returns 'absent' when no entry is found.
  */
 function getComposeServiceState(service: string): ComposeServiceState['state'] {
-  const result = Bun.spawnSync(
-    ['docker', 'compose', 'ps', '--all', '--format', 'json', service],
-    { stdout: 'pipe', stderr: 'pipe' },
-  )
+  const result = captureCommandSync(['docker', 'compose', 'ps', '--all', '--format', 'json', service])
   if (result.exitCode !== 0) return 'absent'
 
-  const stdout = decoder.decode(result.stdout).trim()
+  const stdout = result.stdout.trim()
   if (!stdout) return 'absent'
 
   const parseEntry = (raw: unknown): ComposeServiceState['state'] | null => {
@@ -137,12 +132,9 @@ function getComposeServiceState(service: string): ComposeServiceState['state'] {
 
 function runDocker(args: string[], description: string): void {
   log(description)
-  const result = Bun.spawnSync(['docker', ...args], {
-    stdout: 'inherit',
-    stderr: 'inherit',
-  })
-  if (result.exitCode !== 0) {
-    fail(`\`docker ${args.join(' ')}\` exited with code ${result.exitCode}.`)
+  const exitCode = runCommandSync(['docker', ...args], { stdio: 'inherit' })
+  if (exitCode !== 0) {
+    fail(`\`docker ${args.join(' ')}\` exited with code ${exitCode}.`)
   }
 }
 
@@ -185,7 +177,7 @@ async function waitForPostgresReady(timeoutMs = 60_000): Promise<void> {
   log(`Waiting for postgres at ${POSTGRES_HOST}:${POSTGRES_PORT}...`)
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {
-    const result = Bun.spawnSync(
+    const exitCode = runCommandSync(
       [
         'docker',
         'compose',
@@ -194,13 +186,12 @@ async function waitForPostgresReady(timeoutMs = 60_000): Promise<void> {
         'postgres',
         'pg_isready',
         '-U',
-        'instatic',
+        'fourno',
         '-d',
-        'instatic',
+        'fourno',
       ],
-      { stdout: 'ignore', stderr: 'ignore' },
     )
-    if (result.exitCode === 0) {
+    if (exitCode === 0) {
       log('Postgres is accepting connections.')
       return
     }
@@ -210,11 +201,6 @@ async function waitForPostgresReady(timeoutMs = 60_000): Promise<void> {
 }
 
 // --- main -----------------------------------------------------------------
-
-// Refuse before touching anything: on a Bun older than the Vite proxy needs,
-// the stack comes up looking healthy and the editor never connects.
-const bunError = devStackBunError(Bun.version)
-if (bunError) fail(bunError)
 
 if (isSqliteUrl(DATABASE_URL)) {
   const dbPath = DATABASE_URL.replace(/^sqlite:|^file:/, '')
@@ -231,8 +217,6 @@ if (isSqliteUrl(DATABASE_URL)) {
   stopAppContainerIfRunning()
   await waitForPostgresReady()
 }
-
-await ensureDependencies(log)
 
 await ensurePortFree(CMS_PORT, 'cms', log)
 await ensurePortFree(VITE_PORT, 'vite', log)
@@ -253,7 +237,7 @@ interface DevProcess {
 const processes: DevProcess[] = [
   {
     name: 'cms',
-    command: bunCommand('--watch', 'server/index.ts'),
+    command: tsxCommand('watch', 'server/index.ts'),
     env: {
       PORT: String(CMS_PORT),
       DATABASE_URL,
@@ -271,7 +255,7 @@ const processes: DevProcess[] = [
   },
 ]
 
-const children: Bun.Subprocess[] = []
+const children: ChildProcess[] = []
 let shuttingDown = false
 
 function stopChildren(signal: NodeJS.Signals = 'SIGTERM'): void {
@@ -281,14 +265,9 @@ function stopChildren(signal: NodeJS.Signals = 'SIGTERM'): void {
 }
 
 for (const cfg of processes) {
-  const child = Bun.spawn(cfg.command, {
-    env: { ...process.env, ...cfg.env },
-    stdin: 'inherit',
-    stdout: 'inherit',
-    stderr: 'inherit',
-  })
+  const child = startChild(cfg.command, { ...process.env, ...cfg.env })
   children.push(child)
-  void child.exited.then((code) => {
+  void childExited(child).then((code) => {
     if (shuttingDown) return
     shuttingDown = true
     stopChildren()

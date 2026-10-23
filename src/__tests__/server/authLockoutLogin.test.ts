@@ -5,7 +5,7 @@
  * lockout, audit-event emission, login_attempts row creation, and reset on a
  * subsequent successful login.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { findUserByEmail } from '../../../server/repositories/users'

@@ -1,13 +1,13 @@
 /**
  * Architecture gates for plugin scheduled jobs.
  *
- * The scheduler engine sits inside the same Bun/Node host process as the
+ * The scheduler engine sits inside the same Node host process as the
  * rest of the CMS, but it dispatches to plugin code only through the
  * existing sandboxed worker protocol. These tests lock in the invariants
  * that keep the boundary real: if any of them fail, plugin schedule
  * handlers could escape the sandbox or bypass permission gates.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join, dirname } from 'node:path'

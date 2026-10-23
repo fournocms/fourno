@@ -1,6 +1,13 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
-import { performGatedFetch, isBlockedAddress } from '../../../server/plugins/host/network'
+import { createServer } from 'node:http'
+import type { AddressInfo } from 'node:net'
+import { fetch as undiciFetch, type Dispatcher } from 'undici'
+import {
+  createPinnedDispatcher,
+  performGatedFetch,
+  isBlockedAddress,
+} from '../../../server/plugins/host/network'
 import type { HostPluginRecord } from '../../../server/plugins/host/types'
 
 /**
@@ -26,18 +33,15 @@ function makeEntry(allowlist: string[]): HostPluginRecord {
 const PUBLIC_IP = '93.184.216.34'
 
 /**
- * A fetch stub driven by a scripted sequence of responses keyed by the LOGICAL
- * (hostname) URL. The guard pins the connection to a validated IP, so the real
- * call arrives at `https://<ip>/path` with the hostname in the `Host` header;
- * we reconstruct the hostname URL from that header so scripts stay readable.
+ * A fetch stub driven by a scripted sequence of responses keyed by URL. The
+ * guard keeps the hostname in the URL and pins the connection through an
+ * undici `dispatcher` in the init, so the stub sees the logical URL as-is.
  */
 function scriptedFetch(script: Record<string, Response | (() => Response)>): typeof fetch {
-  return (async (input: string | URL | Request, init?: RequestInit) => {
-    const called = new URL(typeof input === 'string' ? input : input.toString())
-    const hostHeader = (init?.headers as Record<string, string> | undefined)?.Host
-    const logical = `${called.protocol}//${hostHeader ?? called.host}${called.pathname}${called.search}`
-    const entry = script[logical]
-    if (!entry) throw new Error(`unexpected fetch to ${logical} (pinned ${called.host})`)
+  return (async (input: string | URL | Request) => {
+    const called = typeof input === 'string' ? input : input.toString()
+    const entry = script[called]
+    if (!entry) throw new Error(`unexpected fetch to ${called}`)
     return typeof entry === 'function' ? entry() : entry
   }) as unknown as typeof fetch
 }
@@ -95,12 +99,10 @@ describe('performGatedFetch — SSRF guards', () => {
   // between the two. The guard now pins the connection to the checked IP.
   test('pins the connection to the validated IP, defeating DNS rebinding', async () => {
     let fetchedUrl = ''
-    let fetchedHost = ''
-    let fetchedSni = ''
-    const fetchImpl = (async (input: string | URL, init?: RequestInit & { tls?: { serverName: string } }) => {
+    let fetchedDispatcher: Dispatcher | undefined
+    const fetchImpl = (async (input: string | URL, init?: RequestInit & { dispatcher?: Dispatcher }) => {
       fetchedUrl = String(input)
-      fetchedHost = (init?.headers as Record<string, string> | undefined)?.Host ?? ''
-      fetchedSni = init?.tls?.serverName ?? ''
+      fetchedDispatcher = init?.dispatcher
       return new Response('OK', { status: 200 })
     }) as unknown as typeof fetch
 
@@ -117,10 +119,34 @@ describe('performGatedFetch — SSRF guards', () => {
     )
 
     expect(res.status).toBe(200)
-    expect(fetchedUrl).toBe(`https://${PUBLIC_IP}/x`) // pinned to the checked IP
-    expect(fetchedHost).toBe('rebind.example.com') // Host preserved for vhosting
-    expect(fetchedSni).toBe('rebind.example.com') // TLS SNI + cert identity preserved
+    // The URL keeps its hostname, so Host, TLS SNI and certificate identity
+    // all still target the host; the pin lives in the dispatcher.
+    expect(fetchedUrl).toBe('https://rebind.example.com/x')
+    expect(fetchedDispatcher).toBeDefined()
     expect(calls).toBe(1) // resolved exactly once, no re-resolution to rebind
+    await fetchedDispatcher?.close()
+  })
+
+  test('the pinned dispatcher connects to the pinned IP whatever the hostname resolves to', async () => {
+    const seenHostHeaders: string[] = []
+    const server = createServer((req, res) => {
+      seenHostHeaders.push(req.headers.host ?? '')
+      res.end('pinned')
+    })
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve))
+    const { port } = server.address() as AddressInfo
+    // `.invalid` never resolves (RFC 6761), so only the pin can route this.
+    const url = `http://pinned-host.invalid:${port}/probe`
+    const dispatcher = createPinnedDispatcher('127.0.0.1')
+    try {
+      const res = await undiciFetch(url, { dispatcher })
+      expect(await res.text()).toBe('pinned')
+      expect(seenHostHeaders).toEqual([`pinned-host.invalid:${port}`])
+      await expect(undiciFetch(url)).rejects.toThrow()
+    } finally {
+      await dispatcher.close()
+      await new Promise((resolve) => server.close(resolve))
+    }
   })
 
   test('rejects an allowlisted host that resolves to a private IP (DNS rebinding)', async () => {

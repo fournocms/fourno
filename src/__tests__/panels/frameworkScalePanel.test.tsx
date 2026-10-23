@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, render, screen, within } from '@testing-library/react'
 import { SpacingTab } from '@site/panels/SpacingPanel'

@@ -8,7 +8,7 @@
  *  4. validateSite — files field accepted shapes, dedup, drop on unsafe paths
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { isSafePath, normalizePath } from '@core/files/pathValidation'
 import { useEditorStore } from '@site/store/store'
 import { validateSite, SiteValidationError } from '@core/persistence/validate'

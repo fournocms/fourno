@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import type { DbClient, DbResult } from '../../../server/db'
 import { SESSION_COOKIE_NAME } from '../../../server/auth/tokens'
@@ -804,7 +804,7 @@ describe('CMS handlers', () => {
         headers: { 'content-type': 'application/json' },
       }), db)
       const sessionCookie = (loginRes.headers.get('set-cookie') ?? '')
-        .split(';')[0] // just `instatic_admin_session=<token>`
+        .split(';')[0] // just `fourno_admin_session=<token>`
 
       const logoutRes = await handleCmsRequest(new Request('http://localhost/admin/api/cms/logout', {
         method: 'POST',
@@ -830,7 +830,7 @@ describe('CMS handlers', () => {
      * `Origin` is set on the constructed Headers post-hoc because happy-dom
      * (loaded via the test setup) strictly follows the Fetch spec's
      * "forbidden request headers" rule: passing `origin` in the Request
-     * constructor's `headers` init silently drops it. In production, Bun.serve
+     * constructor's `headers` init silently drops it. In production, the server
      * receives the raw HTTP Origin header from the wire — no such filtering
      * applies. Mutating headers after Request construction works in both
      * environments, so we use that path here.

@@ -13,7 +13,7 @@
  * tag the publisher had just injected. Every analytics / observability /
  * tracker plugin with a single external script hit this.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { PLUGIN_API_VERSION, type FrontendAsset } from '@core/plugin-sdk'
 import type { DbResult } from '../../../server/db'
 import {

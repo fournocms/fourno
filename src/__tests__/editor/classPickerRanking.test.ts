@@ -6,7 +6,7 @@
  * `text-*` utility, regardless of registry insertion order.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   rankBySuggestionScore,
   scoreClassNameMatch,

@@ -7,7 +7,7 @@ export type RouteMethod = 'GET' | 'POST' | 'PATCH' | 'DELETE'
 /**
  * Simplified request object available to plugin route handlers inside the
  * QuickJS sandbox. A subset of the Web `Request` API — only the fields that
- * cross the JSON boundary from the Bun host into the VM.
+ * cross the JSON boundary from the Node host into the VM.
  *
  * `headers` is a **case-insensitive** facade matching the standard `Headers`
  * interface surface. It normalises all key lookups to lowercase, so

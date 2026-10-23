@@ -1,5 +1,5 @@
 /**
- * Class composition helper for the instatic.
+ * Class composition helper for the fourno.
  *
  * Joins truthy strings into a single space-separated className.
  * Falsy values (false / null / undefined) are dropped so callers can

@@ -11,7 +11,7 @@
  * assigned dispatch, Arrow-Up/Down highlight clamping, and the submit-
  * tooltip priority order.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   CLASS_PICKER_RESULT_LIMIT,
   useClassPickerSuggestions,

@@ -21,7 +21,7 @@
 import { Type, type Static } from '@sinclair/typebox'
 import { parseJsonWithFallback } from '@core/utils/jsonValidate'
 
-export const CLASS_USAGE_STORAGE_KEY = 'instatic-class-usage'
+export const CLASS_USAGE_STORAGE_KEY = 'fourno-class-usage'
 
 /** How many entries each section shows when the input is empty. */
 export const CLASS_USAGE_RECENT_LIMIT = 8

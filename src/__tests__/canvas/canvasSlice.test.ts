@@ -17,7 +17,7 @@
  * @see Contribution #435 — Phase 2 Infinite Canvas Architecture Spec
  * @see MIN_ZOOM, MAX_ZOOM, MAX_PAN constants in canvasSlice.ts
  */
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import {
   MIN_ZOOM,

@@ -4,7 +4,7 @@
  * single-entry template (parentEntry binding), and pagination markup.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeModule, makePage, makeRegistry, makeSite } from './helpers'
 import { publishPage, type ResolvedLoopRenderData } from '@core/publisher'
 import type { LoopItem } from '@core/loops/types'
@@ -37,7 +37,7 @@ const loopModule = makeModule('base.loop', {
   canHaveChildren: true,
   // Defense-in-depth fallback that should never be called — interceptor
   // handles loop rendering. If it IS called, the test will see this.
-  render: () => ({ html: '<!-- instatic: loop default render hit -->' }),
+  render: () => ({ html: '<!-- fourno: loop default render hit -->' }),
 })
 
 // Renders BOTH the parentEntry and currentEntry bindings in one element so a
@@ -367,12 +367,12 @@ describe('publisher loop renderer', () => {
       loopData: new Map([['loop', loopDataWithMore(items, 2)]]),
     }).html
 
-    expect(html).toContain('data-instatic-loop="loop"')
-    expect(html).toContain('data-instatic-loop-mode="infinite"')
-    expect(html).toContain('data-instatic-loop-has-more="true"')
-    expect(html).toContain('data-instatic-loop-page-size="2"')
+    expect(html).toContain('data-fourno-loop="loop"')
+    expect(html).toContain('data-fourno-loop-mode="infinite"')
+    expect(html).toContain('data-fourno-loop-has-more="true"')
+    expect(html).toContain('data-fourno-loop-page-size="2"')
     // Loop runtime script injected when at least one infinite loop exists
-    expect(html).toContain('/_instatic/assets/loop-runtime.js')
+    expect(html).toContain('/_fourno/assets/loop-runtime.js')
   })
 
   it('does not inject the loop runtime when no loop is infinite', () => {
@@ -426,11 +426,11 @@ describe('publisher loop renderer — htmlAttributes', () => {
   })
 
   it('keeps the loop runtime bookkeeping when an author reuses the name', () => {
-    // The shared sanitiser reserves the `data-instatic-*` prefix, so the
+    // The shared sanitiser reserves the `data-fourno-*` prefix, so the
     // pagination and hole machinery cannot be redirected from the attributes
     // panel — the author's value never reaches the tag at all.
-    const html = publishLoopWith({ 'data-instatic-loop': 'hijacked' })
-    expect(html).toContain('data-instatic-loop="loop"')
+    const html = publishLoopWith({ 'data-fourno-loop': 'hijacked' })
+    expect(html).toContain('data-fourno-loop="loop"')
     expect(html).not.toContain('hijacked')
   })
 
@@ -453,6 +453,6 @@ describe('publisher loop renderer — htmlAttributes', () => {
     const html = publishPage(page, makeSite(), baseRegistry, {
       loopData: new Map([['loop', loopData(items)]]),
     }).html
-    expect(html).toContain('<div data-instatic-loop="loop" data-instatic-loop-page="1">')
+    expect(html).toContain('<div data-fourno-loop="loop" data-fourno-loop-page="1">')
   })
 })

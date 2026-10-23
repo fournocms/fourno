@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { getLayersCommands } from '@admin/spotlight/commands/layers'
 import type { CommandRunContext } from '@admin/spotlight/types'
 import { useEditorStore } from '@site/store/store'

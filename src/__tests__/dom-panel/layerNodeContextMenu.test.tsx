@@ -11,7 +11,7 @@
  *   right-clicked nodeId as parent.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { LayerNodeContextMenu } from '@site/panels/DomPanel/LayerNodeContextMenu'

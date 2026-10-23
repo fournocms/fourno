@@ -2,7 +2,7 @@
  * linkRewrite.test.ts — internal links → dynamic page references on import.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { createNode } from '@core/page-tree'
 import { rewriteInternalLinks } from '@core/siteImport'
 import type { PagePlan } from '@core/siteImport'

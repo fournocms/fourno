@@ -1,20 +1,17 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
+import { runTypeScriptSnippet } from '../../../../src/__tests__/helpers/runTypeScriptSnippet'
 import { sanitizeSvgBytes } from '../svgSanitize'
 
 const enc = new TextEncoder()
 
 describe('sanitizeSvgBytes', () => {
   // The DOMPurify SVG profile is only reliable on the jsdom runtime the server
-  // installs. happy-dom, the bun-test default DOM, mishandles the SVG node walk
+  // installs. happy-dom, the test suite's default DOM, mishandles the SVG node walk
   // (it drops geometry after a removal and can even leave a javascript: URL in
   // an <animate>), so a test on the ambient DOM would not reflect production.
   // Run the sanitiser in a clean process with the real server runtime.
   it('removes scripting vectors while keeping geometry (jsdom runtime, GHSA-5h25)', () => {
-    const result = Bun.spawnSync({
-      cmd: [
-        process.execPath,
-        '-e',
-        `
+    const result = runTypeScriptSnippet(`
           await import('./server/richtextSanitizer.ts')
           const { sanitizeSvgBytes } = await import('./server/handlers/cms/svgSanitize.ts')
           const enc = new TextEncoder(), dec = new TextDecoder()
@@ -48,11 +45,7 @@ describe('sanitizeSvgBytes', () => {
             const o = clean(input)
             for (const t of tokens) must(!o.includes(t), 'expected "' + t + '" gone from ' + JSON.stringify(input) + ', got: ' + o)
           }
-        `,
-      ],
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
+        `)
 
     if (result.exitCode !== 0) {
       throw new Error(new TextDecoder().decode(result.stderr))

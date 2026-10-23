@@ -6,7 +6,7 @@
  * setClassContextStyles / removeClassContext / addCondition / removeCondition.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { conditionId } from '@core/page-tree'
 import '@modules/base'

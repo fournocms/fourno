@@ -1,6 +1,6 @@
 /**
  * Site CSS bundle — type definitions for the four external CSS files served
- * at `/_instatic/css/<filename>` for every published page.
+ * at `/_fourno/css/<filename>` for every published page.
  *
  * The IMPLEMENTATION (`buildSiteCssBundle`) lives in `server/publish/siteCssBundle.ts`
  * because it depends on `node:crypto` for content hashing. Only the type shape
@@ -60,7 +60,7 @@ export type SiteCssBundleId = 'reset' | 'framework' | 'style' | 'userStyles'
 
 /**
  * One built CSS file. `filename` already includes the content hash and `.css`
- * extension, ready to drop into the `/_instatic/css/` URL or a `<link>` href.
+ * extension, ready to drop into the `/_fourno/css/` URL or a `<link>` href.
  */
 export interface CssBundleFile {
   /** Logical bundle this file belongs to. */

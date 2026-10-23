@@ -1,8 +1,8 @@
 # Release Workflow
 
-This maintainer guide covers publishing Instatic Docker images.
+This maintainer guide covers publishing Fourno Docker images.
 
-End users do not need this page to deploy Instatic. They follow [railway.md](railway.md), [render.md](render.md), [vps.md](vps.md), or [docker-image.md](docker-image.md). Maintainers use this page to keep `ghcr.io/corebunch/instatic` release tags aligned with source tags and deployment templates.
+End users do not need this page to deploy Fourno. They follow [railway.md](railway.md), [render.md](render.md), [vps.md](vps.md), or [docker-image.md](docker-image.md). Maintainers use this page to keep `ghcr.io/fourno/fourno` release tags aligned with source tags and deployment templates.
 
 ---
 
@@ -11,9 +11,9 @@ End users do not need this page to deploy Instatic. They follow [railway.md](rai
 Release image tags:
 
 ```txt
-ghcr.io/corebunch/instatic:latest
-ghcr.io/corebunch/instatic:<semver>
-ghcr.io/corebunch/instatic:<major>.<minor>
+ghcr.io/fourno/fourno:latest
+ghcr.io/fourno/fourno:<semver>
+ghcr.io/fourno/fourno:<major>.<minor>
 ```
 
 Release flow:
@@ -21,7 +21,7 @@ Release flow:
 1. Keep `main` releasable.
 2. Update deployment docs that intentionally pin the semver image tag.
 3. Tag a version, e.g. `v0.0.1`.
-4. GitHub Actions runs `bun run build`, `bun test`, and `bun run lint`.
+4. GitHub Actions runs `pnpm build`, `pnpm test`, and `pnpm lint`.
 5. GitHub Actions builds `Dockerfile`.
 6. GitHub Actions pushes the semver image, minor image, and `latest` to GHCR.
 7. GitHub Actions creates the GitHub Release and uploads the release bundle.
@@ -38,13 +38,13 @@ docs/deployment/docker-image.md
 docs/deployment/railway.md
 ```
 
-The checked-in Render Blueprints use `ghcr.io/corebunch/instatic:latest` for new one-click installs. `scripts/build-release-bundle.ts` rewrites the release-bundle copies to the semver image tag automatically.
+The checked-in Render Blueprints use `ghcr.io/fourno/fourno:latest` for new one-click installs. `scripts/build-release-bundle.ts` rewrites the release-bundle copies to the semver image tag automatically.
 
 After the release image is published, copy the two Render Blueprint files into the dedicated template repositories as their root `render.yaml` files when their non-versioned template configuration changes:
 
 ```txt
-corebunch/instatic-render-sqlite
-corebunch/instatic-render-postgres
+fourno/fourno-render-sqlite
+fourno/fourno-render-postgres
 ```
 
 ## Tag A Release
@@ -57,54 +57,16 @@ git push origin v0.0.1
 The release workflow publishes:
 
 ```txt
-ghcr.io/corebunch/instatic:0.0.1
-ghcr.io/corebunch/instatic:0.0
-ghcr.io/corebunch/instatic:latest
+ghcr.io/fourno/fourno:0.0.1
+ghcr.io/fourno/fourno:0.0
+ghcr.io/fourno/fourno:latest
 ```
 
 It also uploads:
 
 ```txt
-instatic-0.0.1-release-bundle.tar.gz
-instatic-server-0.0.1-darwin-arm64.tar.gz
-instatic-server-0.0.1-darwin-x64.tar.gz
-instatic-server-0.0.1-linux-x64.tar.gz
-instatic-server-0.0.1-windows-x64.tar.gz
-instatic-server-0.0.1-checksums.txt
+fourno-0.0.1-release-bundle.tar.gz
 ```
-
-The `instatic-server-*` assets are per-platform **runnable server artifacts**: a
-`bun build --compile` single-file server binary (Bun runtime, sharp/libvips,
-and the QuickJS plugin-sandbox WASM all embedded) plus the built admin `dist/`.
-They are built by `bun run release:server-artifacts` (`scripts/build-server-artifact.ts`)
-on a macOS arm64 runner, which cross-compiles every target. Tooling that
-installs releases should treat a release as artifact-enabled only when these
-assets are present, and verify the sha256 checksums file after download. The Windows artifact
-self-extracts its libvips DLLs on boot into a per-version temp directory
-(Bun embeds files under hashed names, which breaks by-name DLL resolution)
-and preloads them bottom-up — `libvips-42.dll`, then `libvips-cpp-*.dll`,
-then the sharp `.node` — because the Windows loader resolves by-name imports
-from already-loaded modules but never searches a loaded DLL's own directory.
-The C++ DLL is loaded via `kernel32.LoadLibraryW` rather than `bun:ffi`'s
-`dlopen`: it exports only C++-mangled names, which cannot appear in the C
-wrapper `bun:ffi` generates per requested symbol. jsdom and one of its
-dependencies resolve their own files at runtime, which works in dev and fails on
-boot inside the binary: jsdom reads `default-stylesheet.css` through `__dirname`
-and resolves its synchronous-XHR worker with `require.resolve` (a compiled
-binary bakes both as the build machine's absolute paths), and css-tree's ESM
-build loads its data through `createRequire(import.meta.url)` (which resolves
-against `/$bunfs`). `scripts/lib/serverArtifactPlugins.ts` inlines the
-stylesheet, drops the worker (the server never issues synchronous XHR), and
-routes `css-tree` to its CJS build, whose requires the bundler embeds.
-`scripts/lib/serverArtifactPlugins.test.ts` compiles the production sanitizer,
-checks the binary for the build machine's `node_modules` path, and boots it
-with `node_modules` reads denied, so a regression fails `bun test` rather than
-a release. esbuild, which the publisher runs at publish time, spawns a Go
-binary it locates relative to `__dirname`; the artifact embeds the target's
-binary, extracts it at boot to a per-version temp directory
-(`scripts/lib/serverArtifactRuntime.ts`), and points `ESBUILD_BINARY_PATH` at
-it. The compile itself fails if the finished binary still contains the build
-machine's `node_modules` path.
 
 Release notes should link to:
 
@@ -145,8 +107,8 @@ docker compose -f compose.prod.yml -f compose.build.yml up -d --build
 Or build and tag an image manually:
 
 ```sh
-docker build -t ghcr.io/corebunch/instatic:dev .
-INSTATIC_IMAGE=ghcr.io/corebunch/instatic:dev docker compose -f compose.prod.yml up -d
+docker build -t ghcr.io/fourno/fourno:dev .
+FOURNO_IMAGE=ghcr.io/fourno/fourno:dev docker compose -f compose.prod.yml up -d
 ```
 
 ## GitHub Actions Shape
@@ -160,23 +122,22 @@ The release workflow should:
 - push `latest` for tagged releases
 - create a release bundle with the Compose files and deployment docs
 - include the Render Blueprint templates in the release bundle
-- build and upload the per-platform runnable server artifacts + checksums (macOS arm64 runner, cross-compiled)
 
 The first release targets `linux/amd64` because QEMU-based arm64 publishing made the tagged workflow too slow to use as a release gate. Add arm64 as a separate native-runner build before advertising multi-arch images.
 
 ## Image Registry
 
-GHCR (`ghcr.io/corebunch/instatic`) is the only published registry. It is produced directly by the release workflow, is public, and has no aggressive anonymous pull-rate limits — use it in every Compose file, template, and deployment guide. There is no Docker Hub mirror; if one is ever wanted, add a `Mirror To Docker Hub` job plus `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
+GHCR (`ghcr.io/fourno/fourno`) is the only published registry. It is produced directly by the release workflow, is public, and has no aggressive anonymous pull-rate limits — use it in every Compose file, template, and deployment guide. There is no Docker Hub mirror; if one is ever wanted, add a `Mirror To Docker Hub` job plus `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` repository secrets.
 
 ## GHCR Visibility
 
-After the first successful tagged release, open the package page for `ghcr.io/corebunch/instatic` in GitHub Packages and set visibility to public.
+After the first successful tagged release, open the package page for `ghcr.io/fourno/fourno` in GitHub Packages and set visibility to public.
 
 Verify anonymous pulls work:
 
 ```sh
 docker logout ghcr.io
-docker pull ghcr.io/corebunch/instatic:latest
+docker pull ghcr.io/fourno/fourno:latest
 ```
 
 ## Related

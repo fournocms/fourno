@@ -14,7 +14,7 @@
  *   - Cascade order: `generateClassCSS` emits rules in ascending `order`.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { classNamesForClassIds } from '@core/page-tree'
 import { collectClassCSS, generateClassCSS } from '@core/publisher'

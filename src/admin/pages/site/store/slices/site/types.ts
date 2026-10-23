@@ -8,7 +8,7 @@
 
 import type { StoreApi } from 'zustand'
 import type { Draft } from 'mutative'
-import type { FrameworkColorToken, FrameworkColorUtilityType, FrameworkPreferencesSettings, FrameworkScaleManualSize, FrameworkScaleMode, FrameworkSpacingClassGenerator, FrameworkSpacingGroup, FrameworkTypographyClassGenerator, FrameworkTypographyGroup } from '@core/framework-schema'
+import type { FrameworkColorToken, FrameworkPreferencesSettings, FrameworkScaleManualSize, FrameworkSpacingClassGenerator, FrameworkSpacingGroup, FrameworkTypographyClassGenerator, FrameworkTypographyGroup } from '@core/framework-schema'
 import type {
   DecorativeSiteExplorerSectionId,
   DynamicPropBinding,
@@ -28,6 +28,14 @@ import type {
 import type { FontEntry, FontToken } from '@core/fonts'
 import type { ImportFragment } from '@core/htmlImport'
 import type { NewStyleRule, SiteImportTransaction } from '@core/siteImport'
+import type {
+  CreateFrameworkColorTokenInput,
+  SetScaleGroupRequest,
+  SetScaleGroupResult,
+  UpdateFrameworkColorTokenPatch,
+  UpdateFrameworkSpacingGroupPatch,
+  UpdateFrameworkTypographyGroupPatch,
+} from '@core/siteEdit'
 import type { FrameworkChangeImpact, FrameworkPreset } from '@core/framework'
 import type { EditorStore } from '@site/store/types'
 
@@ -35,58 +43,6 @@ import type { EditorStore } from '@site/store/types'
 // Public action surface — every method below appears as a top-level entry on
 // the EditorStore.
 // ---------------------------------------------------------------------------
-
-export type ColorVariantOptions = { enabled: boolean; count: number }
-
-export interface CreateFrameworkColorTokenInput {
-  category?: string
-  slug: string
-  lightValue: string
-  darkValue?: string
-  darkModeEnabled?: boolean
-  generateUtilities?: Partial<Record<FrameworkColorUtilityType, boolean>>
-  generateTransparent?: boolean
-  generateShades?: Partial<ColorVariantOptions>
-  generateTints?: Partial<ColorVariantOptions>
-}
-
-export type UpdateFrameworkColorTokenPatch = Partial<{
-  category: string
-  slug: string
-  lightValue: string
-  darkValue: string
-  darkModeEnabled: boolean
-  generateUtilities: Partial<Record<FrameworkColorUtilityType, boolean>>
-  generateTransparent: boolean
-  generateShades: Partial<ColorVariantOptions>
-  generateTints: Partial<ColorVariantOptions>
-  order: number
-}>
-
-export type UpdateFrameworkTypographyGroupPatch = Partial<{
-  name: string
-  namingConvention: string
-  steps: string
-  baseScaleIndex: number
-  mode: FrameworkScaleMode
-  isDisabled: boolean
-  /** Patch into the `min` breakpoint config — fields are merged, untouched fields preserved. */
-  min: Partial<FrameworkTypographyGroup['min']>
-  max: Partial<FrameworkTypographyGroup['max']>
-  manualSizes: FrameworkScaleManualSize[]
-}>
-
-export type UpdateFrameworkSpacingGroupPatch = Partial<{
-  name: string
-  namingConvention: string
-  steps: string
-  baseScaleIndex: number
-  mode: FrameworkScaleMode
-  isDisabled: boolean
-  min: Partial<FrameworkSpacingGroup['min']>
-  max: Partial<FrameworkSpacingGroup['max']>
-  manualSizes: FrameworkScaleManualSize[]
-}>
 
 interface CreateFontTokenInput {
   name: string
@@ -264,6 +220,8 @@ export interface SiteSlice {
 
   // Framework typography mutations
   toggleFrameworkTypographyDisabled: () => void
+  /** Create-or-update one typography group in ONE mutation (`site_set_type_scale`). */
+  setFrameworkTypographyScale: (request: SetScaleGroupRequest<'typography'>) => SetScaleGroupResult
   createFrameworkTypographyGroup: () => FrameworkTypographyGroup
   updateFrameworkTypographyGroup: (groupId: string, patch: UpdateFrameworkTypographyGroupPatch) => void
   duplicateFrameworkTypographyGroup: (groupId: string) => FrameworkTypographyGroup | null
@@ -278,6 +236,8 @@ export interface SiteSlice {
 
   // Framework spacing mutations
   toggleFrameworkSpacingDisabled: () => void
+  /** Create-or-update one spacing group in ONE mutation (`site_set_spacing_scale`). */
+  setFrameworkSpacingScale: (request: SetScaleGroupRequest<'spacing'>) => SetScaleGroupResult
   createFrameworkSpacingGroup: () => FrameworkSpacingGroup
   updateFrameworkSpacingGroup: (groupId: string, patch: UpdateFrameworkSpacingGroupPatch) => void
   duplicateFrameworkSpacingGroup: (groupId: string) => FrameworkSpacingGroup | null

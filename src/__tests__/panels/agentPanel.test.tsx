@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { createStore } from 'zustand/vanilla'
 import { AgentStoreProvider } from '@admin/ai/AgentStoreContext'
@@ -29,7 +29,7 @@ function installModelFetch(
   contextWindow: number | null = 128_000,
   credential: CredentialView = TEST_CREDENTIAL,
 ): void {
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     if (url.endsWith('/admin/api/ai/credentials')) {
       return jsonResponse({ credentials: [credential] })
@@ -87,7 +87,7 @@ function installImageBrowserMocks(
 
   Object.defineProperty(globalThis, 'createImageBitmap', {
     configurable: true,
-    value: mock(() => bitmapPromise),
+    value: vi.fn(() => bitmapPromise),
   })
   Object.defineProperty(canvasPrototype, 'getContext', {
     configurable: true,
@@ -119,7 +119,7 @@ function fakeBitmap(): ImageBitmap {
   return {
     width: 100,
     height: 80,
-    close: mock(() => {}),
+    close: vi.fn(() => {}),
   } as unknown as ImageBitmap
 }
 
@@ -278,7 +278,7 @@ describe('AgentPanel', () => {
   })
 
   it('surfaces a large setup empty state and header shortcut when no credentials exist', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({ credentials: [] })
@@ -306,7 +306,7 @@ describe('AgentPanel', () => {
   })
 
   it('shows the build prompt when a provider is active (default preloaded)', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({
@@ -441,7 +441,7 @@ describe('AgentPanel', () => {
   })
 
   it('prompts to choose a model when credentials exist but no default is set', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({
@@ -480,7 +480,7 @@ describe('AgentPanel', () => {
   })
 
   it('preloads the scope default on open', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({ credentials: [] })
@@ -498,7 +498,7 @@ describe('AgentPanel', () => {
     // Reproduces issue #2: a prior send left a sticky "No AI provider
     // configured" error; the user then picked a model (active credential +
     // model staged). The setup lockout must NOT show — the composer is usable.
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) {
         return jsonResponse({
@@ -542,7 +542,7 @@ describe('AgentPanel', () => {
     const decode = deferred<ImageBitmap>()
     const bitmap = fakeBitmap()
     installImageBrowserMocks(decode.promise)
-    const sendAgentMessage = mock(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
+    const sendAgentMessage = vi.fn(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
     renderAgentPanel({
       agentActiveCredentialId: TEST_CREDENTIAL.id,
       agentActiveModelId: 'model-1',
@@ -581,7 +581,7 @@ describe('AgentPanel', () => {
   it('retains text and the prepared image when the request is rejected before acceptance', async () => {
     installModelFetch(true)
     installImageBrowserMocks()
-    const sendAgentMessage = mock(async (_content: AiUserContentBlock[]) => ({ accepted: false }))
+    const sendAgentMessage = vi.fn(async (_content: AiUserContentBlock[]) => ({ accepted: false }))
     renderAgentPanel({
       agentActiveCredentialId: TEST_CREDENTIAL.id,
       agentActiveModelId: 'model-1',
@@ -614,9 +614,9 @@ describe('AgentPanel', () => {
     let decodeIndex = 0
     Object.defineProperty(globalThis, 'createImageBitmap', {
       configurable: true,
-      value: mock(() => [firstDecode.promise, secondDecode.promise][decodeIndex++]!),
+      value: vi.fn(() => [firstDecode.promise, secondDecode.promise][decodeIndex++]!),
     })
-    const sendAgentMessage = mock(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
+    const sendAgentMessage = vi.fn(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
     renderAgentPanel({
       agentActiveCredentialId: TEST_CREDENTIAL.id,
       agentActiveModelId: 'model-1',
@@ -656,7 +656,7 @@ describe('AgentPanel', () => {
   it('sends every prepared image in its original paste order', async () => {
     installModelFetch(true)
     installImageBrowserMocks()
-    const sendAgentMessage = mock(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
+    const sendAgentMessage = vi.fn(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
     renderAgentPanel({
       agentActiveCredentialId: TEST_CREDENTIAL.id,
       agentActiveModelId: 'model-1',
@@ -678,7 +678,7 @@ describe('AgentPanel', () => {
   it('attaches multiple local images through the picker beside Send', async () => {
     installModelFetch(true)
     installImageBrowserMocks()
-    const sendAgentMessage = mock(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
+    const sendAgentMessage = vi.fn(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
     const { container } = renderAgentPanel({
       agentActiveCredentialId: TEST_CREDENTIAL.id,
       agentActiveModelId: 'model-1',
@@ -723,7 +723,7 @@ describe('AgentPanel', () => {
   it('keeps an attachment visible but disables send for a non-vision model', async () => {
     installModelFetch(false)
     installImageBrowserMocks()
-    const sendAgentMessage = mock(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
+    const sendAgentMessage = vi.fn(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
     renderAgentPanel({
       agentActiveCredentialId: TEST_CREDENTIAL.id,
       agentActiveModelId: 'model-1',
@@ -743,7 +743,7 @@ describe('AgentPanel', () => {
 
   it('blocks send when the selected model is known not to support agent tools', async () => {
     installModelFetch(true, false)
-    const sendAgentMessage = mock(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
+    const sendAgentMessage = vi.fn(async (_content: AiUserContentBlock[]) => ({ accepted: true }))
     renderAgentPanel({
       agentActiveCredentialId: TEST_CREDENTIAL.id,
       agentActiveModelId: 'model-1',
@@ -784,7 +784,7 @@ describe('AgentPanel', () => {
   })
 
   it('renders a rehydrated user image block in conversation history', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) return jsonResponse({ credentials: [] })
       throw new Error(`Unexpected fetch: ${url}`)
@@ -804,7 +804,7 @@ describe('AgentPanel', () => {
   })
 
   it('coalesces images into compact galleries and opens a focus-restoring preview', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) return jsonResponse({ credentials: [] })
       throw new Error(`Unexpected fetch: ${url}`)
@@ -856,7 +856,7 @@ describe('AgentPanel', () => {
   })
 
   it('opens the same image action menu from chat, keyboard, and the preview', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) return jsonResponse({ credentials: [] })
       throw new Error(`Unexpected fetch: ${url}`)
@@ -903,7 +903,7 @@ describe('AgentPanel', () => {
 
   it('saves a lazy conversation image through the canonical Media upload', async () => {
     let uploadedFile: File | null = null
-    globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) return jsonResponse({ credentials: [] })
       if (url === '/conversation-image/0') {
@@ -950,7 +950,7 @@ describe('AgentPanel', () => {
   })
 
   it('uses the same gallery for assistant and plural tool-result images', async () => {
-    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL) => {
       const url = typeof input === 'string' ? input : input.toString()
       if (url.endsWith('/admin/api/ai/credentials')) return jsonResponse({ credentials: [] })
       throw new Error(`Unexpected fetch: ${url}`)

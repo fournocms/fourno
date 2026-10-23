@@ -8,7 +8,7 @@
  *      SQLite `current_timestamp` writes `YYYY-MM-DD HH:MM:SS`, which V8 parses
  *      as local time, sorts before the ISO `T` form, and compares wrongly
  *      against a bound ISO cutoff — and only on SQLite installs outside UTC,
- *      so a UTC `bun test` never notices.
+ *      so a UTC `pnpm test` never notices.
  *   2. A DDL `default current_timestamp` (the three tables that predate the
  *      ISO `strftime` default, plus `schema_migrations`) may only sit on a
  *      column ending in `_at`: that suffix is what the SQLite adapter's
@@ -26,12 +26,12 @@
  * @see src/__tests__/db/sqlite-timestamp-normalization.test.ts — the read contract
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 import { sqliteMigrations } from '../../../server/db/migrations-sqlite'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const SCAN_ROOT = join(PROJECT_ROOT, 'server')
 /** Committed migrations: their DML is history and cannot bind JS values. Rule 2 still applies. */
 const MIGRATION_FILES = new Set(['server/db/migrations-pg.ts', 'server/db/migrations-sqlite.ts'])

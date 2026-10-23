@@ -9,7 +9,7 @@
  *   - Atomicity: forced upload failure leaves no partial store state
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 // Self-registers all base modules with the global registry so importHtml works
 import '@modules/base'
 import {

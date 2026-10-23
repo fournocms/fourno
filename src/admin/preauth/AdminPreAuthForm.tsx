@@ -130,10 +130,10 @@ export function AdminPreAuthForm({
   const submitLabel = submitting ? copy.submitPending : copy.submit
 
   // Pre-auth brand row: when the install has picked a favicon, render it
-  // in place of the default icon AND swap the "Instatic" label for
+  // in place of the default icon AND swap the "Fourno" label for
   // the operator-configured site name. When neither is set, keep the
   // default mark + product name so a fresh clone still looks like itself.
-  const brandLabel = publicSite.name ?? 'Instatic'
+  const brandLabel = publicSite.name ?? 'Fourno'
 
   const onSubmit =
     phase === 'setup' ? handleSetup :

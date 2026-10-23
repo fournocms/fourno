@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createCapabilityTestHarness, readJson, type CapabilityTestHarness } from '../helpers/capabilityHarness'
 import { __resetMasterKeyCacheForTesting } from '../../../server/secrets/masterKey'
 
@@ -15,7 +15,7 @@ describe('AI credential handler', () => {
     originalWarn = console.warn
     originalError = console.error
     originalNodeEnv = process.env.NODE_ENV
-    originalSecretKey = process.env.INSTATIC_SECRET_KEY
+    originalSecretKey = process.env.FOURNO_SECRET_KEY
     __resetMasterKeyCacheForTesting()
     globalThis.fetch = async (input, init) => {
       const url = typeof input === 'string'
@@ -50,9 +50,9 @@ describe('AI credential handler', () => {
       process.env.NODE_ENV = originalNodeEnv
     }
     if (originalSecretKey === undefined) {
-      delete process.env.INSTATIC_SECRET_KEY
+      delete process.env.FOURNO_SECRET_KEY
     } else {
-      process.env.INSTATIC_SECRET_KEY = originalSecretKey
+      process.env.FOURNO_SECRET_KEY = originalSecretKey
     }
     __resetMasterKeyCacheForTesting()
     await harness.cleanup()
@@ -60,13 +60,26 @@ describe('AI credential handler', () => {
 
   it('creates the credential when auto-default seeding fails', async () => {
     const cookie = await harness.setupOwner()
-    await harness.db.unsafe(`
+    await harness.db.unsafe(
+      harness.db.dialect === 'postgres'
+        ? `
+      create function fail_ai_default_insert() returns trigger as $$
+      begin
+        raise exception 'default write failed';
+      end;
+      $$ language plpgsql;
+      create trigger fail_ai_default_insert
+      before insert on ai_defaults
+      for each row execute function fail_ai_default_insert();
+    `
+        : `
       create trigger fail_ai_default_insert
       before insert on ai_defaults
       begin
         select raise(abort, 'default write failed');
       end;
-    `)
+    `,
+    )
 
     console.warn = () => {}
     const res = await harness.ai('/admin/api/ai/credentials', {
@@ -93,7 +106,7 @@ describe('AI credential handler', () => {
       from ai_provider_credentials
       where provider_id = 'openai'
     `
-    expect(rows[0]?.count).toBe(1)
+    expect(Number(rows[0]?.count)).toBe(1)
   })
 
   it('does not auto-default an offline Ollama credential from fallback models', async () => {
@@ -131,7 +144,7 @@ describe('AI credential handler', () => {
       select count(*) as count
       from ai_defaults
     `
-    expect(rows[0]?.count).toBe(0)
+    expect(Number(rows[0]?.count)).toBe(0)
     expect(warnings.join('\n')).toContain('auto-default skipped')
   })
 
@@ -164,7 +177,7 @@ describe('AI credential handler', () => {
 
   it('surfaces a clear production error when the credential encryption key is missing', async () => {
     process.env.NODE_ENV = 'production'
-    delete process.env.INSTATIC_SECRET_KEY
+    delete process.env.FOURNO_SECRET_KEY
     __resetMasterKeyCacheForTesting()
 
     const cookie = await harness.setupOwner()
@@ -182,7 +195,7 @@ describe('AI credential handler', () => {
 
     expect(res.status).toBe(500)
     const body = await readJson<{ error: string }>(res)
-    expect(body.error).toContain('INSTATIC_SECRET_KEY')
+    expect(body.error).toContain('FOURNO_SECRET_KEY')
     expect(body.error).not.toContain('sk-proj-test')
   })
 

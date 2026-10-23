@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { resolveViewportUnits } from '@core/utils/viewportUnits'
 import { CANVAS_VIEWPORT_HEIGHT } from '@site/canvas/canvasViewport'
 

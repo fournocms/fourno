@@ -33,11 +33,11 @@
  * @see server/db/sqlite.ts          — why _json suffix matters (normalizeSqliteRow)
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 /**
  * Roots that contain DbClient-consuming code in the current layout.
  * The legacy `server/cms/` namespace was split into `server/{repositories,

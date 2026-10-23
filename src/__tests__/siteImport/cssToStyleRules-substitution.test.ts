@@ -14,7 +14,7 @@
  * production) and assert byte-faithful output.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { cssToStyleRules } from '@core/siteImport'
 import {
   encodeSubstitutionDeclarations,

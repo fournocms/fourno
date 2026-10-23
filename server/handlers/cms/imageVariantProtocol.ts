@@ -5,7 +5,7 @@
  * ladder in ~200–500 ms of CPU. Running that on the main thread blocks every
  * visitor request and the admin API for the duration — a burst of uploads
  * was the one observable main-thread stall in the single-process model.
- * This protocol moves the CPU work into a `Bun.Worker` pool so the main
+ * This protocol moves the CPU work into a worker-thread pool so the main
  * thread stays free for HTTP work.
  *
  * Trust boundary: same process, same source tree, structured-clone in

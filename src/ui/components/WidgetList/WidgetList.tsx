@@ -25,7 +25,7 @@
  *
  * Lives under `src/ui/components/` so first-party widgets and plugin
  * widgets render with identical row styling. Exported via
- * `@instatic/host-ui` so plugins drop their data straight in.
+ * `@fourno/host-ui` so plugins drop their data straight in.
  */
 import type { ReactNode } from 'react'
 import styles from './WidgetList.module.css'
@@ -47,7 +47,7 @@ export interface WidgetListRowProps {
   /**
    * Right cell — numbers, badges, or a small inline group of both. Stays
    * in mono font so columns of numbers line up. Composes with `Delta`
-   * from `@instatic/host-ui` for trend indicators.
+   * from `@fourno/host-ui` for trend indicators.
    */
   meta?: ReactNode
 }

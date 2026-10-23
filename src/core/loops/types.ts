@@ -154,7 +154,7 @@ export interface SourceFetchContext {
 export interface SourceRequestContext {
   /** Parsed query params of the originating page request (e.g. `?q=shoes`). */
   query: Record<string, string>
-  /** Path of the originating page (`/search`), NOT the `/_instatic/hole/…` path. */
+  /** Path of the originating page (`/search`), NOT the `/_fourno/hole/…` path. */
   path: string
   /** Trailing path segment, mirrors `RouteFrame.slug`. */
   slug: string | null

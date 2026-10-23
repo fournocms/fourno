@@ -13,7 +13,7 @@
  * play the remote peer at the Y level, proving the surface merges remote
  * edits mid-session and the next keystroke preserves both intents.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
 import * as Y from 'yjs'

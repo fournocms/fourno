@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { publishPage } from '@core/publisher'
 import { makeModule, makeRegistry, makePage, makeSite } from './helpers'
 

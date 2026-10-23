@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { CmsMediaAsset } from '@core/persistence/cmsMedia'
 import { mediaCanvasInsertionForAsset } from '@site/panels/MediaExplorerPanel/mediaCanvasInsertion'
 

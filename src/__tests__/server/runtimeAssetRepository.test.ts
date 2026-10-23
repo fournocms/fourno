@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import {
   getPublishedRuntimeAsset,
@@ -48,17 +48,17 @@ describe('published runtime asset repository', () => {
     await savePublishedRuntimeAssets(db, 'version_1', [
       {
         path: 'entries/entry.js',
-        publicPath: '/_instatic/assets/version_1/entries/entry.js',
+        publicPath: '/_fourno/assets/version_1/entries/entry.js',
         content: 'console.log("ok")',
         bytes: new TextEncoder().encode('console.log("ok")'),
         contentType: 'text/javascript; charset=utf-8',
       },
     ])
 
-    const asset = await getPublishedRuntimeAsset(db, '/_instatic/assets/version_1/entries/entry.js')
+    const asset = await getPublishedRuntimeAsset(db, '/_fourno/assets/version_1/entries/entry.js')
 
     expect(asset).toMatchObject({
-      publicPath: '/_instatic/assets/version_1/entries/entry.js',
+      publicPath: '/_fourno/assets/version_1/entries/entry.js',
       contentType: 'text/javascript; charset=utf-8',
     })
     expect(new TextDecoder().decode(asset?.bytes)).toBe('console.log("ok")')

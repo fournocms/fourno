@@ -44,7 +44,7 @@ export function useInstalledEditorPlugins(enabled = true): void {
       // The runtime MUST be ready before any plugin module dynamic-imports
       // (the plugin bundle's `import * as React from 'react'` statements
       // resolve via the `/runtime/*.js` shims, which read
-      // `globalThis.__instatic`). The first call here triggers the
+      // `globalThis.__fourno`). The first call here triggers the
       // download of the plugin host UI + host hooks + plugin SDK chunks;
       // subsequent calls (on PLUGIN_CHANGED rebroadcasts, on every page
       // mount) receive the cached resolved promise instantly.

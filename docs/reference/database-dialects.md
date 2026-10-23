@@ -8,7 +8,7 @@ The CMS supports **Postgres** (production, multi-author teams, horizontal scale)
 
 ## TL;DR
 
-- **One `DbClient` interface** (`server/db/client.ts`). Two adapters: `postgres.ts` (via `Bun.sql`) and `sqlite.ts` (via `bun:sqlite`).
+- **One `DbClient` interface** (`server/db/client.ts`). Two adapters: `postgres.ts` (via `postgres`, porsager) and `sqlite.ts` (via `better-sqlite3`).
 - **Repositories are dialect-naive.** They use ANSI-standard SQL only. The five Postgres-isms are banned. Gated by `db-postgres-isms.test.ts`.
 - **JSON columns end in `_json`.** Adapters hydrate string-valued JSON on read; SQLite also stringifies objects on write. Gated by `db-json-column-naming.test.ts`.
 - **Timestamps are bound from JS as ISO 8601.** Repositories write `${nowIso()}`, never SQL `current_timestamp`, so every timestamp column holds one shape on both dialects. Migration 030 rewrote the rows stamped before that rule, and the SQLite adapter still normalises the three legacy DDL defaults on read. Gated by `db-timestamp-writes.test.ts`.
@@ -26,7 +26,7 @@ Files under `server/` that import `DbClient` use **only ANSI-standard SQL** that
 | Forbidden                          | Reason                                                 | Use instead                                    |
 |------------------------------------|--------------------------------------------------------|------------------------------------------------|
 | `now()` or `current_timestamp` in DML | SQLite has no `now()`, and its `current_timestamp` writes a second timestamp shape (`YYYY-MM-DD HH:MM:SS`) | Bind `${nowIso()}` from `@core/utils/isoDate` (Rule 4) |
-| `::int` (PG cast syntax)           | SQLite doesn't recognize `::`                          | `cast(x as integer)` (rarely needed — Bun's drivers infer types) |
+| `::int` (PG cast syntax)           | SQLite doesn't recognize `::`                          | `cast(x as integer)` (rarely needed — the drivers infer types) |
 | `::jsonb`                          | SQLite has no JSONB                                    | Use `_json` columns; both adapters handle the conversion |
 | `any($N::...)`                     | PG-specific array binding                              | Compose an `in (?, ?, ?)` list in JS           |
 | `distinct on`                      | PG-specific                                            | Window-function subquery (`row_number() over (...)`) |
@@ -44,7 +44,7 @@ Every column intended to store JSON has a name ending in `_json`. This is a hard
 The adapters exploit it:
 
 - **On read** — any column whose name ends in `_json` and whose value is a non-empty string is auto-`JSON.parse`d. Repositories receive a `Record<string, unknown>`, not a string. Postgres `jsonb` values already arrive parsed; this read normalizer covers `_json` columns backed by text.
-- **On write** — the SQLite adapter auto-`JSON.stringify`s any plain object or array passed via tagged-template interpolation. Postgres relies on `Bun.sql` parameter binding and native `jsonb` handling where the backing column is `jsonb`.
+- **On write** — the SQLite adapter auto-`JSON.stringify`s any plain object or array passed via tagged-template interpolation. Postgres relies on `postgres` parameter binding and native `jsonb` handling where the backing column is `jsonb`.
 
 Result: repository code is identical across dialects:
 
@@ -173,11 +173,11 @@ For SQLite, the parent directory of the DB file is created automatically.
 2. On read, columns ending in `_json` whose value is a non-empty string are auto-`JSON.parse`d.
 3. On read, columns ending in `_at` whose value is SQLite's `YYYY-MM-DD HH:MM:SS[.SSS]` stamp are rewritten to ISO 8601 UTC. Only the three legacy DDL defaults can still write that shape (Rule 4); both read conversions live in `normalizeSqliteRow`.
 4. Pragmas set at boot: `journal_mode = WAL`, `foreign_keys = ON`, `synchronous = NORMAL`, `busy_timeout = 5000`.
-5. **Transaction serialization.** `bun:sqlite` uses one shared synchronous connection, but a transaction callback can `await` async work while its `BEGIN` is still open. Two concurrent `db.transaction()` calls would cause the second `BEGIN` to throw "cannot start a transaction within a transaction", and the implied `ROLLBACK` would silently abort the first transaction's writes. The adapter prevents this with a promise chain (`txChain`): each `.transaction()` call queues behind the previous one and only issues `BEGIN` after the prior transaction has fully settled. Callers don't need to do anything — it's automatic.
+5. **Transaction serialization.** `better-sqlite3` uses one shared synchronous connection, but a transaction callback can `await` async work while its `BEGIN` is still open. Two concurrent `db.transaction()` calls would cause the second `BEGIN` to throw "cannot start a transaction within a transaction", and the implied `ROLLBACK` would silently abort the first transaction's writes. The adapter prevents this with a promise chain (`txChain`): each `.transaction()` call queues behind the previous one and only issues `BEGIN` after the prior transaction has fully settled. Callers don't need to do anything — it's automatic.
 
-The Postgres adapter relies on `Bun.sql`'s native handling of `jsonb` columns and parameter binding — JS objects sent to `jsonb` columns are stored as JSONB and read back as `Record<string, unknown>` automatically.
+The Postgres adapter relies on `postgres`' native handling of `jsonb` columns and parameter binding — JS objects sent to `jsonb` columns are stored as JSONB and read back as `Record<string, unknown>` automatically.
 
-**`bigint` columns read back as strings on Postgres.** `Bun.sql` returns `int8` as a JS string so values above `Number.MAX_SAFE_INTEGER` don't lose precision, while SQLite's `integer` affinity hands back a real number. The adapter deliberately does not coerce — that would throw the precision guarantee away for every caller. **A repository reading a `bigint` column therefore types the row field `number | string` and coerces in its mapper:**
+**`bigint` columns read back as strings on Postgres.** `postgres` returns `int8` as a JS string so values above `Number.MAX_SAFE_INTEGER` don't lose precision, while SQLite's `integer` affinity hands back a real number. The adapter deliberately does not coerce — that would throw the precision guarantee away for every caller. **A repository reading a `bigint` column therefore types the row field `number | string` and coerces in its mapper:**
 
 ```ts
 interface MediaAssetRow {
@@ -189,9 +189,9 @@ function rowToAsset(row: MediaAssetRow): MediaAsset {
 }
 ```
 
-Skipping the coercion is invisible in the default SQLite install and only breaks Postgres deployments, so it will not show up in `bun test` (the harness is in-memory SQLite). Existing examples: `repositories/mediaAssetMapping.ts`, `repositories/mediaMigration.ts`, `ai/conversations/store.ts`, `ai/mcp/oauth/store.ts`, `repositories/syncSequence.ts`. Aggregates need it too — `sum()` over a `bigint` returns `numeric`, which also arrives as a string (`handlers/cms/dashboard/storage.ts`).
+Skipping the coercion is invisible in the default SQLite install and only breaks Postgres deployments, so it will not show up in `pnpm test` (the harness is in-memory SQLite). Existing examples: `repositories/mediaAssetMapping.ts`, `repositories/mediaMigration.ts`, `ai/conversations/store.ts`, `ai/mcp/oauth/store.ts`, `repositories/syncSequence.ts`. Aggregates need it too — `sum()` over a `bigint` returns `numeric`, which also arrives as a string (`handlers/cms/dashboard/storage.ts`).
 
-**`server/db/postgres.ts`** normalizes returned rows by converting `Date` instances to ISO strings and parsing string-valued `_json` columns. It also resolves `rowCount` from `result.count` (Bun's per-command row count from PostgreSQL's CommandComplete tag) rather than `result.length`. For non-RETURNING writes (UPDATE / DELETE / INSERT), Postgres streams the affected-row count in its CommandComplete tag rather than returning data rows, so `result.length` is always 0 for those statements. `result.count` captures the CommandComplete count, giving `rowCount` the same semantics as the SQLite adapter's `info.changes`. Falls back to `result.length` if the property is absent.
+**`server/db/postgres.ts`** normalizes returned rows by converting `Date` instances to ISO strings and parsing string-valued `_json` columns. It also resolves `rowCount` from `result.count` (the per-command row count from PostgreSQL's CommandComplete tag) rather than `result.length`. For non-RETURNING writes (UPDATE / DELETE / INSERT), Postgres streams the affected-row count in its CommandComplete tag rather than returning data rows, so `result.length` is always 0 for those statements. `result.count` captures the CommandComplete count, giving `rowCount` the same semantics as the SQLite adapter's `info.changes`. Falls back to `result.length` if the property is absent.
 
 ---
 
@@ -231,7 +231,7 @@ Skipping the coercion is invisible in the default SQLite install and only breaks
    },
    ```
    The SQLite default is the ISO `strftime` form, never `current_timestamp` (Rule 4).
-4. **Run `bun test`** — the parity gate and the JSON-naming gate confirm you got it right.
+4. **Run `pnpm test`** — the parity gate and the JSON-naming gate confirm you got it right.
 
 ### Dropping a constraint or altering a table in SQLite (table-rebuild dance)
 

@@ -22,11 +22,11 @@
  * @see Task #462 — Button Design System Phase 2 (37-file migration)
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 const ADMIN_ROOT = join(SRC_ROOT, 'admin')
 const EDITOR_ROOT = join(SRC_ROOT, 'editor')
 const SCAN_ROOTS = [

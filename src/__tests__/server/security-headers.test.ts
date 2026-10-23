@@ -5,12 +5,12 @@
  * upload-specific `Content-Security-Policy` added to `hardenUploadResponse`
  * (server/static.ts).
  *
- * Note: `applySecurityHeaders` is called from the Bun.serve fetch handler in
+ * Note: `applySecurityHeaders` is called from the HTTP server fetch handler in
  * server/index.ts (not from handleServerRequest), so the tests here exercise
  * the function directly. The upload CSP tests go through handleServerRequest
  * to verify end-to-end behaviour within the router.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -183,7 +183,7 @@ describe('/uploads/* responses via router (integration)', () => {
   })
 
   it("sets CSP default-src 'none' on inert image uploads", async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-sec-test-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-sec-test-'))
     try {
       writeFileSync(join(uploadsDir, 'photo.png'), 'fake-png-bytes')
       const res = await handleServerRequest(
@@ -199,7 +199,7 @@ describe('/uploads/* responses via router (integration)', () => {
   })
 
   it("sets CSP default-src 'none' on potentially dangerous upload MIMEs", async () => {
-    const uploadsDir = mkdtempSync(join(tmpdir(), 'instatic-sec-test-'))
+    const uploadsDir = mkdtempSync(join(tmpdir(), 'fourno-sec-test-'))
     try {
       writeFileSync(join(uploadsDir, 'data.html'), '<script>evil()</script>')
       const res = await handleServerRequest(

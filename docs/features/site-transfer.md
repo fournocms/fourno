@@ -10,7 +10,7 @@ The **Export site** dialog (`src/admin/pages/data/components/ExportDialog`) is a
 
 ## TL;DR
 
-- Format: `site-bundle-<timestamp>.zip` — `.instatic/site-bundle.json` plus `media/<storagePath>` entries. The archive manifest schema lives in `src/core/data/bundleArchive.ts`; the internal import payload schema lives in `src/core/data/bundleSchema.ts`.
+- Format: `site-bundle-<timestamp>.zip` — `.fourno/site-bundle.json` plus `media/<storagePath>` entries. The archive manifest schema lives in `src/core/data/bundleArchive.ts`; the internal import payload schema lives in `src/core/data/bundleSchema.ts`.
 - Endpoints:
   - `GET /admin/api/cms/export` or `POST /admin/api/cms/export` — produce a bundle from the current site
   - `POST /admin/api/cms/export/estimate` — exact byte size for an `ExportRequest`, without reading media off disk
@@ -34,8 +34,8 @@ The **Export site** dialog (`src/admin/pages/data/components/ExportDialog`) is a
 
 ```text
 src/core/data/bundleArchive.ts
-├── SiteBundleArchiveManifestSchema — archive `.instatic/site-bundle.json` shape
-├── BUNDLE_ARCHIVE_MANIFEST_PATH    — `.instatic/site-bundle.json`
+├── SiteBundleArchiveManifestSchema — archive `.fourno/site-bundle.json` shape
+├── BUNDLE_ARCHIVE_MANIFEST_PATH    — `.fourno/site-bundle.json`
 └── mediaArchivePath()              — maps storagePath → `media/<storagePath>`
 
 src/core/data/bundleSchema.ts
@@ -66,13 +66,13 @@ src/core/persistence/cmsTransfer.ts   — client-side wrapper (typed fetch + arc
 
 ```text
 site-bundle-2026-06-17T15-58-44.zip
-├── .instatic/
+├── .fourno/
 │   └── site-bundle.json
 └── media/
     └── <storagePath>
 ```
 
-`.instatic/site-bundle.json` is the first stored ZIP entry and is a `SiteBundleArchiveManifest`:
+`.fourno/site-bundle.json` is the first stored ZIP entry and is a `SiteBundleArchiveManifest`:
 
 ```ts
 interface SiteBundleArchiveManifest {
@@ -155,7 +155,7 @@ The handler:
 1. Capability-gates on `data.export`.
 2. Loads the shell (always, for `sourceSiteName` even when `includeSite: false`), tables, rows.
 3. If `includeMedia: true`, stats each existing media file under `uploadsDir` and writes it as a streamed `media/<storagePath>` archive entry.
-4. Assembles `.instatic/site-bundle.json` as the first stored entry.
+4. Assembles `.fourno/site-bundle.json` as the first stored entry.
 5. Returns a stored ZIP64 stream with `Content-Type: application/zip` and `Content-Disposition: attachment`.
 
 Row visibility: callers without `content.edit.any` / `content.publish.any` / `content.manage` only export their own rows (gated by `canSeeAllDataRows`).
@@ -167,7 +167,7 @@ Row visibility: callers without `content.edit.any` / `content.publish.any` / `co
 `POST /admin/api/cms/import/preview`
 
 Body: an internal `SiteBundle` JSON (verbatim — no wrapper object). The admin importer builds this from the exported ZIP before previewing.
-For user-facing ZIP archives, the admin importer builds this preview payload from `.instatic/site-bundle.json` only; media entries use empty `bytesBase64` placeholders because preview never needs file bytes.
+For user-facing ZIP archives, the admin importer builds this preview payload from `.fourno/site-bundle.json` only; media entries use empty `bytesBase64` placeholders because preview never needs file bytes.
 
 Returns a `BundlePreview`:
 
@@ -220,7 +220,7 @@ Body: an internal `SiteBundle` JSON (verbatim). Strategy is a query-string param
 
 `POST /admin/api/cms/import/archive[?strategy=replace|merge-add|merge-overwrite]`
 
-Body: the user-facing ZIP archive emitted by export. The manifest must be the first stored entry at `.instatic/site-bundle.json`; media entries must be stored under `media/<storagePath>`. This is the path used by Super Import when a dropped ZIP is an Instatic transfer archive.
+Body: the user-facing ZIP archive emitted by export. The manifest must be the first stored entry at `.fourno/site-bundle.json`; media entries must be stored under `media/<storagePath>`. This is the path used by Super Import when a dropped ZIP is an Fourno transfer archive.
 
 The archive endpoint also accepts a `selection` query parameter containing `BundleImportSelection` JSON. The browser still posts the original ZIP Blob; the server filters the manifest before delegating to the JSON import handler and streams only selected media entries to disk, draining unselected archive entries as needed. Row slug conflict resolutions travel in the same selection as `rowSlugOverrides: { tableId, rowId, slug }[]`; the server applies those overrides to the manifest row before import.
 
@@ -261,7 +261,7 @@ The JSON handler:
 The archive handler:
 
 1. Capability-gates on `data.import`.
-2. Reads and validates the first ZIP entry as `.instatic/site-bundle.json`.
+2. Reads and validates the first ZIP entry as `.fourno/site-bundle.json`.
 3. Applies the optional selection filter and row slug overrides to the manifest.
 4. Runs the same two capability gates (`authorizeImportStrategy`, then `authorizeImportedShell` for whether the selection carries the shell).
 5. Streams selected media entries into temporary files, validating declared size, CRC descriptors, missing selected entries, and unexpected archive entries before data is mutated.

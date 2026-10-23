@@ -28,7 +28,7 @@
  * Spec ambiguities resolved by reading source — see bottom of file.
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore, selectActiveCanvasPage, selectSelectedNode } from '@site/store/store'
 import { create } from 'mutative'
 import type { PageNode } from '@core/page-tree'

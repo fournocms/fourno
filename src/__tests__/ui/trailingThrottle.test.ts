@@ -3,7 +3,7 @@
  * drags). The first call fires immediately, a burst coalesces to its LATEST
  * arguments, and `flush` delivers a pending trailing call at once.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createTrailingThrottle } from '@ui/lib/trailingThrottle'
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms))

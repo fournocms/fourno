@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { DEFAULT_SCRIPT_RUNTIME_CONFIG } from '@core/site-runtime'
 import {
   createDefaultSiteExplorerOrganization,
@@ -76,7 +76,7 @@ describe('buildSiteRuntimeScripts', () => {
       site,
       page,
       target: 'publish',
-      assetBasePath: '/_instatic/assets/version-1/',
+      assetBasePath: '/_fourno/assets/version-1/',
     })
 
     expect(result.diagnostics.filter((diagnostic) => diagnostic.severity === 'error')).toEqual([])
@@ -84,6 +84,6 @@ describe('buildSiteRuntimeScripts', () => {
     expect(result.files[0].content).toContain('require("jquery")')
     expect(result.runtimeAssets.scripts).toHaveLength(1)
     expect(result.runtimeAssets.scripts[0].format).toBe('classic')
-    expect(result.runtimeAssets.scripts[0].src).toContain('/_instatic/assets/version-1/classic/')
+    expect(result.runtimeAssets.scripts[0].src).toContain('/_fourno/assets/version-1/classic/')
   })
 })

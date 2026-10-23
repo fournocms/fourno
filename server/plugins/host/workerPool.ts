@@ -1,7 +1,7 @@
 /**
- * Worker pool — per-plugin Bun.Worker lifecycle and bidirectional RPC.
+ * Worker pool — per-plugin worker-thread lifecycle and bidirectional RPC.
  *
- * One Bun.Worker is spawned per plugin id (see `ensureWorkerFor`). This
+ * One worker thread is spawned per plugin id (see `ensureWorkerFor`). This
  * gives true blast-radius isolation: an uncaught error in plugin A's
  * lifecycle / route handler / hook only kills plugin A's worker; sibling
  * plugins keep running. The next call to `loadPluginInWorker(A,...)` in
@@ -18,6 +18,7 @@ import type { ValidatedApiCall } from '../protocol/apiCallSchema'
 import { handleWorkerCrash } from './crashRecovery'
 import { replyApiError } from './apiReplies'
 import { pendingRequests, workers } from './workerState'
+import { spawnWorker, type WorkerHandle } from '../../runtime/worker'
 
 type ApiCallDispatcher = (msg: ValidatedApiCall) => Promise<void> | void
 
@@ -32,18 +33,17 @@ export function setApiCallDispatcher(dispatcher: ApiCallDispatcher): void {
  * its own message + error listeners so a crash in this worker only affects
  * pendings + state for THIS plugin id.
  */
-function ensureWorkerFor(pluginId: string): Worker {
+function ensureWorkerFor(pluginId: string): WorkerHandle {
   const existing = workers.get(pluginId)
   if (existing) return existing
-  const w = new Worker(new URL('../pluginWorker.ts', import.meta.url).href)
+  const w = spawnWorker(new URL('../pluginWorker.ts', import.meta.url), {
+    onMessage: (message) => handleWorkerMessage(pluginId, message),
+    onCrash: (reason) => {
+      console.error(`[plugin:${pluginId}] uncaught error in worker:`, reason)
+      handleWorkerCrash(pluginId, reason)
+    },
+  })
   workers.set(pluginId, w)
-  w.addEventListener('message', (event: MessageEvent) => {
-    handleWorkerMessage(pluginId, event.data)
-  })
-  w.addEventListener('error', (event: ErrorEvent) => {
-    console.error(`[plugin:${pluginId}] uncaught error in worker:`, event.message, event.error)
-    handleWorkerCrash(pluginId, event.message)
-  })
   return w
 }
 

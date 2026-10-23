@@ -4,15 +4,15 @@
  * The publisher injects the runtime as `<script type="module">`, and the HTML
  * spec leaves `document.currentScript` null inside a module script. The
  * runtime read the endpoint off `currentScript`, so the
- * `data-instatic-loop-endpoint` attribute was never honoured and every fetch
+ * `data-fourno-loop-endpoint` attribute was never honoured and every fetch
  * fell through to the hardcoded default.
  *
  * No user-visible breakage today, because both producers happen to pass the
  * same string as the fallback. These tests pin the plumbing so the first
  * change that sets a different endpoint (subpath mount, CDN prefix) does not
- * silently keep hitting `/_instatic/loop/`.
+ * silently keep hitting `/_fourno/loop/`.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { LOOP_RUNTIME_JS } from '../../../server/publish/loopRuntime'
 
 const ORIGINAL_FETCH = globalThis.fetch
@@ -29,14 +29,14 @@ afterEach(() => {
  */
 async function fetchedUrlFor(endpointAttr: string | null): Promise<string> {
   document.head.innerHTML = endpointAttr === null
-    ? '<script type="module" src="/_instatic/assets/loop-runtime.js"></script>'
-    : `<script type="module" src="/_instatic/assets/loop-runtime.js" data-instatic-loop-endpoint="${endpointAttr}"></script>`
+    ? '<script type="module" src="/_fourno/assets/loop-runtime.js"></script>'
+    : `<script type="module" src="/_fourno/assets/loop-runtime.js" data-fourno-loop-endpoint="${endpointAttr}"></script>`
 
   document.body.innerHTML = `
-    <div data-instatic-loop="loop-1"
-         data-instatic-loop-mode="infinite"
-         data-instatic-loop-page="1"
-         data-instatic-loop-has-more="true"></div>
+    <div data-fourno-loop="loop-1"
+         data-fourno-loop-mode="infinite"
+         data-fourno-loop-page="1"
+         data-fourno-loop-has-more="true"></div>
   `
 
   let requested = ''
@@ -53,7 +53,7 @@ async function fetchedUrlFor(endpointAttr: string | null): Promise<string> {
   // The runtime is shipped as a self-invoking source string.
   new Function(LOOP_RUNTIME_JS)()
 
-  const button = document.querySelector('[data-instatic-loop-load-more]') as HTMLButtonElement | null
+  const button = document.querySelector('[data-fourno-loop-load-more]') as HTMLButtonElement | null
   expect(button).not.toBeNull()
   button!.click()
   // Let the click handler's async work settle.
@@ -62,19 +62,23 @@ async function fetchedUrlFor(endpointAttr: string | null): Promise<string> {
 }
 
 describe('loop runtime endpoint', () => {
-  it('honours data-instatic-loop-endpoint from the script tag', async () => {
+  it('honours data-fourno-loop-endpoint from the script tag', async () => {
     const url = await fetchedUrlFor('/cdn-prefix/loop/')
     expect(url.startsWith('/cdn-prefix/loop/')).toBe(true)
   })
 
   it('falls back to the default when the attribute is absent', async () => {
     const url = await fetchedUrlFor(null)
-    expect(url.startsWith('/_instatic/loop/')).toBe(true)
+    expect(url.startsWith('/_fourno/loop/')).toBe(true)
   })
 
   it('does not depend on document.currentScript, which is null in a module', () => {
     // The regression guard: currentScript is spec-null inside `type="module"`,
-    // so reading it can only ever yield the fallback.
-    expect(LOOP_RUNTIME_JS).not.toContain('currentScript')
+    // so reading it can only ever yield the fallback. The string comes from
+    // `Function.prototype.toString()`, which keeps source comments under the
+    // test transform (the production transpile drops them), so comments are
+    // stripped before checking the code.
+    const runtimeCode = LOOP_RUNTIME_JS.replace(/\/\/.*$/gm, '')
+    expect(runtimeCode).not.toContain('currentScript')
   })
 })

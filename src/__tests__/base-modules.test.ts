@@ -12,7 +12,8 @@
  * the conformance suite calls in dedicated describe blocks.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { existsSync } from 'fs'
 import React from 'react'
 import { render as renderReact } from '@testing-library/react'
@@ -63,7 +64,7 @@ runModuleConformanceSuite(SlotOutletModule)
 
 describe('base module registration', () => {
   it('only imports available production base modules', async () => {
-    const baseIndex = await Bun.file('src/modules/base/index.ts').text()
+    const baseIndex = readFileSync('src/modules/base/index.ts', 'utf8')
 
     expect(baseIndex).not.toContain("import './columns'")
     expect(baseIndex).not.toContain("import './spacer'")
@@ -221,7 +222,7 @@ describe('base.loop — module contract specifics', () => {
 
 describe('base.text — unified text module', () => {
   it('is the only registered base typography module', async () => {
-    const baseIndex = await Bun.file('src/modules/base/index.ts').text()
+    const baseIndex = readFileSync('src/modules/base/index.ts', 'utf8')
 
     expect(baseIndex).toContain("import './text'")
     expect(baseIndex).not.toContain("import './heading'")
@@ -258,7 +259,7 @@ describe('base.text — unified text module', () => {
         'aria-label': 'Intro',
         class: 'skip',
         'data-aos': 'fade-up',
-        'data-instatic-node': 'skip',
+        'data-fourno-node': 'skip',
         onclick: 'alert(1)',
         role: 'note',
       },
@@ -268,7 +269,7 @@ describe('base.text — unified text module', () => {
     expect(html).toContain(' role="note"')
     expect(html).not.toContain('class="skip"')
     expect(html).not.toContain('onclick')
-    expect(html).not.toContain('data-instatic-node')
+    expect(html).not.toContain('data-fourno-node')
   })
 
   it('escapes text content through the publisher pipeline', async () => {
@@ -491,7 +492,7 @@ describe('base.body — render() specifics', () => {
     expect(editorDocument.body.className).toBe('ist-body')
     expect(editorDocument.body.style.backgroundColor).toBe('rgb(9, 10, 11)')
     expect(editorDocument.body.style.backgroundImage).toBe('linear-gradient(red, blue)')
-    expect(container.querySelector('[data-instatic-body-probe]')).toBeNull()
+    expect(container.querySelector('[data-fourno-body-probe]')).toBeNull()
     expect(container.querySelector('p')?.textContent).toBe('Body child')
     expect(container.children).toHaveLength(1)
     expect(container.firstElementChild?.tagName).toBe('P')

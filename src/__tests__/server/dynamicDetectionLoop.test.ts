@@ -1,10 +1,10 @@
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { findDynamicNodeIds } from '../../core/publisher/dynamicDetection'
 import { makePage, makeSite, makeRegistry, makeModule } from '../publisher/helpers'
 
 /**
  * ISS-021: a request-dependent node inside a STATIC loop body must promote the
- * LOOP to a single <instatic-hole>, not the inner child. Otherwise the static
+ * LOOP to a single <fourno-hole>, not the inner child. Otherwise the static
  * loop renders the child's hole once per iteration — N duplicate holes with the
  * same id, all resolving to the same context-less fragment.
  */

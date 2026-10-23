@@ -7,7 +7,7 @@
  * browser builds the snapshot, and the server builds the prompt from it.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { buildCurrentPageContext, executeAgentTool } from '@site/agent'
 import { buildSiteSystemPrompt } from '../../../server/ai/tools/site/systemPrompt'

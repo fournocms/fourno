@@ -1,4 +1,4 @@
-# Instatic
+# Fourno
 
 This file is the **agent rule book**. Read it before changing code. Detailed explanations live in `docs/` — start at [`docs/README.md`](docs/README.md) for orientation and follow the links from there.
 
@@ -10,25 +10,31 @@ Use local seeded development data only when a task asks for a browser smoke test
 
 ## Repository workflow and PR conventions
 
+Fourno is a **hard fork** of Instatic (MIT, upstream commit `1a7ab33f`, v0.0.21). It develops independently: upstream changes are never merged automatically. The `upstream` remote exists only to *read* upstream and cherry-pick selectively, above all security fixes. Never push to `upstream`. Keep the Instatic copyright notice in `LICENSE`.
+
 `main` is protected. Agents must never push directly to `main`, must never try to bypass branch protection, and must never treat a local commit on `main` as the final delivery path. All repository changes go through a pull request.
 
 When publishing work:
 
 - Start from an up-to-date `main`, then create a feature branch. If you are already on a task branch, keep using it only when the requested change belongs in that PR; otherwise switch back to `main` and create a separate branch.
-- Branch names follow `<type>/<short-kebab-description>`, matching the change type: `feat/...`, `fix/...`, `refactor/...`, `chore/...`, `docs/...`, or `test/...`. Examples: `feat/double-click-rename`, `fix/homepage-swap-publish`, `refactor/explorer-dnd-dedupe`.
+- Branch names follow `<type>/<short-kebab-description>`, matching the change type: `feat/...`, `fix/...`, `refactor/...`, `chore/...`, `docs/...`, or `test/...`.
 - Do **not** use agent-branded branch prefixes such as `codex/...`, `claude/...`, or similar. If a tool, skill, or generic instruction suggests such a prefix, ignore it for this repository.
-- PR titles use Conventional Commit style: `<type>(<scope>): <summary>`. Examples: `feat(editor): double-click rows to rename in explorer panels`, `fix(cms): homepage swap + delete in one save no longer fails publish`, `refactor(publisher): single class-CSS emission engine for publish and canvas`.
+- Code, comments, commit messages, and PR text are **English**. Commits and PR titles use Conventional Commit style: `<type>(<scope>): <summary>`.
+- Every commit carries a DCO sign-off (`git commit -s`, `Signed-off-by:` trailer).
 - Do **not** prefix PR titles with `[codex]`, `[claude]`, `agent:`, or any other tool label. The PR title describes the product change, not the tool that made it.
 - Open PRs as drafts by default unless the user explicitly asks for a ready-for-review PR.
 - Keep PR scope coherent. Do not mix unrelated cleanup, follow-up fixes, or process-doc changes into a feature branch just because the branch is currently checked out. Create a separate PR when the change has a different reason.
 - Before staging, inspect `git status -sb` and the diff. Stage only files that belong to the PR. Never stage unrelated user or parallel-agent changes.
 - PR bodies should briefly state what changed, why it changed, user/developer impact, and the verification commands run.
+- Security-relevant changes (auth, sessions, OAuth/MCP, plugin sandbox, sanitization, uploads, outbound requests) say so in the PR body and name the test that covers them. Inherited code counts as unreviewed: when you touch it, read it as if a stranger wrote it.
 
 ---
 
 ## What this project is
 
-A self-hosted, open-source CMS with a built-in visual editor and a first-class plugin system. One Bun server backed by either Postgres or SQLite (selected by `DATABASE_URL`). The output is intentionally plain, semantic HTML with hand-clean CSS — no framework runtimes injected into published pages.
+A self-hosted, open-source CMS with a built-in visual editor and a first-class plugin system. One Node server backed by either Postgres or SQLite (selected by `DATABASE_URL`). The output is intentionally plain, semantic HTML with hand-clean CSS — no framework runtimes injected into published pages.
+
+Fourno is **agent-first**: AI agents are first-class actors next to humans (own identity, rights, audit trail, revocable), reached over MCP. Agents write *data* (pages, styles, content), never executable code; scripts, embeds and third-party code need human approval. This rule outranks convenience when designing any new tool or permission.
 
 The product is **self-hosted only**. The codebase should not carry assumptions about multi-tenant SaaS operation.
 
@@ -36,28 +42,28 @@ Read [`docs/architecture.md`](docs/architecture.md) for the system overview, [`d
 
 ### Stack at a glance
 
-- **Runtime:** Bun (server + tooling). Use Bun, not Node.
+- **Runtime:** Node.js (>=24.11) with pnpm as package manager and Vitest as test runner. TypeScript runs through `tsx` (`node --import tsx server/index.ts`).
 - **Language:** TypeScript everywhere.
 - **Frontend:** React 19 with the **React Compiler enabled** (Babel preset in `vite.config.ts`) + Vite, Zustand + Mutative for state (via `zustand-mutative`; `immer` is banned), CodeMirror for code-editing UI, `@dnd-kit/core` for drag-and-drop. The compiler auto-memoizes — do not hand-write `useMemo`/`useCallback`/`memo`. See "React Compiler and memoization". Store mutations use draft-mutation style (`set((s) => { s.x = … })`); a recipe that returns a partial must wrap it in `rawReturn(...)` or Mutative emits a perf warning.
-- **Server:** `Bun.serve` with a hand-written router (`server/router.ts`). CMS modules at `server/{repositories,handlers/cms,auth,plugins,publish}/`. Deep dive: [`docs/server.md`](docs/server.md).
-- **Database:** Postgres (`Bun.sql`) OR SQLite (`bun:sqlite`), selected by `DATABASE_URL`. One `DbClient` interface, two adapters, two migration files with identical IDs. Rules: [`docs/reference/database-dialects.md`](docs/reference/database-dialects.md).
+- **Server:** a hand-written router (`server/router.ts`) behind a thin HTTP adapter (`server/runtime/httpServer.ts`: `srvx` for Web `Request`/`Response`, `ws` for WebSockets, topic pub/sub on top). Server code stays on web-standard APIs; Node specifics live in `server/runtime/*`. CMS modules at `server/{repositories,handlers/cms,auth,plugins,publish}/`. Deep dive: [`docs/server.md`](docs/server.md).
+- **Database:** Postgres (`postgres`, porsager) OR SQLite (`better-sqlite3`), selected by `DATABASE_URL`. One `DbClient` interface, two adapters, two migration files with identical IDs. Rules: [`docs/reference/database-dialects.md`](docs/reference/database-dialects.md).
 - **Content model:** All content lives in `data_tables` + `data_rows`. The four system tables (`posts`, `pages`, `components`, `layouts`) are seeded and locked from rename/delete. There are no separate `pages` or `page_versions` tables.
 - **Real-time co-editing:** Yjs CRDT engine. One Y doc per row (`page:<id>`, `component:<id>`, `layout:<id>`) + one site-shell doc, multiplexed over `/admin/api/cms/site-socket`. The editor store stays the render source of truth: local mutations apply directly AND translate to Y ops (`@core/collab`); remote/undo changes project back. The server relay (`server/collab/`) persists continuously (blob + derived row JSON) — there is NO client-side save pipeline, no autosave, no Cmd+S. Undo is per-editor per-doc `Y.UndoManager`. Feature doc: [`docs/features/site-shell.md`](docs/features/site-shell.md) → "Real-time co-editing".
 - **Validation:** TypeBox at every untyped boundary. Schemas are source of truth (`type Foo = Static<typeof FooSchema>`, never a parallel `interface`). `zod` is banned repo-wide (the AI drivers pass TypeBox schemas through as JSON Schema, so no typebox→zod adapter is needed). Helpers + patterns: [`docs/reference/typebox-patterns.md`](docs/reference/typebox-patterns.md).
 - **Sanitization:** DOMPurify at the publisher boundary (`src/core/sanitize.ts`).
-- **Plugins:** Zip packages with a `plugin.json` manifest, lifecycle hooks. Server entrypoints and canvas module packs run inside a **QuickJS-WASM sandbox** — no Node/Bun ambient access, network gated by `network.outbound` permission + `networkAllowedHosts`. The VM bootstrap (SDK factory + `__run*` dispatchers) is authored as typed TS in `server/plugins/quickjs/bootstrap/src/` and bundled to committed string artifacts in `bootstrap/generated/` — after editing the source run `bun run bootstrap:sync` (gated by `plugin-bootstrap-fresh.test.ts`). Permission enforcement everywhere (VM, host, editor) validates against `grantedPermissions`, never the declared `permissions` array. Feature doc: [`docs/features/plugin-system.md`](docs/features/plugin-system.md).
+- **Plugins:** Zip packages with a `plugin.json` manifest, lifecycle hooks. Server entrypoints and canvas module packs run inside a **QuickJS-WASM sandbox** — no Node/Bun ambient access, network gated by `network.outbound` permission + `networkAllowedHosts`. The VM bootstrap (SDK factory + `__run*` dispatchers) is authored as typed TS in `server/plugins/quickjs/bootstrap/src/` and bundled to committed string artifacts in `bootstrap/generated/` — after editing the source run `pnpm bootstrap:sync` (gated by `plugin-bootstrap-fresh.test.ts`). Permission enforcement everywhere (VM, host, editor) validates against `grantedPermissions`, never the declared `permissions` array. Feature doc: [`docs/features/plugin-system.md`](docs/features/plugin-system.md).
 - **Routing:** In-house router at `src/admin/lib/routing/`. Replaces `react-router-dom`. Use it for all internal admin navigation, including links rendered from the site editor. `react-router-dom` is banned, raw `<a href="/admin...">` hard navigations are banned in admin UI, and `src/core/` + `src/modules/` must not import the admin router. Gated by `admin-router-usage.test.ts`.
-- **Icons:** `pixel-art-icons/icons/<name>` — deep-imported, tree-shakeable. Vendored at `vendor/pixel-art-icons/`. No `lucide-react`, no inline SVG strings — gated by `no-third-party-icons.test.ts`, `direct-icon-imports.test.ts`. Add a new icon by importing it and running `bun run icons:sync`.
-- **AI providers:** No provider SDKs. Each driver in `server/ai/drivers/` talks directly to its provider's REST API over HTTP/SSE, sharing one multi-turn tool loop (`drivers/http/toolLoop.ts`). `@anthropic-ai/sdk`, `@anthropic-ai/claude-agent-sdk`, `@openai/agents`, and `@openrouter/agent` are banned repo-wide. The official split `@modelcontextprotocol/server` / `@modelcontextprotocol/client` v2 packages are **scoped, not banned**: allowed only under `server/ai/mcp/` (Instatic's MCP *server* implements a real wire protocol), still banned in the drivers and the browser. Gated by `ai-driver-isolation.test.ts`.
-- **MCP server:** Instatic exposes its CMS tools to external MCP clients (Claude Code, Codex, remote agents) at `/_instatic/mcp`, authenticated by per-connector bearer tokens. Thin adapter over the existing tool engine: headless reads and explicit `site_publish` run in-process; browser tools route by scope to the connector owner's **open Site or Content workspace** through the `(userId, scope)` live bridge (`server/ai/mcp/editorBridge.ts` + `useMcpWorkspaceBridge`). The live workspace is the single source of truth for edits (no headless DB-mutating page-tree tool, which would desync), and writes remain drafts until the explicitly capability-gated publish call. Feature doc: [`docs/features/mcp-connectors.md`](docs/features/mcp-connectors.md).
+- **Icons:** `pixel-art-icons/icons/<name>` — deep-imported, tree-shakeable. Vendored at `vendor/pixel-art-icons/`. No `lucide-react`, no inline SVG strings — gated by `no-third-party-icons.test.ts`, `direct-icon-imports.test.ts`. Add a new icon by importing it and running `pnpm icons:sync`.
+- **AI providers:** No provider SDKs. Each driver in `server/ai/drivers/` talks directly to its provider's REST API over HTTP/SSE, sharing one multi-turn tool loop (`drivers/http/toolLoop.ts`). `@anthropic-ai/sdk`, `@anthropic-ai/claude-agent-sdk`, `@openai/agents`, and `@openrouter/agent` are banned repo-wide. The official split `@modelcontextprotocol/server` / `@modelcontextprotocol/client` v2 packages are **scoped, not banned**: allowed only under `server/ai/mcp/` (Fourno's MCP *server* implements a real wire protocol), still banned in the drivers and the browser. Gated by `ai-driver-isolation.test.ts`.
+- **MCP server:** Fourno exposes its CMS tools to external MCP clients (Claude Code, Codex, remote agents) at `/_fourno/mcp`, authenticated by per-connector bearer tokens. Thin adapter over the existing tool engine: headless reads and explicit `site_publish` run in-process; browser tools route by scope to the connector owner's **open Site or Content workspace** through the `(userId, scope)` live bridge (`server/ai/mcp/editorBridge.ts` + `useMcpWorkspaceBridge`). Page edits no longer need an open editor: the page-editing tools run in `server/collab/siteEditor.ts` as one more Yjs peer (pure recipes from `@core/siteEdit`, written through the editor's own patch→Y translator, checked by the collab update guard with the connection's capabilities, audited as `site.edit`). The Yjs document stays the single source of truth — there is no DB-mutating page-tree path. Page, CSS, class, colour-token and scale edits all take this path. Tools not yet moved (font tokens, code assets, render snapshot) still relay to an open workspace. Writes remain drafts until the explicitly capability-gated publish call. Feature doc: [`docs/features/mcp-connectors.md`](docs/features/mcp-connectors.md).
 - **Tree primitive:** Every tree-of-nodes — pages, Visual Components, slot fills — uses one shape: `NodeTree<TNode>` in `src/core/page-tree/treeSchema.ts`. Mutations are tree-agnostic. Reference: [`docs/reference/page-tree.md`](docs/reference/page-tree.md).
-- **Publishing:** Three-layer pipeline. **Layer A** bakes fully-static pages to `uploads/published/current/<route>.html` at publish time via a two-slot pointer-file swap (`server/publish/staticArtefact.ts`; `current` is a plain file naming the active slot — symlink-free so it works for unprivileged Windows users). **Layer B** is an in-memory LRU keyed by `(urlPath, queryString, publishVersion)` for dynamic routes (`server/publish/renderCache.ts`); `bumpPublishVersion()` evicts wholesale on every publish. **Layer C** emits `<instatic-hole>` placeholders for nodes auto-detected as request-dependent; a ~668 B `IntersectionObserver` runtime lazy-fetches each fragment from `/_instatic/hole/<nodeId>`. Auto-detection lives in `src/core/publisher/dynamicDetection.ts` — one walker, four rules. Single entry: `server/publish/publicRouter.ts:renderPublicResolution`. Full design: [`docs/features/publisher.md`](docs/features/publisher.md).
-- **Tests:** `bun test`. Architectural rules in `src/__tests__/architecture/*` — when *your* change drifts a structural rule, fix the rule's gate test in the same change.
+- **Publishing:** Three-layer pipeline. **Layer A** bakes fully-static pages to `uploads/published/current/<route>.html` at publish time via a two-slot pointer-file swap (`server/publish/staticArtefact.ts`; `current` is a plain file naming the active slot — symlink-free so it works for unprivileged Windows users). **Layer B** is an in-memory LRU keyed by `(urlPath, queryString, publishVersion)` for dynamic routes (`server/publish/renderCache.ts`); `bumpPublishVersion()` evicts wholesale on every publish. **Layer C** emits `<fourno-hole>` placeholders for nodes auto-detected as request-dependent; a ~668 B `IntersectionObserver` runtime lazy-fetches each fragment from `/_fourno/hole/<nodeId>`. Auto-detection lives in `src/core/publisher/dynamicDetection.ts` — one walker, four rules. Single entry: `server/publish/publicRouter.ts:renderPublicResolution`. Full design: [`docs/features/publisher.md`](docs/features/publisher.md).
+- **Tests:** `pnpm test`. Architectural rules in `src/__tests__/architecture/*` — when *your* change drifts a structural rule, fix the rule's gate test in the same change.
 
 ### Repo layout
 
 ```
-server/         Bun server: router, handlers, repositories, auth, plugins, publish, db
+server/         Node server: router, handlers, repositories, auth, plugins, publish, db
 src/admin/      Admin app (React) — shell, workspaces, plugin host UI
 src/admin/pages/site/   Visual editor (canvas, panels, toolbar, editor store)
 src/core/       Engine: page tree, publisher, plugin SDK + runtime, persistence
@@ -75,15 +81,15 @@ Source of truth for layout details: [`docs/architecture.md`](docs/architecture.m
 
 ## Development status — READ THIS FIRST
 
-**This project has live, self-hosted installations with real user data.** That has direct consequences for how Claude must approach changes in this repo.
+**Fourno has not had its first release and runs nowhere in production.** There are no installations with real user data (Instatic had them; this fork does not inherit them). That has direct consequences for how Claude must approach changes in this repo.
 
 **For code** (TypeScript APIs, function signatures, types, modules, plugin SDK): there are no backward-compatibility obligations. Refactor freely, rename boldly, delete dead code, fix bad abstractions — the aggressive stance throughout this section applies in full.
 
-**Database schema is the exception.** Live installations run the migration runner on every pull. A destructive schema change breaks those installations permanently. Every schema change ships as an additive, non-destructive migration. See "Database, schema, and stored data" below.
+**Database schema: free until the first release, additive-only afterwards.** Until the first tagged Fourno release, the migration history may be edited, squashed or rebuilt, and a dev database may be dropped and recreated. From the first release on, live installations run the migration runner on every pull, and every schema change ships as an additive, non-destructive migration. See "Database, schema, and stored data" below. The release maintainer flips this rule in the same PR that cuts the first release.
 
 ### No backward compatibility. Ever.
 
-There is nothing to be backward compatible with — **for code.** TypeScript APIs, function signatures, types, and module shapes can change freely. **Database schema is the explicit exception: see "Database, schema, and stored data" below.**
+There is nothing to be backward compatible with — **for code.** TypeScript APIs, function signatures, types, and module shapes can change freely. **Database schema has its own rule: see "Database, schema, and stored data" below.**
 
 - **Do not preserve old function signatures, schemas, types, or APIs out of compatibility concern.** If a cleaner shape exists, change it everywhere and delete the old one.
 - **Do not add deprecation shims.** Don't keep a `legacyFoo()` that forwards to `foo()`. Just rename it and update callers.
@@ -113,7 +119,9 @@ What you must not do:
 
 ### Database, schema, and stored data
 
-**The database is NOT disposable.** Live, self-hosted installations exist with real user data. The migration runner executes every unrun migration on startup — a destructive schema change breaks those installations on the next pull.
+**Before the first Fourno release the database is disposable.** No installation holds real data, so migrations may be edited, reordered, squashed into a clean baseline, or rebuilt when that gives a cleaner schema (e.g. for multilingual content). Keep the PG and SQLite files in parity with identical IDs (gated by `migration-parity.test.ts`) and update the tests that pin migration IDs in the same change.
+
+**From the first release on the database is NOT disposable.** Live, self-hosted installations will hold real user data, and the migration runner executes every unrun migration on startup — a destructive schema change breaks those installations on the next pull. The rules below then apply in full (they are the standing rules; today they are the target state to preserve once a release exists):
 
 - **Every schema change ships as a new additive migration.** Add it to BOTH `migrations-pg.ts` AND `migrations-sqlite.ts` with the next sequential ID and the same semantic effect. See "Database dialect rules" for the mechanics.
 - **Never edit or rewrite a migration that has already been committed.** If a past migration has the wrong shape, ship a new forward migration that corrects it.
@@ -169,11 +177,11 @@ The **React Compiler is enabled** for the whole app (`babel({ presets: [reactCom
 
 There are exactly three exceptions where memoization stays — keep it, and add a one-line comment saying why:
 
-1. **The value/function is referenced in a `useEffect` (or other hook) dependency array.** The static `react-hooks/exhaustive-deps` lint rule can't see the compiler's runtime memoization, so it still demands a stable identity there. Wrapping a *function* used as a dep in `useCallback` (and the transitive closure it depends on) is required to keep `bun run lint` clean. If a removable plain value feeds a dep array, that's fine — only functions trip the rule.
+1. **The value/function is referenced in a `useEffect` (or other hook) dependency array.** The static `react-hooks/exhaustive-deps` lint rule can't see the compiler's runtime memoization, so it still demands a stable identity there. Wrapping a *function* used as a dep in `useCallback` (and the transitive closure it depends on) is required to keep `pnpm lint` clean. If a removable plain value feeds a dep array, that's fine — only functions trip the rule.
 2. **A `React.memo` re-render bailout on a hot, list-rendered component** (e.g. a recursive per-node canvas renderer). `React.memo` skips re-rendering on equal props — a *different* mechanism from the compiler's within-component memoization — so dropping it on an O(N) critical path is not behavior-preserving without runtime perf validation. Rare; justify in a comment.
 3. **The compiler genuinely cannot compile a function** (escape hatch). Add the `"use no memo"` directive at the top of that function body, or the existing `eslint-disable react-compiler/react-compiler` pattern, and keep the manual memoization it needs.
 
-**Gate:** `eslint-plugin-react-compiler` (runs in `bun run lint` / CI) is the enforcement gate — it flags both compiler bailouts and `react-compiler/react-compiler` violations. `react-doctor` (`bun run doctor`) also surfaces `react-doctor/react-compiler-no-manual-memoization`, but as a **warning** only (React Compiler rules are downgraded to warn in `react-doctor.config.json`; `bun run doctor` fails only on error-tier Security/Correctness diagnostics). A new component that ships `useMemo`/`useCallback`/`memo` outside the three exceptions above is drift — remove the memoization. Full detail: [`docs/reference/react-compiler.md`](docs/reference/react-compiler.md).
+**Gate:** `eslint-plugin-react-compiler` (runs in `pnpm lint` / CI) is the enforcement gate — it flags both compiler bailouts and `react-compiler/react-compiler` violations. `react-doctor` (`pnpm doctor`) also surfaces `react-doctor/react-compiler-no-manual-memoization`, but as a **warning** only (React Compiler rules are downgraded to warn in `react-doctor.config.json`; `pnpm doctor` fails only on error-tier Security/Correctness diagnostics). A new component that ships `useMemo`/`useCallback`/`memo` outside the three exceptions above is drift — remove the memoization. Full detail: [`docs/reference/react-compiler.md`](docs/reference/react-compiler.md).
 
 ---
 
@@ -233,7 +241,7 @@ Detailed: [`docs/reference/database-dialects.md`](docs/reference/database-dialec
 2. **JSON columns end in `_json`.** The SQLite adapter auto-parses `*_json` strings on read and auto-stringifies plain objects on write. Gated by `db-json-column-naming.test.ts`.
 3. **Migrations are split per dialect with identical IDs.** `server/db/migrations-pg.ts` (PG dialect) and `server/db/migrations-sqlite.ts` (SQLite dialect). Parity gated by `migration-parity.test.ts`.
 
-**Adding a new migration:** add it to BOTH `migrations-pg.ts` and `migrations-sqlite.ts` with the next sequential ID and the same semantic effect. Migrations must be **additive and non-destructive** — live installations run the migration runner on every pull. Never rewrite or delete a committed migration; if a past migration is wrong, ship a new forward migration that corrects it. Never write a migration that requires dropping or recreating the database.
+**Adding a new migration:** add it to BOTH `migrations-pg.ts` and `migrations-sqlite.ts` with the next sequential ID and the same semantic effect. After the first release, migrations must be **additive and non-destructive** — live installations run the migration runner on every pull (before it, see "Database, schema, and stored data": the history may still be reworked). Never rewrite or delete a released migration; if a past migration is wrong, ship a new forward migration that corrects it. Never write a migration that requires dropping or recreating the database.
 
 **Adding a JSON column:** name it `*_json`.
 
@@ -286,37 +294,37 @@ Note: `@core/framework-schema` is a dependency of both `@core/page-tree` (for `F
 - **Names must be honest.** A function called `renderPage` renders a page.
 - **One reason per module.** Files in `server/{repositories,handlers/cms,auth,plugins,publish}/*` and `src/core/*` are organized by responsibility — keep them that way.
 - **No dead code.** Unused exports, parameters, types, files: delete them. `fallow` (`npx fallow dead-code`) is the canonical tool; `knip`, `madge`, and `jscpd` remain available for second-opinion checks.
-- **Health checks with coverage.** `bun run fallow:health` runs `bun test --coverage` and feeds the result to `fallow health --coverage`. Run before deciding whether a hotspot needs more tests vs. more refactoring.
+- **Health checks with coverage.** `pnpm fallow:health` runs `pnpm test:coverage` and feeds the result to `fallow health --coverage`. Run before deciding whether a hotspot needs more tests vs. more refactoring.
 - **No `any` to escape a type problem.** Fix the type.
 - **No commented-out code.** Git remembers.
 - **Validate at the boundary, trust inside.** Don't `as Foo` your way past it.
 - **Schemas are source of truth.** `type Foo = Static<typeof FooSchema>` — never a parallel `interface Foo` next to `FooSchema`.
 - **Architecture tests are first-class.** When you change a structural rule (folder layout, allowed imports, banned APIs, design tokens), update the matching test in `src/__tests__/architecture/`.
 - **Documentation tracks code.** When you change code that a doc describes, update the doc in the same change. Doc rules: [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md).
-- **At the end of the task, your own changes must pass `bun test`, `bun run build`, and `bun run lint`.** Verification is an end-of-task gate, not a per-edit ritual.
+- **At the end of the task, your own changes must pass `pnpm test`, `pnpm build`, and `pnpm lint`.** Verification is an end-of-task gate, not a per-edit ritual.
 
 ## Tooling rules
 
-- Always use `bun` (not `npm` / `pnpm` / `yarn`) for installs, scripts, and tests.
-- Lockfile is `bun.lock`. Do not introduce `package-lock.json` or `yarn.lock`.
-- Server scripts run with `bun --watch server/index.ts`. Frontend dev runs with `vite`.
-- Run the full stack locally with `bun run dev` (defaults to SQLite at `.tmp/dev.db` — no external dependencies; runs `bun install --frozen-lockfile` first, so a pull never leaves a stale `node_modules`) or `docker compose up --build` (everything in containers with Postgres). Set `DATABASE_URL=postgres://...` before `bun run dev` to use Postgres instead.
-- **`bun run build` runs `tsc -b && vite build`** — both type-checking and bundling. A change that runs in dev but fails `tsc` is not done.
+- Always use `pnpm` (not `npm` / `yarn` / `bun`) for installs, scripts, and tests. Node is the runtime; the supported version range is `engines.node` in `package.json`.
+- Lockfile is `pnpm-lock.yaml`. Do not introduce `package-lock.json`, `yarn.lock` or `bun.lock`. pnpm settings (blocked install scripts, 7-day `minimumReleaseAge`) live in `pnpm-workspace.yaml`.
+- Server scripts run with `tsx watch server/index.ts`. Frontend dev runs with `vite`.
+- Run the full stack locally with `pnpm dev` (defaults to SQLite at `.tmp/dev.db` — no external dependencies; pnpm re-installs before any script when `node_modules` is stale, via `verifyDepsBeforeRun`, so a pull never leaves a stale install) or `docker compose up --build` (everything in containers with Postgres). Set `DATABASE_URL=postgres://...` before `pnpm dev` to use Postgres instead.
+- **`pnpm build` runs `tsc -b && vite build`** — both type-checking and bundling. A change that runs in dev but fails `tsc` is not done.
 
 ## Verification
 
 ```sh
-bun install
-bun run build         # tsc -b && vite build
-bun test
-bun run lint
+pnpm install
+pnpm build         # tsc -b && vite build
+pnpm test
+pnpm lint
 ```
 
 ### When to run
 
-Run verification **once, at the end of the task**, before declaring work complete. You do not need to run `bun test` / `bun run build` / `bun run lint` after every edit — that wastes time. Make your changes, then verify.
+Run verification **once, at the end of the task**, before declaring work complete. You do not need to run `pnpm test` / `pnpm build` / `pnpm lint` after every edit — that wastes time. Make your changes, then verify.
 
-Use `bun run build` and `bun test` for any non-trivial change. Add `bun run lint` if you touched `.ts`/`.tsx` files.
+Use `pnpm build` and `pnpm test` for any non-trivial change. Add `pnpm lint` if you touched `.ts`/`.tsx` files.
 
 ### Parallel sessions and pre-existing failures
 
@@ -334,7 +342,7 @@ The bar is: **your work is clean.**
 
 ## TL;DR
 
-1. Live installations exist with real user data. Refactor **code** freely — no compat shims needed. **DB schema is the exception: every change ships as an additive, non-destructive migration; never rewrite a committed migration or require a DB drop.**
+1. No production installations exist yet. Refactor **code** freely — no compat shims needed. **DB schema: the migration history may be reworked until the first release; after it, every change ships as an additive, non-destructive migration and a released migration is never rewritten.**
 2. Never preserve backward compatibility in code, never leave band-aids, never duplicate "old vs new" code paths.
 3. If the architecture would be cleaner with a multi-file refactor — do the refactor, in this change.
 4. Every untyped boundary goes through TypeBox. `as Foo` at a JSON boundary is a bug. `zod` is banned repo-wide — AI drivers pass TypeBox schemas straight to providers as JSON Schema.

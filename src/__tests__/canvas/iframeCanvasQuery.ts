@@ -20,7 +20,7 @@
  */
 
 import { waitFor } from '@testing-library/react'
-import { expect } from 'bun:test'
+import { expect } from 'vitest'
 
 /**
  * CI-tolerant ceiling for canvas-frame readiness. `waitFor` returns the instant

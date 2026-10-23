@@ -19,7 +19,7 @@
  * `CrossSheetClassConflict` in the wizard's Conflicts step — the user picks
  * rename / keep-first / overwrite per class, instead of the importer silently
  * generating scope classes. (The previous automatic
- * `instatic-import-scope-*` body-class machinery is gone; pages that need
+ * `fourno-import-scope-*` body-class machinery is gone; pages that need
  * hard isolation keep their stylesheet as a file instead — see
  * `StylesheetImportMode`.)
  *

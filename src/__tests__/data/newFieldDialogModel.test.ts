@@ -7,7 +7,7 @@
  * function and the dialog throws on open. Option ids must be generated with a
  * primitive that does not depend on secure-context availability.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import { DataFieldSchema } from '@core/data/schemas'
 import { fieldIdError, makeOption, slugifyOptionValue } from '@admin/pages/data/components/NewFieldDialog/newFieldDialogModel'
@@ -89,7 +89,7 @@ describe('fieldIdError', () => {
     }
   })
 
-  it("accepts Instatic's own built-in post-type field ids", () => {
+  it("accepts Fourno's own built-in post-type field ids", () => {
     // The regression in #434: the dialog rejected ids that the product itself
     // ships, so one table could end up holding two naming conventions.
     for (const id of [

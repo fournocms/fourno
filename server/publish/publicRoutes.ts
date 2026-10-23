@@ -75,7 +75,7 @@ export async function trySetupRedirect(req: Request, runtime: ServerRuntime, _ur
 /**
  * Last route before the dispatcher's bare JSON 404: serve the site's designed
  * 404 page (the `notFound` template) for any GET no other route claimed.
- * Namespaced prefixes (`/admin/api/*`, `/_instatic/*`, `/uploads/*`) never
+ * Namespaced prefixes (`/admin/api/*`, `/_fourno/*`, `/uploads/*`) never
  * reach here — they absorb their namespace and emit their own 404s. Returns
  * null (→ JSON 404) when the published site has no notFound template.
  */

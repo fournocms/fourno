@@ -13,7 +13,7 @@
  *   - Factory throws: error propagates and in-flight slot is cleared
  *   - resetForTests() resets all state
  */
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   __setMaxEntriesForTests,
   getOrRender,

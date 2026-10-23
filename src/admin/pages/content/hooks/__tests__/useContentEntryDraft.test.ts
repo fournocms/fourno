@@ -7,14 +7,14 @@
  * editing one flips `isDirty`, and saving merges them back into the payload
  * without clobbering the built-in cells.
  */
-import { afterEach, describe, expect, it, mock, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react'
 import type { DataRow } from '@core/data/schemas'
 import { useContentEntryDraft } from '../useContentEntryDraft'
 
 afterEach(() => {
   cleanup()
-  mock.restore()
+  vi.restoreAllMocks()
 })
 
 function fakeRow(cells: DataRow['cells']): DataRow {
@@ -41,8 +41,8 @@ function fakeRow(cells: DataRow['cells']): DataRow {
 }
 
 function renderDraft(entry: DataRow) {
-  const updateSelectedEntry = mock(() => {})
-  const setError = mock(() => {})
+  const updateSelectedEntry = vi.fn(() => {})
+  const setError = vi.fn(() => {})
   const rendered = renderHook(() =>
     useContentEntryDraft({ selectedEntry: entry, updateSelectedEntry, setError }),
   )
@@ -75,7 +75,7 @@ describe('useContentEntryDraft custom cells', () => {
   it('saves custom cells merged with the built-in cells', async () => {
     const entry = fakeRow({ title: 'Hello', slug: 'hello', body: '# Hello', subtitle: 'World' })
     let patchBody: unknown = null
-    spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_input, init) => {
       patchBody = JSON.parse(String(init?.body))
       const saved = fakeRow({ ...entry.cells, subtitle: 'Universe' })
       return new Response(JSON.stringify({ row: saved }), {

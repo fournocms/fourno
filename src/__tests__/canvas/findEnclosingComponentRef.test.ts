@@ -7,7 +7,7 @@
  * Architecture source: Phase 4 component system (F4).
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   findEnclosingComponentRef,
   type AnnotatedPageNode,

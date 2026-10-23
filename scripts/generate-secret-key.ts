@@ -1,11 +1,11 @@
-#!/usr/bin/env bun
+#!/usr/bin/env tsx
 /**
  * Generate a fresh 32-byte (256-bit) base64 AES key suitable for
- * `INSTATIC_SECRET_KEY`.
+ * `FOURNO_SECRET_KEY`.
  *
  * Usage:
  *
- *     bun run scripts/generate-secret-key.ts
+ *     pnpm tsx scripts/generate-secret-key.ts
  *
  * Prints the key (and a setup hint) to stdout. The key is generated via
  * `crypto.getRandomValues`, never written to disk by this script — that's
@@ -32,7 +32,7 @@ if (process.stderr.isTTY) {
   process.stderr.write(
     `\nGenerated a new 256-bit master key for encrypted server secrets.\n` +
     `Add it to your environment to use it:\n\n` +
-    `    export INSTATIC_SECRET_KEY=${key}\n\n` +
+    `    export FOURNO_SECRET_KEY=${key}\n\n` +
     `Or set it in your deployment's secret manager. Without it, reversible ` +
     `server secrets such as AI credentials and MFA TOTP seeds cannot be ` +
     `decrypted (existing rows become unreadable if the key is lost).\n`,

@@ -3,7 +3,7 @@
  * strips scripting / HTML-smuggling vectors.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { sanitizeSvg } from '@core/sanitize'
 
 describe('sanitizeSvg', () => {

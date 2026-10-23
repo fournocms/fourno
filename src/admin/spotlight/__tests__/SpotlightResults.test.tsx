@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { SpotlightInternalContext, type SpotlightInternalContextValue } from '../spotlightContext'
@@ -8,7 +8,7 @@ import type { SpotlightOpenState } from '../state'
 
 afterEach(() => {
   cleanup()
-  mock.restore()
+  vi.restoreAllMocks()
 })
 
 function makeOpenState(highlightedIndex: number): SpotlightOpenState {
@@ -48,7 +48,7 @@ function renderResults(highlightedIndex: number) {
 
 describe('SpotlightResults', () => {
   it('scrolls the highlighted row into view when keyboard navigation changes selection', async () => {
-    const scrollIntoView = mock(() => {})
+    const scrollIntoView = vi.fn(() => {})
     const originalScrollIntoView = HTMLElement.prototype.scrollIntoView
     HTMLElement.prototype.scrollIntoView = scrollIntoView
 
@@ -69,7 +69,7 @@ describe('SpotlightResults', () => {
   })
 
   it('selects a select-type arg value when its option row is clicked', () => {
-    const onSelectArg = mock(() => {})
+    const onSelectArg = vi.fn(() => {})
     const command: Command = {
       id: 'test.cmd',
       title: 'Test command',

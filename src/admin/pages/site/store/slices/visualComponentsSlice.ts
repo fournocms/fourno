@@ -26,7 +26,7 @@ import {
   wouldCreateCycle,
 } from '@core/visualComponents'
 import { buildSiteHelpers } from './site/helpers'
-import { syncAllVCRefSlotInstances, allTreeNodeMaps } from './vcSlotReconcile'
+import { syncAllVCRefSlotInstances, allTreeNodeMaps } from '@core/siteEdit'
 import {
   VisualComponentNameError,
   VisualComponentParamNameError,

@@ -1,6 +1,6 @@
 # Capability E2E Scenarios
 
-These rows exercise capability behavior through the browser. They complement the Bun route/access tests by verifying that a real user sees the right navigation, disabled controls, step-up prompts, and recoverable error states.
+These rows exercise capability behavior through the browser. They complement the Vitest route/access tests by verifying that a real user sees the right navigation, disabled controls, step-up prompts, and recoverable error states.
 
 Use disposable local data and create one custom role per scenario. Log out between personas, or use separate browser contexts, so cached admin state does not leak across checks.
 

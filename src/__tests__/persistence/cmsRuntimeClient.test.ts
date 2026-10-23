@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { ApiError } from '@core/http'
 import {
   buildCmsRuntimePreview,
@@ -15,7 +15,7 @@ describe('CMS runtime client', () => {
       updatedAt: 123,
     }
     const packageImportmap = {
-      imports: { 'canvas-confetti': '/_instatic/runtime/cache/abc/canvas-confetti/dist/confetti.module.mjs' },
+      imports: { 'canvas-confetti': '/_fourno/runtime/cache/abc/canvas-confetti/dist/confetti.module.mjs' },
       lockHash: 'abc',
     }
 

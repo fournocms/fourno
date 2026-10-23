@@ -15,7 +15,7 @@
  *   10. An empty category (count 0 from the summary) is disabled
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import type { DataTableListItem } from '@core/data/schemas'
 import { subscribeToasts, type Toast } from '@ui/components/Toast/toastBus'

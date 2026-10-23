@@ -1,9 +1,9 @@
 /**
- * `instatic-plugin lint` — unit tests for the lint pipeline.
+ * `fourno-plugin lint` — unit tests for the lint pipeline.
  *
  * Builds throwaway plugin source trees in a temp directory, then asserts
  * that `lintPlugin(dir)` reports the expected findings. Tests cover:
- *  • Missing or malformed `instatic-plugin.config.ts` is surfaced cleanly
+ *  • Missing or malformed `fourno-plugin.config.ts` is surfaced cleanly
  *  • `network.outbound` permission without `networkAllowedHosts` is an error
  *  • `networkAllowedHosts` without `network.outbound` is a warning
  *  • `cms.content.*` permissions without a matching `contentAccess` mode
@@ -14,18 +14,18 @@
  *  • The CLI's own content-editor scaffold builds a manifest that carries
  *    `contentAccess` through `definePlugin` and lints clean
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, mkdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { lintPlugin } from '../../core/plugin-sdk/cli/lint'
 import { runPluginInit } from '../../core/plugin-sdk/cli/init'
 import { readPluginDefinition } from '../../core/plugin-sdk/cli/build'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../..')
+const PROJECT_ROOT = join(import.meta.dirname, '../../..')
 
 /**
  * Plugin source trees must live INSIDE the monorepo so the dynamic `import`
- * of `instatic-plugin.config.ts` can resolve `@core/plugin-sdk` via the host's
+ * of `fourno-plugin.config.ts` can resolve `@core/plugin-sdk` via the host's
  * tsconfig paths. Lint-test temp dirs land under `.tmp-lint/` next to the
  * other dev temp dirs.
  */
@@ -42,9 +42,9 @@ async function withTempPlugin(setup: (dir: string) => Promise<void>) {
 }
 
 /**
- * Helper: write a minimal `instatic-plugin.config.ts` so the lint reaches the
+ * Helper: write a minimal `fourno-plugin.config.ts` so the lint reaches the
  * checks under test. The SDK import resolves via the host's tsconfig paths
- * because the lint process is run by `bun test` inside the monorepo.
+ * because the lint process is run by `pnpm test` inside the monorepo.
  */
 function writeConfig(dir: string, overrides: Record<string, unknown> = {}): Promise<void> {
   const config = {
@@ -56,13 +56,13 @@ function writeConfig(dir: string, overrides: Record<string, unknown> = {}): Prom
     ...overrides,
   }
   return writeFile(
-    join(dir, 'instatic-plugin.config.ts'),
+    join(dir, 'fourno-plugin.config.ts'),
     `import { definePlugin } from '@core/plugin-sdk'\nexport default definePlugin(${JSON.stringify(config, null, 2)})\n`,
     'utf-8',
   )
 }
 
-describe('instatic-plugin lint', () => {
+describe('fourno-plugin lint', () => {
   it('reports a clean plugin with zero findings', async () => {
     const result = await withTempPlugin(async (dir) => {
       await writeConfig(dir)
@@ -190,7 +190,7 @@ describe('instatic-plugin lint', () => {
     expect(result.findings).toEqual([])
   })
 
-  it('reports a config-level error when instatic-plugin.config.ts is missing', async () => {
+  it('reports a config-level error when fourno-plugin.config.ts is missing', async () => {
     const result = await withTempPlugin(async () => {
       // Intentionally do not write any config file.
     })

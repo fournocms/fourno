@@ -56,7 +56,7 @@ export const RouteContext = createContext<RouteContextValue>({ params: {} })
 
 // Custom event the navigate functions dispatch so useSyncExternalStore picks
 // up pushState/replaceState (which don't fire popstate natively).
-export const LOCATION_CHANGE_EVENT = 'instatic:locationchange'
+export const LOCATION_CHANGE_EVENT = 'fourno:locationchange'
 
 export function isBrowser(): boolean {
   return typeof window !== 'undefined' && typeof window.history !== 'undefined'

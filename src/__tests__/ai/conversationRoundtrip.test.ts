@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Value } from '@sinclair/typebox/value'
 import sharp from 'sharp'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'

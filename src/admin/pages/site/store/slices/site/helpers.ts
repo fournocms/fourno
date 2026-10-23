@@ -13,7 +13,6 @@ import type { StoreApi } from 'zustand'
 import type { NodeTree, PageNode, StyleRule, SiteDocument } from '@core/page-tree'
 import { addPage, createNode, reconcileSiteExplorerInPlace, reindexNodeParents } from '@core/page-tree'
 import type { VisualComponent } from '@core/visualComponents'
-import { syncAllVCRefSlotInstances, allTreeNodeMaps } from '../vcSlotReconcile'
 import { collectSlotOutletNames } from '@core/visualComponents'
 import { create } from 'mutative'
 import type { Draft, Patches } from 'mutative'
@@ -22,16 +21,18 @@ import type { NewStyleRule } from '@core/siteImport'
 import { addImportedScriptDependencies, addImportedScripts, addImportedStylesheets } from './importedSiteFiles'
 import { applyLocalSitePatches, notifyCollabBlocked } from './collabBinding'
 import type { EditorStore } from '@site/store/types'
-import { reconcileFrameworkClasses } from './framework/reconcile'
+import { reconcileFrameworkClasses } from '@core/siteEdit'
 import {
   createStyleRuleOrderAllocator,
   indexStyleRulesByName,
   linkImportedClassNames,
   type StyleRuleOrderAllocator,
+  syncAllVCRefSlotInstances,
+  allTreeNodeMaps,
   findReimportedStyleRule,
   indexStyleRulesByOrigin,
   registerStyleRuleOrigin,
-} from './importLinking'
+} from '@core/siteEdit'
 import { addImportedColorTokens, overwriteImportedColorTokens } from './importedColorTokens'
 import { addImportedFonts, addImportedFontTokens, addInstalledFontEntries, overwriteImportedFontTokens } from './importedFonts'
 import type { SiteMutationResult, SiteSliceHelpers, SiteSliceRecipe } from './types'

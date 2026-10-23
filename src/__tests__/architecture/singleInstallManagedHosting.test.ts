@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'bun:test'
-import { readFileSync } from 'fs'
+import { describe, expect, it } from 'vitest'
+import { globSync, readFileSync } from 'fs'
 import { join } from 'path'
 
-const ROOT = join(import.meta.dir, '../../..')
+const ROOT = join(import.meta.dirname, '../../..')
 const RUNTIME_SOURCE_ROOTS = ['server', 'src/admin', 'src/core']
 
 function read(path: string): string {
@@ -35,7 +35,7 @@ describe('Single-install CMS architecture', () => {
 
     const offenders: string[] = []
     for (const root of RUNTIME_SOURCE_ROOTS) {
-      for (const file of new Bun.Glob('**/*.{ts,tsx}').scanSync(join(ROOT, root))) {
+      for (const file of globSync('**/*.{ts,tsx}', { cwd: join(ROOT, root) })) {
         const path = join(root, file)
         const src = read(path)
         for (const pattern of forbidden) {

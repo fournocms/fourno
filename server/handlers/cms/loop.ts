@@ -1,5 +1,5 @@
 /**
- * `/_instatic/loop/<loopId>` endpoint — serves additional pages for
+ * `/_fourno/loop/<loopId>` endpoint — serves additional pages for
  * infinite-loading loops.
  *
  * Called by the loop runtime (`loopRuntime.ts`) after the user clicks
@@ -35,7 +35,7 @@ import { getPublishedLoopIndexForVersion } from '../../publish/publishedSnapshot
 import { getPublishVersion } from '../../publish/publishState'
 import { LOOP_RUNTIME_JS } from '../../publish/loopRuntime'
 
-const LOOP_RUNTIME_PATH = '/_instatic/assets/loop-runtime.js'
+const LOOP_RUNTIME_PATH = '/_fourno/assets/loop-runtime.js'
 
 export function isLoopRuntimeAssetPath(pathname: string): boolean {
   return pathname === LOOP_RUNTIME_PATH
@@ -66,8 +66,8 @@ export async function handleLoopRequest(
     return jsonResponse({ error: 'Method not allowed' }, { status: 405 })
   }
 
-  // /_instatic/loop/<encoded-loopId>
-  const loopId = decodeURIComponent(url.pathname.slice('/_instatic/loop/'.length))
+  // /_fourno/loop/<encoded-loopId>
+  const loopId = decodeURIComponent(url.pathname.slice('/_fourno/loop/'.length))
   if (!loopId) return jsonResponse({ error: 'Missing loop id' }, { status: 400 })
 
   const pageNumberRaw = url.searchParams.get('page') ?? '1'

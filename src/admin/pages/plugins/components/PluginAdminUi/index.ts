@@ -4,7 +4,7 @@
  * Settings dialog uses `pluginAdminUi.Switch` etc.).
  *
  * Plugin code no longer reaches into this namespace — plugins import the
- * named primitives directly from `@instatic/host-ui` (resolved via
+ * named primitives directly from `@fourno/host-ui` (resolved via
  * the host's import map at runtime). This file is internal host plumbing.
  */
 import type { ComponentType } from 'react'

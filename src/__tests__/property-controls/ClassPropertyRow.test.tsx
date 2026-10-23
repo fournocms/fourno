@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 
 describe('ClassPropertyRow remove button layout', () => {
   it('does not reserve a right-side gutter that shrinks property controls', async () => {

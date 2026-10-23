@@ -3,4 +3,4 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ${INSTATIC_IMAGE:-instatic:local}
+    image: ${FOURNO_IMAGE:-fourno:local}

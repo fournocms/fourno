@@ -1,4 +1,4 @@
-import { expect } from 'bun:test'
+import { expect } from 'vitest'
 import type { CoreCapability } from '../../../server/auth/capabilities'
 import { SESSION_COOKIE_NAME } from '../../../server/auth/tokens'
 import type { DbClient } from '../../../server/db'

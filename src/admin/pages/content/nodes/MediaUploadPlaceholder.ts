@@ -77,7 +77,7 @@ export const MediaUploadPlaceholder = Node.create<MediaUploadPlaceholderOptions>
   // renderHTML for completeness; ProseMirror requires `renderHTML` on
   // every node and won't accept a node-view-only render path here.
   parseHTML() {
-    return [{ tag: 'div[data-instatic-upload-placeholder]' }]
+    return [{ tag: 'div[data-fourno-upload-placeholder]' }]
   },
 
   renderHTML({ HTMLAttributes, node }) {
@@ -89,10 +89,10 @@ export const MediaUploadPlaceholder = Node.create<MediaUploadPlaceholderOptions>
     return [
       'div',
       mergeAttributes(HTMLAttributes, {
-        'data-instatic-upload-placeholder': '',
-        'data-instatic-upload-id': attrs.uploadId,
-        'data-instatic-upload-status': attrs.status,
-        'data-instatic-upload-progress': String(progressPct),
+        'data-fourno-upload-placeholder': '',
+        'data-fourno-upload-id': attrs.uploadId,
+        'data-fourno-upload-status': attrs.status,
+        'data-fourno-upload-progress': String(progressPct),
         role: 'status',
         'aria-live': 'polite',
       }),

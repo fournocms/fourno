@@ -13,7 +13,7 @@
  *   └─ outsideText (base.text)
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { Page, PageNode } from '@core/page-tree'
 import { resolveDomDropTarget } from '@site/panels/DomPanel/domPanelDnd'
 

@@ -1,5 +1,5 @@
 /**
- * Custom bun:test matchers for the instatic test suite.
+ * Custom Vitest matchers for the fourno test suite.
  *
  * Import this file as a side-effect in any test that uses the custom matchers:
  *   import '../matchers'
@@ -8,14 +8,14 @@
  *   - toBeCleanHTML() — asserts an HTML string contains no XSS vectors
  */
 
-import { expect } from 'bun:test'
+import { expect } from 'vitest'
 
 // ---------------------------------------------------------------------------
 // TypeScript augmentation — lets IDEs autocomplete the custom matchers
 // ---------------------------------------------------------------------------
 
-declare module 'bun:test' {
-  interface Matchers<R = unknown> {
+declare module 'vitest' {
+  interface Matchers<T = unknown> {
     /**
      * Asserts that the received HTML string contains no XSS vectors:
      * - No `<script>` tags

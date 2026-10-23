@@ -56,7 +56,7 @@ export function applyIframeBodyPresentation(
   }
 
   const declarations = normaliseInlineStyles(presentation.style)
-  if (body.dataset.instaticIframeInteraction === 'canvas') {
+  if (body.dataset.fournoIframeInteraction === 'canvas') {
     for (const property of CANVAS_BODY_RESET_PROPERTIES) declarations.delete(property)
   }
   // Snapshot every touched declaration BEFORE applying any of them. A

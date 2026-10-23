@@ -1,7 +1,7 @@
 /**
  * Development-only database + uploads reset.
  *
- * `bun run db:drop` wipes local state so you can start from a clean slate:
+ * `pnpm db:drop` wipes local state so you can start from a clean slate:
  *
  *   - SQLite (default): deletes the database file and its `-wal` / `-shm` /
  *     `-journal` sidecar files (e.g. ./.tmp/dev.db*).
@@ -13,7 +13,7 @@
  * (DATABASE_URL, UPLOADS_DIR) via readServerConfig, so this always targets
  * whatever database the local dev server is actually using.
  *
- * The next `bun run dev` re-runs migrations and recreates the database from
+ * The next `pnpm dev` re-runs migrations and recreates the database from
  * scratch.
  *
  * This is destructive and intentionally local-only — never run it against a
@@ -21,8 +21,10 @@
  * prompt (useful for scripting).
  */
 
-import { SQL } from 'bun'
+import postgres from 'postgres'
+import { existsSync } from 'node:fs'
 import { readdir, rm, mkdir } from 'node:fs/promises'
+import { createInterface } from 'node:readline/promises'
 import { join, resolve } from 'node:path'
 import { isSqliteUrl, parseSqlitePath } from '../server/db'
 import { readServerConfig } from '../server/config'
@@ -47,8 +49,10 @@ if (!skipPrompt) {
   log('This will PERMANENTLY delete:')
   log(`  • database: ${databaseUrl}`)
   log(`  • uploads:  ${resolve(uploadsDir)}`)
-  const answer = prompt('[db:drop] Type "y" to continue:')
-  if (answer?.trim().toLowerCase() !== 'y') {
+  const readline = createInterface({ input: process.stdin, output: process.stderr })
+  const answer = await readline.question('[db:drop] Type "y" to continue: ')
+  readline.close()
+  if (answer.trim().toLowerCase() !== 'y') {
     fail('Aborted — nothing was deleted.')
   }
 }
@@ -60,7 +64,7 @@ async function dropSqlite(): Promise<void> {
   const targets = [dbPath, `${dbPath}-wal`, `${dbPath}-shm`, `${dbPath}-journal`]
   let removed = 0
   for (const target of targets) {
-    if (await Bun.file(target).exists()) {
+    if (existsSync(target)) {
       await rm(target, { force: true })
       removed += 1
       log(`Removed ${target}`)
@@ -74,7 +78,7 @@ async function dropSqlite(): Promise<void> {
 async function dropPostgres(): Promise<void> {
   // Reset the schema rather than dropping the whole database — the connection
   // role keeps its rights and the next migration run rebuilds every table.
-  const sql = new SQL(databaseUrl)
+  const sql = postgres(databaseUrl, { onnotice: () => {} })
   try {
     await sql.unsafe('drop schema if exists public cascade')
     await sql.unsafe('create schema public')
@@ -83,10 +87,10 @@ async function dropPostgres(): Promise<void> {
     const message = err instanceof Error ? err.message : 'Unknown error'
     fail(
       `Could not reach Postgres at ${databaseUrl}: ${message}\n` +
-        '         Is the database running? For the dockerised dev DB, start it with `bun run dev` first.',
+        '         Is the database running? For the dockerised dev DB, start it with `pnpm dev` first.',
     )
   } finally {
-    await sql.close()
+    await sql.end()
   }
 }
 
@@ -125,4 +129,4 @@ async function clearUploads(): Promise<void> {
 
 await clearUploads()
 
-log('Done. Run `bun run dev` to recreate the database from migrations.')
+log('Done. Run `pnpm dev` to recreate the database from migrations.')

@@ -5,7 +5,7 @@
  * safety gate (Constraint #230: validate before store hydration).
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { validateSite, validatePages, SiteValidationError } from '@core/persistence/validate'
 import type { SiteDocument } from '@core/page-tree'
 

@@ -24,15 +24,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      # `bun run build` is `tsc -b && vite build` — typecheck and bundle in one.
+      # `pnpm build` is `tsc -b && vite build` — typecheck and bundle in one.
       - name: Build
-        run: bun run build
+        run: pnpm build
 
   lint:
     name: Lint
@@ -41,14 +47,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: bun run lint
+        run: pnpm lint
 
   test:
     name: Test
@@ -57,17 +69,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Bun
-        uses: oven-sh/setup-bun@v2
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
 
       - name: Install dependencies
-        run: bun install --frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
       - name: Test
-        run: bun test
+        run: pnpm test
 
 # NOTE: The Playwright E2E suite is intentionally NOT run in CI yet. As
 # configured (`workers: 1`, fully serial, 156 tests) it takes ~45-60 min and is
 # timeout-fragile against the un-optimized dev server, so it cannot gate PRs
-# reliably today. Run it locally with `bun run test:e2e`. It will be reintroduced
+# reliably today. Run it locally with `pnpm test:e2e`. It will be reintroduced
 # as its own workflow once the suite is sharded/parallelized and stabilized.

@@ -2,7 +2,7 @@
  * Unit tests for htmlPagePlan — HTML→PagePlan transformation.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 // Self-registers all base modules with the global registry so importHtml works
 import '@modules/base'
 import { makeHtmlPagePlan, deriveSlug, prettifyTitle, resolveHref } from '@core/siteImport'

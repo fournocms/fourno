@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { collectUsedFrameworkClassIds } from '@core/framework'
 import type { SiteDocument } from '@core/page-tree'
 

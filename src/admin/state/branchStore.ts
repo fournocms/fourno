@@ -2,7 +2,7 @@
  * Active branch — which site branch this tab is editing, plus the branch
  * registry and the switcher's UI state.
  *
- * Every admin request carries the branch as the `X-Instatic-Branch` header
+ * Every admin request carries the branch as the `X-Fourno-Branch` header
  * (registered as an ambient header provider at boot), every collab doc id
  * minted by the editor carries it, and the branch-scoped workspaces (Site,
  * Content, Data) remount when it changes so their data reloads.

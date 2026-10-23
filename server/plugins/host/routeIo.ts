@@ -42,7 +42,7 @@ import type {
 export async function serializeRouteRequest(
   request: Request,
 ): Promise<{ request: SerializedRequest; body: Record<string, unknown> }> {
-  // Real Bun `Headers` supports both `forEach` and the entries iterator.
+  // Real `Headers` supports both `forEach` and the entries iterator.
   // Test stubs may only provide `.get(name)` — handle both shapes so we
   // can ship realistic typing without forcing tests to mock the full
   // Headers contract.
@@ -85,7 +85,7 @@ export async function serializeRouteRequest(
         parsedBody[key] = values.length === 1 ? values[0]! : values
       }
     } else if (contentType.startsWith('multipart/form-data')) {
-      // Bun's `Request.formData()` parses multipart. We re-create a Request
+      // `Request.formData()` parses multipart. We re-create a Request
       // from the ORIGINAL bytes + content-type (the boundary parameter rides
       // along in the header) so file payloads stay byte-exact. Text fields
       // become strings; file fields become SerializedUploadedFile markers.

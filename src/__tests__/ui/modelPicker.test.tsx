@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { ModelPicker, type ModelChoice } from '@admin/ai/ModelPicker'
 import { clearModelListCache, type CredentialView } from '@admin/ai/api'
@@ -34,7 +34,7 @@ const MODELS = Array.from({ length: 12 }, (_, i) => ({
 }))
 
 function mockModelsFetch() {
-  globalThis.fetch = mock(async () =>
+  globalThis.fetch = vi.fn(async () =>
     new Response(JSON.stringify({ models: MODELS }), {
       status: 200,
       headers: { 'content-type': 'application/json' },

@@ -59,7 +59,7 @@ const DANGEROUS_URL_SCHEMES = new Set(['javascript:', 'vbscript:', 'data:'])
  * module packs that execute inside the QuickJS-WASM sandbox, whose `URL`
  * polyfill (`server/plugins/quickjs/bootstrap/`) is a regex approximation that
  * requires `scheme://authority` and strips no control characters. A pure-string
- * implementation behaves identically in Bun, in browsers, and in the sandbox.
+ * implementation behaves identically in Node, in browsers, and in the sandbox.
  */
 export function urlScheme(value: string): string | null {
   // Matching control characters is the entire point of this function — the C0

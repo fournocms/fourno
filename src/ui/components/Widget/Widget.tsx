@@ -19,7 +19,7 @@
  * directly through the cascade without prop drilling.
  *
  * Lives under `src/ui/components/` — NOT `src/admin/pages/dashboard/` —
- * so plugins can import it via `@instatic/host-ui`. The four allowed
+ * so plugins can import it via `@fourno/host-ui`. The four allowed
  * `tint` tokens are the same four `--accent-*` accents declared in
  * `src/styles/globals.css`.
  */

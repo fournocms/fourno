@@ -108,7 +108,7 @@ test.describe('visual builder', () => {
     const containerRow = page
       .getByRole('tree', { name: 'Page element tree' })
       .getByRole('treeitem', { name: 'Container' })
-    const containerNodeId = await containerRow.getAttribute('data-instatic-node-id')
+    const containerNodeId = await containerRow.getAttribute('data-fourno-node-id')
     expect(containerNodeId, 'Container row should expose a canvas node id').toBeTruthy()
 
     const containerCanvas = canvasFrame(page).locator(

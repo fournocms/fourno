@@ -8,7 +8,7 @@ The **React Compiler is enabled** for the whole app (`babel({ presets: [reactCom
 
 - Don't write `useMemo`, `useCallback`, or `memo()` — the compiler handles it.
 - Three exceptions exist (dep-array functions, hot-list `React.memo`, lint escape hatches); add a comment on each.
-- **Enforcement gate:** `eslint-plugin-react-compiler` in `bun run lint` / CI.
+- **Enforcement gate:** `eslint-plugin-react-compiler` in `pnpm lint` / CI.
 - `react-doctor` surfaces violations as **warnings** only (`react-doctor.config.json`); it cannot distinguish the three legitimate exceptions.
 
 ## The rule
@@ -20,7 +20,7 @@ The **React Compiler is enabled** for the whole app (`babel({ presets: [reactCom
 
 Memoization legitimately stays in exactly three cases. **Keep it, and add a one-line comment saying why** so the next reader (and the linters) know it's deliberate.
 
-1. **The value/function is referenced in a hook dependency array.** The static `react-hooks/exhaustive-deps` rule can't see the compiler's runtime memoization, so it still demands a stable identity for anything in a `useEffect`/`useMemo`/`useCallback` dep array. Wrapping a *function* used as a dep in `useCallback` (plus the transitive closure it depends on) is required to keep `bun run lint` clean. Only **functions** trip the rule — a plain value feeding a dep array can be inlined.
+1. **The value/function is referenced in a hook dependency array.** The static `react-hooks/exhaustive-deps` rule can't see the compiler's runtime memoization, so it still demands a stable identity for anything in a `useEffect`/`useMemo`/`useCallback` dep array. Wrapping a *function* used as a dep in `useCallback` (plus the transitive closure it depends on) is required to keep `pnpm lint` clean. Only **functions** trip the rule — a plain value feeding a dep array can be inlined.
 
 2. **A `React.memo` re-render bailout on a hot, list-rendered component** (e.g. a recursive per-node canvas/tree renderer rendered O(N) times). `React.memo` skips re-rendering on equal props — a *different* mechanism from the compiler's within-component memoization — so dropping it on an O(N) critical path is not behavior-preserving without runtime perf validation. Rare; justify in a comment. Examples: `NodeRenderer`, `DomPanel/TreeNode`, `AgentPanel`'s `MessageBubble`/`MarkdownTextBubble`.
 
@@ -30,7 +30,7 @@ Memoization legitimately stays in exactly three cases. **Keep it, and add a one-
 
 ## The gate
 
-Enforcement is **`eslint-plugin-react-compiler` + `eslint-plugin-react-hooks`**, run in `bun run lint` / CI — that is the authoritative gate:
+Enforcement is **`eslint-plugin-react-compiler` + `eslint-plugin-react-hooks`**, run in `pnpm lint` / CI — that is the authoritative gate:
 
 - `eslint-plugin-react-compiler` flags functions the compiler had to bail out on.
 - `react-hooks/exhaustive-deps` and `react-hooks/refs` enforce exceptions (1) and (3).

@@ -27,7 +27,7 @@
  * leaf's schema-derived types, including the exact CSS execution-input type.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { siteWriteTools } from '../../../server/ai/tools/site/writeTools'
@@ -63,7 +63,7 @@ import {
   RenderSnapshotInputSchema,
 } from '@core/ai'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 
 /** Tool name → the canonical leaf schema the registry MUST reference. */
 const EXPECTED_SCHEMA_BY_TOOL = {

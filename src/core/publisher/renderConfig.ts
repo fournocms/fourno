@@ -15,7 +15,7 @@
  *  - `RenderAccumulators` (mutable): the outputs of a render pass — the
  *    deduped CSS map, deduped module-JS map, per-page CSP requirements, the
  *    set of infinite-loop ids, and the set of nodes that actually emitted a
- *    `<instatic-hole>`. The top-level `publishPage` owns these, initialises
+ *    `<fourno-hole>`. The top-level `publishPage` owns these, initialises
  *    all five up-front, and threads the SAME instances down the whole tree so
  *    every renderer appends to one shared accumulator.
  *    Passing it as an explicit parameter is what makes the shared-mutable
@@ -95,14 +95,14 @@ export interface RenderConfig {
   readonly loopData?: ReadonlyMap<string, ResolvedLoopRenderData>
   /**
    * Set of page node ids classified as dynamic by `findDynamicNodeIds`.
-   * When a node's id is in this set, `renderNode` emits a `<instatic-hole>`
+   * When a node's id is in this set, `renderNode` emits a `<fourno-hole>`
    * placeholder instead of recursing into the subtree. Absent (or empty)
    * means render everything inline — used by the hole endpoint and tests
    * that want full rendering without any holes.
    */
   readonly dynamicNodeIds?: ReadonlySet<string>
   /**
-   * Monotonic publish version stamped into every `<instatic-hole data-instatic-version>`
+   * Monotonic publish version stamped into every `<fourno-hole data-fourno-version>`
    * attribute. The hole runtime sends this value back as `?v=` on each
    * fetch; the hole endpoint returns a stale fragment when the version
    * no longer matches the current `publishVersion` in `publishState.ts`.
@@ -151,10 +151,10 @@ export interface RenderAccumulators {
    */
   readonly infiniteLoopIds: Set<string>
   /**
-   * Each node that actually emits a `<instatic-hole>` during the render walk
+   * Each node that actually emits a `<fourno-hole>` during the render walk
    * calls `acc.holeNodeIds.add(nodeId)`. After the walk completes, `render.ts`
    * reads `.size > 0` to decide whether to inject the
-   * `/_instatic/hole-runtime.js` script tag into the `<head>`. This is more
+   * `/_fourno/hole-runtime.js` script tag into the `<head>`. This is more
    * precise than checking `dynamicNodeIds.size` because it reflects what was
    * actually rendered (not just what was classified as dynamic before the walk
    * began).

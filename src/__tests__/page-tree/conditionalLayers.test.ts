@@ -6,7 +6,7 @@
  * migrated at parse time.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { parseStyleRule } from '@core/page-tree'
 
 function baseRaw(extra: Record<string, unknown> = {}) {

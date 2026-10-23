@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   createCapabilityTestHarness,
   expectStepUpRequired,
@@ -42,7 +42,7 @@ describe('MCP connection management handler', () => {
     expect(listRes.status).toBe(200)
     const overview = await readJson<McpConnectionOverview>(listRes)
     expect(overview.connections).toHaveLength(1)
-    expect(overview.endpoint).toBe('http://localhost/_instatic/mcp')
+    expect(overview.endpoint).toBe('http://localhost/_fourno/mcp')
     expect(overview.remoteAccess).toBe('local-only')
     expect(JSON.stringify(overview)).not.toContain(created.accessToken)
   })

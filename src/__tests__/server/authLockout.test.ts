@@ -4,7 +4,7 @@
  * Covers the pure-function half (decision math). The end-to-end interaction
  * with the login handler is exercised by `authLockoutLogin.test.ts`.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   LOCKOUT_CAP_MS,
   LOCKOUT_INITIAL_MS,

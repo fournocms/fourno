@@ -57,8 +57,8 @@ const routes: readonly RouteHandler[] = [
   // runtime rewrite. The site editor now POSTs `/admin/api/ai/chat/site`.
   tryServeAi,
   tryServeCmsApi,
-  // Branch preview links — `/_instatic/preview/<token>` sets the preview
-  // cookie, `/_instatic/preview/exit` clears it. Public GETs below then
+  // Branch preview links — `/_fourno/preview/<token>` sets the preview
+  // cookie, `/_fourno/preview/exit` clears it. Public GETs below then
   // render the branch's draft while the cookie names a live link.
   tryServeBranchPreviewLink,
   tryServeLoopRuntimeAsset,
@@ -106,17 +106,21 @@ export async function handleServerRequest(
  * with HEAD by convention) reported a healthy published site as permanently
  * missing. See issue #306.
  *
- * Dropping the body is `Bun.serve`'s job and it already does it: a HEAD
+ * Dropping the body is the Node HTTP layer's job and it already does it: a HEAD
  * response goes out with the headers a GET would have produced, `content-length`
  * included, and no content. Handlers stay body-agnostic.
  *
- * Cloning is safe here — the copy keeps the URL, the cookies, and the synthetic
- * `x-bun-socket-ip` header that `stampSocketIp` writes at the `Bun.serve`
- * boundary, so `clientIp()` attribution is unaffected. HEAD carries no body,
- * so there is nothing to re-stream.
+ * Cloning is safe here — the copy keeps the URL, the cookies, the abort
+ * signal, and the synthetic `x-fourno-socket-ip` header that `stampSocketIp`
+ * writes at the server boundary, so `clientIp()` attribution is unaffected.
+ * HEAD carries no body, so there is nothing to re-stream. The copy is built
+ * from the URL and headers rather than `new Request(req)`, which only accepts
+ * the runtime's own `Request` class, not the server adapter's lazy one.
  */
 function asGetForHead(req: Request): Request {
-  return req.method === 'HEAD' ? new Request(req, { method: 'GET' }) : req
+  return req.method === 'HEAD'
+    ? new Request(req.url, { method: 'GET', headers: req.headers, signal: req.signal })
+    : req
 }
 
 // ---------------------------------------------------------------------------
@@ -159,7 +163,7 @@ function tryServeAi(req: Request, runtime: ServerRuntime, url: URL, _pathname: s
 }
 
 /**
- * MCP server endpoint (`/_instatic/mcp`). Authenticates per-connector via a
+ * MCP server endpoint (`/_fourno/mcp`). Authenticates per-connector via a
  * OAuth or personal bearer token (NOT the admin session cookie) and exposes
  * the capability-gated CMS tool surface over MCP. Returns `null` for any
  * other path so the dispatcher keeps walking.
@@ -188,12 +192,12 @@ function tryServeLoopRuntimeAsset(req: Request, _runtime: ServerRuntime, _url: U
 }
 
 function tryServeLoop(req: Request, runtime: ServerRuntime, url: URL, pathname: string): Promise<Response> | null {
-  if (!pathname.startsWith('/_instatic/loop/')) return null
+  if (!pathname.startsWith('/_fourno/loop/')) return null
   return handleLoopRequest(req, url, { db: runtime.db })
 }
 
 /**
- * The hole runtime is a fixed CMS asset served at `/_instatic/hole-runtime.js`.
+ * The hole runtime is a fixed CMS asset served at `/_fourno/hole-runtime.js`.
  * Registered before `tryServeHole` so the exact path is consumed here and
  * never falls through to the hole fragment handler.
  */
@@ -203,16 +207,16 @@ function tryServeHoleRuntimeAsset(req: Request, _runtime: ServerRuntime, _url: U
 }
 
 /**
- * Layer C hole fragment endpoint — `/_instatic/hole/<nodeId>`.
+ * Layer C hole fragment endpoint — `/_fourno/hole/<nodeId>`.
  * Renders a dynamic node subtree on-demand and caches the result via Layer B.
  */
 function tryServeHole(req: Request, runtime: ServerRuntime, url: URL, pathname: string): Promise<Response> | null {
-  if (!pathname.startsWith('/_instatic/hole/')) return null
+  if (!pathname.startsWith('/_fourno/hole/')) return null
   return handleHoleRequest(req, url, { db: runtime.db })
 }
 
 /**
- * Per-module published JS — `/_instatic/module-js/<moduleId>.js`. Prefix-
+ * Per-module published JS — `/_fourno/module-js/<moduleId>.js`. Prefix-
  * namespaced: unknown paths under the prefix 404 inside the handler rather
  * than falling through to the public-slug resolver.
  */
@@ -222,12 +226,12 @@ function tryServeModuleJsAsset(req: Request, runtime: ServerRuntime, url: URL, p
 }
 
 function tryServePublicForm(req: Request, runtime: ServerRuntime, url: URL, pathname: string): Promise<Response | null> | null {
-  if (!pathname.startsWith('/_instatic/form/')) return null
+  if (!pathname.startsWith('/_fourno/form/')) return null
   return handlePublicFormRequest(req, runtime.db, url)
 }
 
 async function tryServeRuntimeAsset(req: Request, runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response | null> {
-  if (req.method !== 'GET' || !pathname.startsWith('/_instatic/assets/')) return null
+  if (req.method !== 'GET' || !pathname.startsWith('/_fourno/assets/')) return null
 
   // Allowlist the asset kinds the publisher emits here (JS/CSS/maps/fonts/raster).
   // An unrecognised extension is a hard 404, so a file planted in the published
@@ -282,7 +286,7 @@ async function tryServeRuntimeAsset(req: Request, runtime: ServerRuntime, _url: 
 
 /** Derive a response content-type for a baked static asset from its extension. */
 /**
- * Content type for a `/_instatic/assets/*` path, or `null` when the extension
+ * Content type for a `/_fourno/assets/*` path, or `null` when the extension
  * is not one the publisher emits here — an allowlist, so `null` means the
  * caller 404s rather than serving active content like SVG/HTML (GHSA-5h25).
  */
@@ -304,13 +308,13 @@ function contentTypeForAssetPath(pathname: string): string | null {
 
 /**
  * Per-site runtime dependency cache — served from the hashed
- * `bun install` workspace under `/_instatic/runtime/cache/<hash>/<...path>`.
+ * `npm install` workspace under `/_fourno/runtime/cache/<hash>/<...path>`.
  * The publisher emits a `<script type="importmap">` mapping bare
  * specifiers like `three` to URLs in this namespace, so plugin module
  * scripts and frontend bundles share a single locally-installed copy
  * of every site dependency.
  *
- * The /_instatic/runtime/cache/ namespace is exclusive: unknown paths under it
+ * The /_fourno/runtime/cache/ namespace is exclusive: unknown paths under it
  * 404 here rather than falling through to a later matcher.
  */
 async function tryServeRuntimePackageNamespace(req: Request, _runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response | null> {
@@ -325,13 +329,13 @@ async function tryServeRuntimePackageNamespace(req: Request, _runtime: ServerRun
  * the browser falls back to refetching the HTML (which carries the new
  * hash).
  *
- * The /_instatic/css/ namespace is exclusive: any unknown path under it is a
+ * The /_fourno/css/ namespace is exclusive: any unknown path under it is a
  * 404, never falls through to the public-slug handler. That prevents an
- * unrelated path like `/_instatic/css/anything.css` from accidentally
+ * unrelated path like `/_fourno/css/anything.css` from accidentally
  * rendering the homepage.
  */
 async function tryServeSiteCssNamespace(req: Request, runtime: ServerRuntime, _url: URL, pathname: string): Promise<Response | null> {
-  if (req.method !== 'GET' || !pathname.startsWith('/_instatic/css/')) return null
+  if (req.method !== 'GET' || !pathname.startsWith('/_fourno/css/')) return null
   return (await serveSiteCss(runtime.db, pathname, runtime.uploadsDir)) ?? new Response('Not found', { status: 404 })
 }
 
@@ -340,7 +344,7 @@ async function tryServeSiteCssNamespace(req: Request, runtime: ServerRuntime, _u
  * adapter with `servingMode !== 'public-url'`.
  *
  * `dispatchUpload` synthesises a host-owned URL of the shape
- *   /_instatic/media/<adapterId>/<storagePath>
+ *   /_fourno/media/<adapterId>/<storagePath>
  * for non-public-url writes, then stores that on `media_assets.public_path`
  * (or inside each variant's `path`). Browsers hit this route; we ask the
  * adapter for a freshly-signed read URL and 302-redirect.
@@ -360,11 +364,11 @@ async function tryServeMediaRedirect(
   _url: URL,
   pathname: string,
 ): Promise<Response | null> {
-  if (!pathname.startsWith('/_instatic/media/')) return null
+  if (!pathname.startsWith('/_fourno/media/')) return null
   if (req.method !== 'GET') {
     return new Response('Method not allowed', { status: 405 })
   }
-  const match = pathname.match(/^\/_instatic\/media\/([^/]+)\/(.+)$/)
+  const match = pathname.match(/^\/_fourno\/media\/([^/]+)\/(.+)$/)
   if (!match) return new Response('Not found', { status: 404 })
   const adapterId = decodeURIComponent(match[1])
   const storagePath = decodeURIComponent(match[2])
@@ -406,7 +410,7 @@ async function tryServeMediaRedirect(
  *   - `/favicon.svg`               — the site favicon copied from `public/`.
  *   - `/runtime/<shim>.js`         — plugin-runtime ESM shims that the
  *                                    admin's import map re-exports
- *                                    `react`, `react-dom`, `@instatic/*`
+ *                                    `react`, `react-dom`, `@fourno/*`
  *                                    from. Without these, plugin bundles
  *                                    fail to fetch on a production install
  *                                    (the dev server hides this because
@@ -503,7 +507,7 @@ function adminUiNotBuiltResponse(pathname: string): Response {
 <h1>Admin UI not served on this port</h1>
 <p>This is the CMS API server (port 3001). In development, the admin UI is served by the Vite dev server.</p>
 <p>Open <a href="${targetUrl}">${targetUrl}</a>.</p>
-<p>If Vite isn't running yet, start it with <code>bun run dev</code> from the project root.</p>
+<p>If Vite isn't running yet, start it with <code>pnpm dev</code> from the project root.</p>
 </body>
 </html>`
   return new Response(html, {
@@ -515,7 +519,7 @@ function adminUiNotBuiltResponse(pathname: string): Response {
 /**
  * Serve one of the three site CSS bundle files (reset / framework / style).
  *
- * The URL path is `/_instatic/css/<bundle>-<hash>.css` where `<bundle>` is the
+ * The URL path is `/_fourno/css/<bundle>-<hash>.css` where `<bundle>` is the
  * logical layer name and `<hash>` is the 12-hex SHA-256 prefix that
  * `buildSiteCssBundle` produces.
  *
@@ -555,7 +559,7 @@ registerVersionedCacheReset(() => {
 })
 
 async function serveSiteCss(db: DbClient, pathname: string, uploadsDir?: string): Promise<Response | null> {
-  const filename = pathname.slice('/_instatic/css/'.length)
+  const filename = pathname.slice('/_fourno/css/'.length)
   const match = filename.match(/^(reset|framework|style|userStyles)-([a-f0-9]{12})\.css$/)
   if (!match) return null
 

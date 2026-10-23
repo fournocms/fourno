@@ -3,7 +3,7 @@
  * shapes plus their shared serialization helpers (SerializedRequest/Response/User).
  *
  * These types define the wire format between the host process and each
- * per-plugin Bun.Worker. The host and worker both import from here; keeping
+ * per-plugin worker thread. The host and worker both import from here; keeping
  * the types in one file prevents skew between the two sides.
  */
 

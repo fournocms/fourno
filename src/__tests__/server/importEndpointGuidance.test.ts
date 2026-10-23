@@ -9,7 +9,7 @@
  * SiteBundleSchema", which reads as a bug in the bundle rather than a wrong
  * door. The handler now recognises the ZIP magic bytes and names the mistake.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -21,7 +21,7 @@ import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { handleImportRoute } from '../../../server/handlers/cms/import'
 
 async function setupDb(): Promise<{ db: DbClient; cleanup: () => Promise<void> }> {
-  const dir = await mkdtemp(join(tmpdir(), 'instatic-import-guide-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fourno-import-guide-'))
   const db = createSqliteClient(join(dir, 'test.db'))
   await runMigrations(db, sqliteMigrations)
   return {

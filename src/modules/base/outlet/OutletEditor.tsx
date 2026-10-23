@@ -59,7 +59,7 @@ export const OutletEditor: React.FC<ModuleComponentProps<OutletStoredProps>> = (
     return React.createElement(tag, {
       ...nodeWrapperProps,
       className: mcClassName || undefined,
-      'data-instatic-content-region': '',
+      'data-fourno-content-region': '',
       dangerouslySetInnerHTML: { __html: html },
     })
   }
@@ -81,7 +81,7 @@ export const OutletEditor: React.FC<ModuleComponentProps<OutletStoredProps>> = (
     {
       ...nodeWrapperProps,
       className: mcClassName || undefined,
-      'data-instatic-content-region': '',
+      'data-fourno-content-region': '',
     },
     inner,
   )

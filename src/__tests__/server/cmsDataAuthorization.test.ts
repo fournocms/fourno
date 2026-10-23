@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import type { DbClient } from '../../../server/db'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
@@ -47,7 +47,7 @@ async function login(db: DbClient, email: string): Promise<string> {
   })
   expect(res.status).toBe(200)
   const cookie = (res.headers.get('set-cookie') ?? '').split(';')[0]
-  expect(cookie).toContain('instatic_admin_session=')
+  expect(cookie).toContain('fourno_admin_session=')
   return cookie
 }
 
@@ -59,7 +59,7 @@ async function stepUp(db: DbClient, cookie: string): Promise<string> {
   })
   expect(res.status).toBe(200)
   const steppedCookie = (res.headers.get('set-cookie') ?? '').split(';')[0]
-  expect(steppedCookie).toContain('instatic_admin_session=')
+  expect(steppedCookie).toContain('fourno_admin_session=')
   return steppedCookie
 }
 

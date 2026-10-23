@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { normalizeOrigin, readServerConfig, resolvePublicOrigins } from '../../../server/config'
 
 describe('normalizeOrigin', () => {
@@ -137,10 +137,10 @@ describe('readServerConfig', () => {
       readServerConfig({
         PORT: '4321',
         HOST: '127.0.0.1',
-        INSTATIC_SHUTDOWN_TOKEN: 'tok-123',
-        DATABASE_URL: 'postgres://instatic:secret@postgres:5432/instatic',
-        UPLOADS_DIR: '/srv/instatic/uploads',
-        STATIC_DIR: '/srv/instatic/dist',
+        FOURNO_SHUTDOWN_TOKEN: 'tok-123',
+        DATABASE_URL: 'postgres://fourno:secret@postgres:5432/fourno',
+        UPLOADS_DIR: '/srv/fourno/uploads',
+        STATIC_DIR: '/srv/fourno/dist',
         TRUSTED_PROXY_CIDRS: '10.0.0.0/8, 192.168.0.0/16, ',
         PUBLIC_ORIGIN: 'https://CMS.example.com/, http://localhost:5173',
         RENDER_EXTERNAL_URL: 'https://ignored.onrender.com',
@@ -151,9 +151,9 @@ describe('readServerConfig', () => {
       port: 4321,
       host: '127.0.0.1',
       shutdownToken: 'tok-123',
-      databaseUrl: 'postgres://instatic:secret@postgres:5432/instatic',
-      uploadsDir: '/srv/instatic/uploads',
-      staticDir: '/srv/instatic/dist',
+      databaseUrl: 'postgres://fourno:secret@postgres:5432/fourno',
+      uploadsDir: '/srv/fourno/uploads',
+      staticDir: '/srv/fourno/dist',
       trustedProxyCidrs: ['10.0.0.0/8', '192.168.0.0/16'],
       publicOrigins: ['https://cms.example.com', 'http://localhost:5173'],
       npmRegistryUrl: 'https://npm.example.com/registry',

@@ -4,13 +4,13 @@
  *
  * Two pieces have to agree:
  *
- *   1. The host-side router exposes a `/_instatic/media/<adapterId>/<storagePath>`
+ *   1. The host-side router exposes a `/_fourno/media/<adapterId>/<storagePath>`
  *      route that looks up the adapter, calls `getReadUrl`, and 302-redirects.
  *      This is the read-side of any adapter whose servingMode isn't
  *      `'public-url'`.
  *
  *   2. `dispatchUpload` SUBSTITUTES the plugin's returned publicUrl with the
- *      host-owned `/_instatic/media/...` URL for those adapters — so the plugin
+ *      host-owned `/_fourno/media/...` URL for those adapters — so the plugin
  *      doesn't have to know the host's resolution URL shape, and (more
  *      importantly) the stored `media_assets.public_path` never holds a
  *      time-expiring signed URL.
@@ -19,7 +19,7 @@
  * a major real-world use case (private buckets) wouldn't work end-to-end.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join, dirname } from 'node:path'
@@ -31,10 +31,10 @@ async function read(relative: string): Promise<string> {
 }
 
 describe('media signed-redirect serving', () => {
-  it('router exposes /_instatic/media/<adapterId>/<storagePath> with 302 redirect', async () => {
+  it('router exposes /_fourno/media/<adapterId>/<storagePath> with 302 redirect', async () => {
     const source = await read('server/router.ts')
     expect(source).toContain('tryServeMediaRedirect')
-    expect(source).toContain("'/_instatic/media/'")
+    expect(source).toContain("'/_fourno/media/'")
     expect(source).toContain('mediaStorageRegistry')
     // The route must hit the adapter's getReadUrl and emit a 302. Without
     // these the route would 200 / 404 silently and signed-redirect would
@@ -70,7 +70,7 @@ describe('media signed-redirect serving', () => {
       /adapter\.servingMode === 'public-url'[\s\S]*?result\.publicUrl[\s\S]*?buildSignedRedirectUrl/,
     )
     // The built URL must match the router's expected shape.
-    expect(source).toMatch(/`\/_instatic\/media\/\$\{encodeURIComponent\(adapterId\)\}\/\$\{encodeURIComponent\(storagePath\)\}`/)
+    expect(source).toMatch(/`\/_fourno\/media\/\$\{encodeURIComponent\(adapterId\)\}\/\$\{encodeURIComponent\(storagePath\)\}`/)
   })
 
   it('the route encoding round-trips correctly', async () => {

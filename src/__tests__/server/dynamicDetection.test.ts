@@ -12,7 +12,7 @@
  * source distinction that is the key invariant of Layer C.
  */
 
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach } from 'vitest'
 import { findDynamicNodeIds } from '../../core/publisher/dynamicDetection'
 import { loopSourceRegistry } from '../../core/loops/registry'
 import { makePage, makeSite, makeRegistry, makeModule } from '../publisher/helpers'

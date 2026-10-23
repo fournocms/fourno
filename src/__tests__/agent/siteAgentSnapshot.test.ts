@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { buildSiteAgentSnapshot } from '@site/agent/siteAgentSnapshot'
 import type { SiteDocument, Page } from '@core/page-tree'
 

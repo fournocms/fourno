@@ -33,7 +33,7 @@
  * applied, owner user + stepped-up session seeded via the real setup/login
  * endpoints, requests dispatched through `handleCmsRequest`.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteShell } from '@core/page-tree'
 import {
   createCapabilityTestHarness,
@@ -146,7 +146,8 @@ async function storedRows(harness: CapabilityTestHarness, tableId: string): Prom
     from data_rows
     where table_id = ${tableId}
   `
-  return new Map(rows.map((row) => [row.id, row]))
+  // Postgres returns int8 (`seq`) as a string; SQLite already gives a number.
+  return new Map(rows.map((row) => [row.id, { ...row, seq: Number(row.seq) }]))
 }
 
 async function backdateRows(harness: CapabilityTestHarness, tableId: string): Promise<void> {

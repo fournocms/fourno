@@ -9,8 +9,8 @@ CMS-native forms let the visual editor build semantic HTML forms from primitive 
 - The module picker exposes the form primitives in its Forms category; preview wireframes live in `src/admin/pages/site/module-picker/moduleWireframes.ts`.
 - Paste HTML, agent HTML insert/replace, and Super Import all use `@core/htmlImport`, so semantic HTML form tags import as these same primitive modules.
 - CMS form snapshots are derived at publish/request time by `src/core/forms/snapshot.ts`.
-- Public submissions go through `POST /_instatic/form/challenge` and `POST /_instatic/form/submit`, implemented in `server/forms/handler.ts`.
-- The browser runtime ships through the module-JS channel: `base.form`'s render() emits it as `js` when `mode === 'cms'` (`src/modules/base/forms/formRuntimeJs.ts`), published pages load it from `/_instatic/module-js/base.form.js`, and `server/forms/formRuntime.ts`'s `stampFormPageTokens` stamps `data-instatic-page-token` + `data-instatic-page-id` onto every CMS form tag — on baked pages and on hole fragments.
+- Public submissions go through `POST /_fourno/form/challenge` and `POST /_fourno/form/submit`, implemented in `server/forms/handler.ts`.
+- The browser runtime ships through the module-JS channel: `base.form`'s render() emits it as `js` when `mode === 'cms'` (`src/modules/base/forms/formRuntimeJs.ts`), published pages load it from `/_fourno/module-js/base.form.js`, and `server/forms/formRuntime.ts`'s `stampFormPageTokens` stamps `data-fourno-page-token` + `data-fourno-page-id` onto every CMS form tag — on baked pages and on hole fragments.
 
 ## Editor Model
 
@@ -49,8 +49,8 @@ The published runtime finalizes auto labels in the browser because labels and in
 
 CMS-native submission is a two-step public flow:
 
-1. The runtime requests a short-lived challenge from `/_instatic/form/challenge` when the form attaches in the browser.
-2. The runtime posts values plus the challenge to `/_instatic/form/submit`.
+1. The runtime requests a short-lived challenge from `/_fourno/form/challenge` when the form attaches in the browser.
+2. The runtime posts values plus the challenge to `/_fourno/form/submit`.
 
 The submit handler reloads the latest published site snapshot, derives the form snapshot from the published page tree, requires the target `DataTable` to be a non-system `data` table, validates fields against that table, and creates a `data_rows` record with `createDataRow`. After persistence, `server/forms/handler.ts` calls `emitContentEntryCreated` from `server/publish/contentEvents.ts` with the `system` actor, so plugins can react to successful submissions through the standard `content.entry.created` channel.
 

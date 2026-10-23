@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { selectRightSidebarExpanded, useEditorStore } from '@site/store/store'
 import '@modules/base/index'
 

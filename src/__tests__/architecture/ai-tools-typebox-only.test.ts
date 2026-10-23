@@ -8,11 +8,11 @@
  * create two competing sources of truth.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const TOOLS_ROOT = join(REPO_ROOT, 'server/ai/tools')
 
 function collectFiles(dir: string): string[] {

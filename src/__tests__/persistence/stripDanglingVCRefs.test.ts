@@ -11,7 +11,7 @@
  *   - Refs that DO resolve to a known VC are left alone.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { stripDanglingVCRefs } from '@core/persistence/validate'
 import { makeSite, makePage, makeNode, makeVC } from '../fixtures'
 

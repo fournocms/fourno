@@ -25,11 +25,11 @@
  * @see db-postgres-isms.test.ts  — companion gate for other PG-only syntax
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const SCAN_ROOT = join(PROJECT_ROOT, 'server')
 
 /** Strip JS line and block comments so documented mentions of operators don't false-positive. */

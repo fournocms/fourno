@@ -2,7 +2,7 @@
  * Version history — listing a row's published versions and restoring one
  * into the draft on the request's branch.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 import { getDataRow, listDataRows, saveDataRowDraft } from '../../../server/repositories/data'
 import {
@@ -57,7 +57,7 @@ describe('row version history', () => {
     const onBranch = await harness.cms(`${ROWS}/${home!.id}/versions/${second.id}/restore`, {
       method: 'POST',
       cookie: owner,
-      headers: { 'x-instatic-branch': 'history' },
+      headers: { 'x-fourno-branch': 'history' },
     })
     expect(onBranch.status).toBe(200)
     expect((await getDataRow(harness.db, { branchId: 'history' }, home!.id))!.cells.title).toBe('Second')

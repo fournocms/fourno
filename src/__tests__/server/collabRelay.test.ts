@@ -4,7 +4,8 @@
  * Runs on a real migrated database via the capability harness (setup seeds
  * the home page row exactly like a live install).
  */
-import { afterEach, describe, expect, it, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { setTimeout as sleep } from 'node:timers/promises'
 import * as Y from 'yjs'
 import {
   LOCAL_ORIGIN,
@@ -392,7 +393,7 @@ describe('collab relay', () => {
   })
 
   it('keeps a dirty doc resident and retries when the final persist fails', async () => {
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     const harness = await createCapabilityTestHarness()
     cleanups.push(() => harness.cleanup())
     await harness.setupOwner()
@@ -427,7 +428,7 @@ describe('collab relay', () => {
   })
 
   it('makes an explicit flush fail instead of publishing stale derived JSON', async () => {
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     const harness = await createCapabilityTestHarness()
     cleanups.push(() => harness.cleanup())
     await harness.setupOwner()
@@ -685,9 +686,9 @@ describe('collab relay', () => {
         swept = true
         break
       }
-      await Bun.sleep(10)
+      await sleep(10)
     }
-    expect(swept).toBeTrue()
+    expect(swept).toBe(true)
     gated.release()
     await relay.flushAll()
 
@@ -768,7 +769,7 @@ describe('collab relay', () => {
     notifyShellWrite('main')
     // Let reset A capture its own SITE-only batch and wait on the blocked
     // persist before the external creation emits reset B.
-    await Bun.sleep(5)
+    await sleep(5)
 
     const rowId = 'later-reset-page'
     await createDataRow(harness.db, MAIN_SCOPE, {
@@ -828,7 +829,7 @@ describe('collab relay', () => {
       ;(rostersMap(siteDoc).get('pages') as Y.Map<unknown>).delete(page.id)
     }, LOCAL_ORIGIN)
     await sweep.completedPass
-    await Bun.sleep(5)
+    await sleep(5)
 
     deleting.release()
     await relay.flushAll()
@@ -940,7 +941,7 @@ describe('collab relay', () => {
     editTitleUpdate(retained.doc, 'Stale page edit must not undo the move')
 
     const moved = await updateDataRowTable(harness.db, MAIN_SCOPE, original.id, customTable.id)
-    expect(moved.ok).toBeTrue()
+    expect(moved.ok).toBe(true)
     await relay.flushAll()
 
     const { rows: persisted } = await harness.db<{
@@ -951,7 +952,7 @@ describe('collab relay', () => {
     `
     expect(persisted[0]?.table_id).toBe(customTable.id)
     expect(persisted[0]?.cells_json).toEqual(original.cells_json)
-    expect(oldDocDestroyed).toBeTrue()
+    expect(oldDocDestroyed).toBe(true)
 
     const resetBlob = await getCollabDocumentState(harness.db, docId)
     expect(resetBlob?.generation).not.toBe(retained.generation)
@@ -1012,7 +1013,7 @@ describe('collab relay', () => {
     `
     expect(rows[0]?.table_id).toBe(targetTable.id)
     expect(rows[0]?.cells_json).toEqual(importedCells)
-    expect(oldDocDestroyed).toBeTrue()
+    expect(oldDocDestroyed).toBe(true)
     const rebound = await relay.openDoc(docId)
     expect(rebound.generation).not.toBe(oldGeneration)
     const { doc: reseededSite } = await relay.openDoc(MAIN_SITE_DOC_ID)
@@ -1143,7 +1144,7 @@ describe('collab relay', () => {
     const reset = relay.resetDocs([docId])
     // resetDocs has installed its gate, captured the retained ref, and is now
     // waiting for this blocked persist inside eviction.
-    await Bun.sleep(5)
+    await sleep(5)
     relay.release(docId)
     gated.release()
     await reset
@@ -1152,8 +1153,8 @@ describe('collab relay', () => {
     let destroyed = false
     unboundFresh.on('destroy', () => { destroyed = true })
     editTitleUpdate(unboundFresh, 'No phantom owner remains')
-    await Bun.sleep(30)
-    expect(destroyed).toBeTrue()
+    await sleep(30)
+    expect(destroyed).toBe(true)
   })
 
   it('a release before reset captures held refs leaves no phantom page owner', async () => {
@@ -1185,15 +1186,15 @@ describe('collab relay', () => {
     relay.release(docId)
     gated.release()
     await reset
-    expect(originalDestroyed).toBeTrue()
+    expect(originalDestroyed).toBe(true)
 
     const { doc: unboundFresh } = await relay.openDoc(docId)
     expect(unboundFresh).not.toBe(retained.doc)
     let freshDestroyed = false
     unboundFresh.on('destroy', () => { freshDestroyed = true })
     editTitleUpdate(unboundFresh, 'No pre-snapshot phantom owner remains')
-    await Bun.sleep(30)
-    expect(freshDestroyed).toBeTrue()
+    await sleep(30)
+    expect(freshDestroyed).toBe(true)
   })
 
   it('a reset drains an open already reading the old lineage before deleting it', async () => {
@@ -1240,7 +1241,7 @@ describe('collab relay', () => {
       slug: row.slug,
     })
     // Let the queued reset install its gate and begin waiting for staleOpen.
-    await Bun.sleep(10)
+    await sleep(10)
     gated.release()
     await staleOpen
     await resetDone
@@ -1293,7 +1294,7 @@ describe('collab relay', () => {
     retained.doc.on('destroy', finishDestroy)
     relay.release(docId)
     await destroyed
-    await Bun.sleep(5)
+    await sleep(5)
     expect(returnedDestroyCount).toBe(1)
   })
 
@@ -1392,7 +1393,7 @@ describe('collab relay', () => {
       slug: row.slug,
     }).then(() => { externalFinished = true })
 
-    await Bun.sleep(10)
+    await sleep(10)
     const externalWaitedForDerivedWrite = !externalFinished
     gated.release()
     await Promise.all([collabFlush, externalSave, resetDone])
@@ -1404,7 +1405,7 @@ describe('collab relay', () => {
       nodes: Record<string, { label?: string }>
       rootNodeId: string
     }
-    expect(externalWaitedForDerivedWrite).toBeTrue()
+    expect(externalWaitedForDerivedWrite).toBe(true)
     expect(persistedBody.nodes[persistedBody.rootNodeId]?.label).toBe('External ordered last')
   })
 
@@ -1452,7 +1453,7 @@ describe('collab relay', () => {
     await gated.blocked
     const reset = relay.resetDocs([MAIN_SITE_DOC_ID, docId])
     editTitleUpdate(pageDoc, 'Late stale collaborative edit')
-    await Bun.sleep(30)
+    await sleep(30)
     gated.release()
     await reset
 
@@ -1469,7 +1470,7 @@ describe('collab relay', () => {
   })
 
   it('an explicit flush retries and drains a transient queued reset failure', async () => {
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     const harness = await createCapabilityTestHarness()
     cleanups.push(() => harness.cleanup())
     await harness.setupOwner()
@@ -1504,7 +1505,7 @@ describe('collab relay', () => {
     // An already-bound socket can send another frame before publish triggers
     // the retry, and a new socket can briefly bind/unbind in the same window.
     // Both must share one logical ref count with the refs held by the reset.
-    await Bun.sleep(5)
+    await sleep(5)
     const { doc: gapDoc } = await relay.openDoc(docId)
     const extraBinding = await relay.retain(docId)
     expect(extraBinding.doc).toBe(gapDoc)
@@ -1532,11 +1533,11 @@ describe('collab relay', () => {
     let reboundDestroyed = false
     rebound.on('destroy', () => { reboundDestroyed = true })
     editTitleUpdate(rebound, 'Connected after reset retry')
-    await Bun.sleep(30)
-    expect(reboundDestroyed).toBeFalse()
+    await sleep(30)
+    expect(reboundDestroyed).toBe(false)
     relay.release(docId)
-    await Bun.sleep(10)
-    expect(reboundDestroyed).toBeTrue()
+    await sleep(10)
+    expect(reboundDestroyed).toBe(true)
     errorLog.mockRestore()
   })
 

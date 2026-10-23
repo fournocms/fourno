@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { SESSION_COOKIE_NAME } from '../../../server/auth/tokens'
 import type { DbClient, DbResult } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
@@ -275,7 +275,7 @@ describe('CMS runtime handlers', () => {
     expect(res.status).toBe(200)
     const body = await res.text()
     expect(body).toContain('ISS-234 SERVER LOOP ROW')
-    expect(body).not.toContain('instatic: loop data missing')
+    expect(body).not.toContain('fourno: loop data missing')
   })
 
   it('builds a runtime preview from a VC virtual page id when the editor is in VC canvas mode', async () => {

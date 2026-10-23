@@ -5,7 +5,7 @@
  * its own kind. Plan, apply, undo, fork, and delete are built on nothing
  * else, so a kind that passes this is a kind they can carry.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { SITE_SHELL_LOGICAL_ID } from '@core/branches'
 import {
   ENTITY_KINDS,

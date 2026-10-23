@@ -1,3 +1,5 @@
+import './runtime/cssModuleStub'
+import './runtime/webStorageGuard'
 import { timingSafeEqual } from 'node:crypto'
 import { createDbClient } from './db'
 import { runMigrations } from './db/runMigrations'
@@ -7,19 +9,21 @@ import { configureNpmRegistryUrl } from './registry/config'
 import { DEV_ORIGIN_ALLOWLIST, configurePublicOrigins, configureTrustedProxyCidrs, stampSocketIp } from './auth/security'
 import { applySecurityHeaders } from './securityHeaders'
 import { startConversationPurgeTick } from './ai/boot'
-import { unsupportedBunWarning } from './bunVersion'
+import { unsupportedNodeWarning } from './nodeVersion'
+import { startHttpServer } from './runtime/httpServer'
 
 // Before anything that could fail for a version-related reason, say which
-// Bun this is when it is not one a release was tested on. Boot continues.
-const bunWarning = unsupportedBunWarning(Bun.version)
-if (bunWarning) console.warn(bunWarning)
+// Node this is when it is not one a release was tested on. Boot continues.
+const nodeWarning = unsupportedNodeWarning(process.versions.node)
+if (nodeWarning) console.warn(nodeWarning)
 
 await import('./richtextSanitizer')
 const { handleServerRequest } = await import('./router')
 const { activateInstalledServerPlugins } = await import('./plugins/runtime')
 const { mediaStorageRegistry } = await import('@core/plugins/mediaStorageRegistry')
 const { createCollabRelay } = await import('./collab/relay')
-const { SITE_SOCKET_PATH, createCollabSocketLayer, handleCollabSocketUpgrade } =
+const { configureSiteEditor } = await import('./collab/siteEditor')
+const { SITE_SOCKET_PATH, authorizeCollabSocket, createCollabSocketLayer } =
   await import('./collab/socket')
 
 const config = readServerConfig()
@@ -52,6 +56,10 @@ startConversationPurgeTick(db)
 // the multiplexed y-protocols wire (see server/collab/socket.ts).
 const collabRelay = createCollabRelay(db)
 const collabSocket = createCollabSocketLayer(collabRelay)
+// Server-side editing (PRD 8.6): MCP page-edit tools write the same Y docs the
+// editors hold, so an agent needs no open editor and an open editor sees every
+// change live.
+configureSiteEditor(collabRelay)
 
 /**
  * Build the CORS response headers for an incoming request.
@@ -81,20 +89,11 @@ function corsHeaders(origin: string | null): Record<string, string> {
   }
 }
 
-const server = Bun.serve({
+const server = await startHttpServer({
   port: config.port,
   hostname: config.host,
 
-  // Disable Bun's default 10-second idle timeout. The agent endpoint streams
-  // NDJSON for as long as Claude's loop is running — Claude's "thinking"
-  // gaps between tool calls regularly exceed 10s on multi-step builds, and
-  // hitting the default would kill the streaming response mid-flight, leave
-  // the bridge resolver hanging server-side, and stall the agent. Other
-  // routes finish as normal HTTP request/response cycles, so removing the
-  // idle timeout has no downside for them.
-  idleTimeout: 0,
-
-  async fetch(req: Request, server: Bun.Server<unknown>) {
+  async fetch(req, { clientAddress }) {
     const origin = req.headers.get('origin')
     const cors = corsHeaders(origin)
     const pathname = new URL(req.url).pathname
@@ -102,7 +101,7 @@ const server = Bun.serve({
     // Stamp the socket peer address onto the request so downstream
     // `clientIp(req)` returns a real value when no `X-Forwarded-For` is
     // present (dev, self-hosted without a proxy). Strips any inbound spoof.
-    stampSocketIp(req, server.requestIP(req)?.address ?? null)
+    stampSocketIp(req, clientAddress)
 
     // Handle CORS preflight
     if (req.method === 'OPTIONS') {
@@ -113,12 +112,12 @@ const server = Bun.serve({
     }
 
     // Supervisor shutdown: on platforms without POSIX signals (Windows, where
-    // Bun never receives SIGTERM) a supervising process stops the server
-    // through this token-gated endpoint instead. Only exists when the
-    // supervisor set INSTATIC_SHUTDOWN_TOKEN at spawn; 404s otherwise so it
+    // the process never receives SIGTERM) a supervising process stops the
+    // server through this token-gated endpoint instead. Only exists when the
+    // supervisor set FOURNO_SHUTDOWN_TOKEN at spawn; 404s otherwise so it
     // is invisible on normal deployments.
-    if (pathname === '/_instatic/shutdown' && req.method === 'POST') {
-      const provided = req.headers.get('x-instatic-shutdown-token')
+    if (pathname === '/_fourno/shutdown' && req.method === 'POST') {
+      const provided = req.headers.get('x-fourno-shutdown-token')
       if (config.shutdownToken && shutdownTokenMatches(provided, config.shutdownToken)) {
         setTimeout(() => void shutdown('shutdown endpoint'), 50)
         return applySecurityHeaders(
@@ -132,15 +131,17 @@ const server = Bun.serve({
       return applySecurityHeaders(new Response('Not Found', { status: 404 }), pathname)
     }
 
-    // Real-time co-editing socket — a WebSocket upgrade is a different
-    // protocol lifecycle from the request/response router, so it dispatches
-    // here at the `Bun.serve` boundary (the only place `server.upgrade` is
-    // available). Returning `undefined` hands the connection to the
-    // `websocket` handlers below.
+    // A plain (non-upgrade) request to the collab socket path. Real
+    // handshakes never get here: the server adapter takes WebSocket upgrades
+    // off the connection before the request handler runs.
     if (pathname === SITE_SOCKET_PATH) {
-      const rejection = await handleCollabSocketUpgrade(req, db, server)
-      if (rejection === null) return undefined
-      return applySecurityHeaders(rejection, pathname)
+      return applySecurityHeaders(
+        new Response(JSON.stringify({ error: 'WebSocket upgrade required' }), {
+          status: 426,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+        pathname,
+      )
     }
 
     try {
@@ -172,16 +173,24 @@ const server = Bun.serve({
     }
   },
 
-  websocket: collabSocket.handlers,
-
-  error(err: Error) {
-    console.error('[server] Unhandled error:', err)
-    return new Response('Internal Server Error', { status: 500 })
+  // Real-time co-editing socket — a WebSocket upgrade is a different
+  // protocol lifecycle from the request/response router, so it is gated
+  // here at the server boundary: origin + session auth run on the handshake
+  // request, and a rejection is answered with the same security headers as
+  // any other response.
+  upgrade: {
+    path: SITE_SOCKET_PATH,
+    async authorize(req, { clientAddress }) {
+      stampSocketIp(req, clientAddress)
+      const verdict = await authorizeCollabSocket(req, db)
+      return verdict instanceof Response ? applySecurityHeaders(verdict, SITE_SOCKET_PATH) : verdict
+    },
+    handlers: collabSocket.handlers,
   },
 })
 
-// The collab fan-out publishes through Bun pub/sub — register the live
-// server handle now that `Bun.serve` returned.
+// The collab fan-out publishes through the server's topic registry —
+// register the live server handle now that it is listening.
 collabSocket.setPublisher(server)
 
 // Graceful shutdown: the relay persists on an 800 ms debounce, so a redeploy
@@ -198,7 +207,7 @@ async function shutdown(signal: string): Promise<void> {
   } catch (err) {
     console.error('[server] collab flush on shutdown failed:', err)
   }
-  server.stop()
+  await server.stop()
   process.exit(0)
 }
 process.on('SIGTERM', () => void shutdown('SIGTERM'))

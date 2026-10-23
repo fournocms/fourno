@@ -10,7 +10,7 @@
  * cell as text, so a field holding a collection can never match a single
  * value and must not reach the picker at all.
  */
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import {
   cellFilterSql,
   cellOrderSql,

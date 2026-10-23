@@ -6,7 +6,7 @@
  * - The publisher calls resolveProps() which merges these overrides
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { create } from 'mutative'
 import {
   setBreakpointOverride,

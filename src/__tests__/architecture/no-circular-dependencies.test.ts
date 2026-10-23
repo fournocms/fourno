@@ -1,41 +1,27 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
+import { spawnSync } from 'node:child_process'
 import { join } from 'node:path'
 
-const ROOT = join(import.meta.dir, '../../..')
-
-function decode(bytes: Uint8Array): string {
-  return new TextDecoder().decode(bytes)
-}
+const ROOT = join(import.meta.dirname, '../../..')
+const MADGE_CLI = join(ROOT, 'node_modules/madge/bin/cli.js')
 
 describe('Circular dependencies', () => {
   it('keeps the tsconfig-aware source graph cycle-free', () => {
-    const result = Bun.spawnSync({
-      cmd: [
-        process.execPath,
-        'x',
-        'madge',
-        '--circular',
-        '--ts-config',
-        'tsconfig.json',
-        '--extensions',
-        'ts,tsx',
-        'src',
-        'server',
-      ],
-      cwd: ROOT,
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
+    const result = spawnSync(
+      process.execPath,
+      [MADGE_CLI, '--circular', '--ts-config', 'tsconfig.json', '--extensions', 'ts,tsx', 'src', 'server'],
+      { cwd: ROOT, encoding: 'utf8' },
+    )
 
-    const output = `${decode(result.stdout)}${decode(result.stderr)}`
-    if (result.exitCode !== 0) {
+    const output = `${result.stdout}${result.stderr}`
+    if (result.status !== 0) {
       throw new Error(
         `Circular dependencies found. Run the same command locally for the full graph:\n` +
-          `bun x madge --circular --ts-config tsconfig.json --extensions ts,tsx src server\n\n` +
+          `pnpm exec madge --circular --ts-config tsconfig.json --extensions ts,tsx src server\n\n` +
           output,
       )
     }
 
     expect(output).toContain('No circular dependency found')
-  }, 15000)
+  }, 60_000) // madge parses all ~2800 source files; ~15 s on Node under load
 })

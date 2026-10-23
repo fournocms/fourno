@@ -88,7 +88,7 @@ export interface RenderOutput {
   /**
    * Optional vanilla-JS runtime for this module TYPE, deduplicated per
    * moduleId exactly like `css` and served as an external per-module asset
-   * (`/_instatic/module-js/<moduleId>.js`) on published pages — never inlined,
+   * (`/_fourno/module-js/<moduleId>.js`) on published pages — never inlined,
    * so no `</script>` escaping is needed. Authoring contract: a self-contained
    * IIFE; bind via document-level event delegation (hole fragments insert into
    * the DOM after load); idempotent; no load-order assumptions; no framework
@@ -201,9 +201,9 @@ export interface NodeWrapperProps {
    * and to open the source on double-click. `kind` routes the open action
    * ('page' → openPageInCanvas, 'component' → setActiveDocument).
    */
-  'data-instatic-readonly-label'?: string
-  'data-instatic-readonly-kind'?: 'page' | 'component'
-  'data-instatic-readonly-id'?: string
+  'data-fourno-readonly-label'?: string
+  'data-fourno-readonly-kind'?: 'page' | 'component'
+  'data-fourno-readonly-id'?: string
   /**
    * The node's inline styles (`node.inlineStyles`) as a React style object, so
    * the canvas preview matches the published `style="…"` attribute. Present
@@ -334,7 +334,7 @@ export interface ModuleDefinition<
    * cannot be pre-rendered into a static disk artefact at publish time.
    *
    * Layer A's dynamic-node detection checks this flag to classify pages as
-   * dynamic. Layer C uses it to emit `<instatic-hole>` placeholders around the
+   * dynamic. Layer C uses it to emit `<fourno-hole>` placeholders around the
    * node at publish time, with the actual render deferred to request time.
    *
    * No first-party module sets this to `true` yet — the flag is
@@ -345,7 +345,7 @@ export interface ModuleDefinition<
   dynamic?: boolean
 
   /**
-   * Optional loading state rendered at publish time into the `<instatic-hole>`
+   * Optional loading state rendered at publish time into the `<fourno-hole>`
    * placeholder element. Called once at publish time (not per-request).
    *
    * When present, its output is sanitised via `sanitizeRichtext` before
@@ -353,7 +353,7 @@ export interface ModuleDefinition<
    * as a meaningful fallback; JS visitors see it briefly until the hole
    * runtime swaps in the server-rendered fragment.
    *
-   * If omitted, the `<instatic-hole>` element is empty (zero visible content
+   * If omitted, the `<fourno-hole>` element is empty (zero visible content
    * until the runtime fires). Only applies when `dynamic: true` OR when
    * the node is otherwise classified as dynamic by auto-detection.
    */

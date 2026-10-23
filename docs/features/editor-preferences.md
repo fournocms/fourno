@@ -14,7 +14,7 @@ The feature is **catalog-driven**: one declarative array drives the schema, the 
 - Read from React: `useEditorPreference('hoverPreview')` / `useEditorSelectPreference('density')` / `useEditorAppearancePreferences()`.
 - Read from non-React: `readEditorPreferenceBool('hoverPreview')` + `subscribeToEditorPrefsChanged(listener)`.
 - Settings UI renders automatically from the catalog — no per-preference wiring.
-- Storage: `localStorage["instatic-editor-prefs"]` (`EDITOR_PREFS_KEY`). `additionalProperties: true` on the schema keeps forward / backward compatibility silent.
+- Storage: `localStorage["fourno-editor-prefs"]` (`EDITOR_PREFS_KEY`). `additionalProperties: true` on the schema keeps forward / backward compatibility silent.
 
 ### Adding a new preference
 
@@ -229,7 +229,7 @@ Both setters dispatch the change event so all hook consumers re-render and bus l
 ## Storage shape
 
 ```jsonc
-// localStorage["instatic-editor-prefs"]
+// localStorage["fourno-editor-prefs"]
 {
   "hoverPreview": false,
   "theme": "light",

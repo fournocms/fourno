@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, spyOn } from 'bun:test'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { createSqliteClient } from '../../../db/sqlite'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'
 import { runMigrations } from '../../../db/runMigrations'
@@ -30,9 +30,9 @@ function mcpRequest(
     Accept: 'application/json, text/event-stream',
   }
   if (token) headers.Authorization = `Bearer ${token}`
-  const req = new Request('http://localhost/_instatic/mcp', { method: 'POST', headers, body })
+  const req = new Request('http://localhost/_fourno/mcp', { method: 'POST', headers, body })
   // happy-dom strips browser-controlled headers such as Origin from Request
-  // init, though Bun.serve receives them on real network requests.
+  // init, though the server receives them on real network requests.
   for (const [name, value] of Object.entries(extraHeaders)) {
     req.headers.set(name, value)
   }
@@ -42,7 +42,7 @@ function mcpRequest(
 function mcpMethodRequest(method: 'GET' | 'DELETE', token?: string): Request {
   const headers: Record<string, string> = {}
   if (token) headers.Authorization = `Bearer ${token}`
-  return new Request('http://localhost/_instatic/mcp', { method, headers })
+  return new Request('http://localhost/_fourno/mcp', { method, headers })
 }
 
 function parseRpcBody(text: string): {
@@ -155,7 +155,7 @@ describe('mcp http transport', () => {
     expect(res?.status).toBe(200)
     expect(parseRpcBody(await res!.text()).result).toBeDefined()
 
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       const mismatch = await handleMcpHttp(
         mcpRequest(body, token, { ...headers, 'Mcp-Name': 'site_read_styles' }),
@@ -182,7 +182,7 @@ describe('mcp http transport', () => {
         },
       },
     })
-    const errorLog = spyOn(console, 'error').mockImplementation(() => {})
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => {})
     try {
       const res = await handleMcpHttp(
         mcpRequest(body, token, {
@@ -216,7 +216,7 @@ describe('mcp http transport', () => {
     expect(res?.headers.get('Mcp-Session-Id')).toBeNull()
     const rpc = parseRpcBody(await res!.text())
     expect(rpc.result?.protocolVersion).toBe('2025-06-18')
-    expect(rpc.result?.serverInfo).toEqual({ name: 'instatic', version: '1.0.0' })
+    expect(rpc.result?.serverInfo).toEqual({ name: 'fourno', version: '1.0.0' })
   })
 
   it('rejects an oversized request before MCP protocol dispatch', async () => {

@@ -184,7 +184,7 @@ export type ContentAccessMode = Static<typeof ContentAccessModeSchema>
 
 /**
  * The permission each `contentAccess` mode consumes. `parsePluginManifest`
- * requires the permission for every declared mode and `instatic-plugin lint`
+ * requires the permission for every declared mode and `fourno-plugin lint`
  * warns about a permission no entry's mode consumes — both read this one
  * table, so the two checks cannot drift apart.
  */

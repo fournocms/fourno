@@ -7,11 +7,11 @@
  * data/media/plugin clients and pulls their chunks into startup.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'fs'
 import { join, relative } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const STARTUP_DIRS = [
   join(REPO_ROOT, 'src/admin/preauth'),
 ]

@@ -1,7 +1,7 @@
 /**
  * Server plugin runtime — integration tests through the cms handler.
  *
- * Plugin server modules run in a Bun Worker (the host never imports them
+ * Plugin server modules run in a worker thread (the host never imports them
  * directly), so these tests build real `.zip` packages and install them
  * via the cms handler, then verify behavior end-to-end:
  *  - public GET routes (`api.cms.routes.public.get`) don't require auth
@@ -14,7 +14,7 @@
  * globalThis), same pattern the agent-browser e2e and `cmsPlugins.test.ts`
  * lifecycle test use.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -298,7 +298,7 @@ const baseManifest = {
 
 describe('server plugin runtime SDK', () => {
   it('lets plugins explicitly register public GET routes (no auth required)', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-public-routes-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-public-routes-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     try {
@@ -334,7 +334,7 @@ describe('server plugin runtime SDK', () => {
   })
 
   it('blocks backend route registration without the cms.routes permission grant', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-perm-gate-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-perm-gate-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     try {
@@ -364,7 +364,7 @@ describe('server plugin runtime SDK', () => {
   })
 
   it('registers loop sources with the loops.register permission grant', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-loop-source-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-loop-source-'))
     const sourceId = 'acme.workflow.products'
     const db = makeFakeDb()
     const cookie = await createCookie(db)
@@ -402,7 +402,7 @@ describe('server plugin runtime SDK', () => {
   })
 
   it('exposes plugin metadata (id, version, permissions) inside lifecycle hooks', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-metadata-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-metadata-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
 
@@ -448,7 +448,7 @@ describe('server plugin runtime SDK', () => {
   })
 
   it('pushes admin settings updates into a running plugin VM without a reload', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-settings-push-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-settings-push-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     try {
@@ -503,7 +503,7 @@ describe('server plugin runtime SDK', () => {
   })
 
   it('treats a settings update for a plugin with no running worker as a clean no-op', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-settings-noop-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-settings-noop-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     try {
@@ -542,7 +542,7 @@ describe('server plugin runtime SDK', () => {
   })
 
   it('updates the VM mirror before settings.changed fires, so listeners read the new values', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-settings-hook-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-settings-hook-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
     try {
@@ -594,7 +594,7 @@ describe('server plugin runtime SDK', () => {
   })
 
   it('force-namespaces plugin emits and rejects impersonation of other plugins', async () => {
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-hook-namespace-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-hook-namespace-'))
     const db = makeFakeDb()
     const cookie = await createCookie(db)
 

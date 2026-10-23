@@ -1,5 +1,6 @@
 /**
- * Collab end-to-end — a real `Bun.serve` running the relay + socket layer,
+ * Collab end-to-end — the real HTTP/WebSocket server adapter running the
+ * relay + socket layer,
  * with real client providers (the same transport the editor uses) over real
  * WebSockets:
  *
@@ -14,7 +15,8 @@
  *   - `runPublishFlush` drains the persist debounce, so publish bakes the
  *     edit an admin made seconds earlier instead of losing it.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
+import { WebSocket } from 'ws'
 import * as Y from 'yjs'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import * as encoding from 'lib0/encoding'
@@ -40,9 +42,11 @@ import {
 import { createCollabRelay, type CollabRelay } from '../../../server/collab/relay'
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 import {
+  authorizeCollabSocket,
   createCollabSocketLayer,
-  handleCollabSocketUpgrade,
 } from '../../../server/collab/socket'
+import { startHttpServer, type HttpServerHandle } from '../../../server/runtime/httpServer'
+import type { DbClient } from '../../../server/db/client'
 import { getCollabDocumentState } from '../../../server/repositories/collabDocuments'
 import { runPublishFlush } from '../../../server/publish/publishFlush'
 import { getDataRow, saveDataRowDraft } from '../../../server/repositories/data'
@@ -75,6 +79,26 @@ async function waitFor(
   }
 }
 
+/** The production wiring of server/index.ts, minus the HTTP router. */
+async function startCollabServer(
+  db: DbClient,
+  socketLayer: ReturnType<typeof createCollabSocketLayer>,
+): Promise<HttpServerHandle> {
+  const server = await startHttpServer({
+    port: 0,
+    hostname: '127.0.0.1',
+    fetch: async () => new Response('not found', { status: 404 }),
+    upgrade: {
+      path: SITE_SOCKET_PATH,
+      authorize: (req) => authorizeCollabSocket(req, db),
+      handlers: socketLayer.handlers,
+    },
+  })
+  socketLayer.setPublisher(server)
+  cleanups.push(() => server.stop())
+  return server
+}
+
 interface Stack {
   harness: CapabilityTestHarness
   relay: CollabRelay
@@ -91,20 +115,7 @@ async function startStack(): Promise<Stack> {
   cleanups.push(() => relay.destroy())
   const socketLayer = createCollabSocketLayer(relay)
 
-  const server = Bun.serve({
-    port: 0,
-    fetch: async (req, srv) => {
-      if (new URL(req.url).pathname === SITE_SOCKET_PATH) {
-        const rejection = await handleCollabSocketUpgrade(req, harness.db, srv)
-        if (rejection === null) return undefined
-        return rejection
-      }
-      return new Response('not found', { status: 404 })
-    },
-    websocket: socketLayer.handlers,
-  })
-  socketLayer.setPublisher(server)
-  cleanups.push(() => server.stop(true))
+  const server = await startCollabServer(harness.db, socketLayer)
 
   const { rows } = await harness.db<{ id: string }>`
     select id from data_rows where table_id = ${'pages'}
@@ -112,7 +123,7 @@ async function startStack(): Promise<Stack> {
   return {
     harness,
     relay,
-    url: `ws://localhost:${server.port}${SITE_SOCKET_PATH}`,
+    url: `ws://127.0.0.1:${server.port}${SITE_SOCKET_PATH}`,
     cookie,
     homeId: rows[0].id,
   }
@@ -126,7 +137,9 @@ function connectClient(
   let lastSocket: WebSocket | null = null
   const provider = createCollabProvider({
     createSocket: () => {
-      // Bun's WebSocket client supports custom handshake headers.
+      // The `ws` client, not Node's global WebSocket: the global one builds
+      // its `open` event from the global `Event`, which the happy-dom test
+      // setup replaces, so `onopen` never fires in this process.
       lastSocket = new WebSocket(stack.url, { headers: { cookie } })
       return lastSocket as unknown as CollabSocketLike
     },
@@ -266,28 +279,32 @@ describe('collab relay integration (real server, real sockets)', () => {
 
     // Happened-after marker on a DIFFERENT key — writing the same key would
     // make the assertion depend on Yjs' concurrent-set clientID tiebreak
-    // (random per run), not on the server's refusal. Once the marker lands on
-    // the viewer, the server has processed both frames.
+    // (random per run), not on the server's refusal.
     boundWriter.doc.transact(() => {
       const nodes = treeMap(boundWriter.doc).get('nodes') as Y.Map<unknown>
       ;(nodes.get(rootId) as Y.Map<unknown>).set('marker', 'writer-was-here')
     }, LOCAL_ORIGIN)
-    await waitFor(() => {
-      const nodes = treeMap(boundReadOnly.doc).get('nodes') as Y.Map<unknown>
-      return (nodes.get(rootId) as Y.Map<unknown>).get('marker') === 'writer-was-here'
-    })
 
-    // The sneaky edit never reached the WRITER — the guard refused it.
-    expect(nodeLabel(boundWriter.doc, rootId)).not.toBe('Sneaky viewer edit')
-
-    // …and the refusal RESETS the viewer, so its own optimistic edit reverts
+    // The refusal RESETS the viewer, so its own optimistic edit reverts
     // instead of stranding it in a divergent doc that still reports "synced".
     // A read-only connection used to be dropped silently at a `canWrite` gate
     // with no reset, leaving exactly that permanent local divergence.
     await waitFor(() => resets.includes(docId))
+
+    // The reset and the writer's marker travel on two independent
+    // connections, so either may reach the viewer first; the provider unbinds
+    // on reset and drops a later marker frame. Rebinding pulls the
+    // authoritative doc, and once it carries the marker the server has
+    // processed both frames.
     const rebound = readOnly.bind(docId)
     await rebound.whenSynced
+    await waitFor(() => {
+      const nodes = treeMap(rebound.doc).get('nodes') as Y.Map<unknown>
+      return (nodes.get(rootId) as Y.Map<unknown>).get('marker') === 'writer-was-here'
+    })
     expect(nodeLabel(rebound.doc, rootId)).not.toBe('Sneaky viewer edit')
+    // The sneaky edit never reached the WRITER — the guard refused it.
+    expect(nodeLabel(boundWriter.doc, rootId)).not.toBe('Sneaky viewer edit')
   })
 
   it('enforces per-category capabilities on partial writers and relays read-only presence', async () => {
@@ -510,20 +527,7 @@ describe('collab relay integration (real server, real sockets)', () => {
     cleanups.push(() => relay.destroy())
     const socketLayer = createCollabSocketLayer(relay)
 
-    const server = Bun.serve({
-      port: 0,
-      fetch: async (req, srv) => {
-        if (new URL(req.url).pathname === SITE_SOCKET_PATH) {
-          const rejection = await handleCollabSocketUpgrade(req, harness.db, srv)
-          if (rejection === null) return undefined
-          return rejection
-        }
-        return new Response('not found', { status: 404 })
-      },
-      websocket: socketLayer.handlers,
-    })
-    socketLayer.setPublisher(server)
-    cleanups.push(() => server.stop(true))
+    const server = await startCollabServer(harness.db, socketLayer)
 
     const { rows } = await harness.db<{ id: string }>`
       select id from data_rows where table_id = ${'pages'}
@@ -531,7 +535,7 @@ describe('collab relay integration (real server, real sockets)', () => {
     const homeId = rows[0].id
     const stack: Stack = {
       harness,
-      url: `ws://localhost:${server.port}${SITE_SOCKET_PATH}`,
+      url: `ws://127.0.0.1:${server.port}${SITE_SOCKET_PATH}`,
       cookie,
       homeId,
     }
@@ -640,7 +644,7 @@ describe('collab relay integration (real server, real sockets)', () => {
 
     const socket = client.lastSocket()!
     const pongs: number[] = []
-    socket.addEventListener('message', (event: MessageEvent) => {
+    socket.addEventListener('message', (event) => {
       const data = new Uint8Array(event.data as ArrayBuffer)
       pongs.push(decodeCollabFrame(data).frameType)
     })

@@ -179,7 +179,7 @@ export async function handleRuntimeRoutes(
       const build = await buildSiteRuntimeScripts({
         site,
         target: 'publish',
-        assetBasePath: '/_instatic/runtime-validation/',
+        assetBasePath: '/_fourno/runtime-validation/',
         dependencyCache: await runtimeDependencyCache(site),
         scriptSelection: 'all-enabled',
       })
@@ -225,7 +225,7 @@ export async function handleRuntimeRoutes(
         site,
         page,
         registry,
-        assetBasePath: '/_instatic/preview/runtime/',
+        assetBasePath: '/_fourno/preview/runtime/',
         dependencyCache: await runtimeDependencyCache(site),
         breakpointId,
         templateContext,

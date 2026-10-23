@@ -5,7 +5,7 @@
  * 'three'` exploded as a raw `TypeError: Failed to resolve module
  * specifier` inside the sandbox.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { ModuleSandboxFrame } from '@site/canvas/ModuleSandboxFrame'
@@ -36,7 +36,7 @@ const MODULE: AnyModuleDefinition = {
  * Seed the editor store. When `installed: true`, populate the site's
  * runtime importmap so `ModuleSandboxFrame`'s "is the importmap ready?"
  * gate clears and the iframe mounts. Real flow: `Resolve runtime` writes
- * both `dependencyLock` + `packageImportmap` after `bun install` runs.
+ * both `dependencyLock` + `packageImportmap` after `npm install` runs.
  */
 function seed(packageDeps: Record<string, string>, opts: { installed?: boolean } = {}) {
   const packageJson = { dependencies: packageDeps, devDependencies: {} }
@@ -48,8 +48,8 @@ function seed(packageDeps: Record<string, string>, opts: { installed?: boolean }
         lockHash: 'test-hash',
         imports: Object.fromEntries(
           Object.keys(packageDeps).flatMap((name) => [
-            [name, `/_instatic/runtime/cache/test-hash/${name}/index.js`],
-            [`${name}/`, `/_instatic/runtime/cache/test-hash/${name}/`],
+            [name, `/_fourno/runtime/cache/test-hash/${name}/index.js`],
+            [`${name}/`, `/_fourno/runtime/cache/test-hash/${name}/`],
           ]),
         ),
       },
@@ -132,7 +132,7 @@ describe('ModuleSandboxFrame — missing dependency empty state', () => {
 
   it('keeps the placeholder while runtime cache is still resolving', () => {
     // Dep declared in package.json but importmap hasn't been built yet
-    // (e.g. legacy persisted state, or background `bun install` running).
+    // (e.g. legacy persisted state, or background `npm install` running).
     // The iframe must NOT mount — otherwise three.js fails to resolve.
     seed({ three: '^0.169.0' })
 

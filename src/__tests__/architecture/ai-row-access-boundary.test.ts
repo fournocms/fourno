@@ -13,7 +13,7 @@
  * except through `resolveRowAccess` / `rowVisibilityFor`.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readdir, readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { join, dirname, relative } from 'node:path'

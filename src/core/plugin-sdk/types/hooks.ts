@@ -45,7 +45,7 @@ export interface CmsServerEvents {
   // endpoints and (optionally) re-emit on the hook bus for cross-plugin
   // coordination. Plugin emits are always namespaced by the host, so the
   // name other plugins subscribe to is `plugin.<emitter-id>.<name>` (e.g.
-  // `plugin.instatic.analytics.page-view`).
+  // `plugin.fourno.analytics.page-view`).
   [key: string]: Record<string, unknown>
 }
 

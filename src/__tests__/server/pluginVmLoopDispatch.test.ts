@@ -12,7 +12,7 @@
  *   - preview() that is async  → loud TypeError (preview is contractually sync)
  * and confirm the normal return paths still work end-to-end.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createPluginVm } from '../../../server/plugins/quickjs/vm'
 import type { PluginVmEnv } from '../../../server/plugins/quickjs/types'
 

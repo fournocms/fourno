@@ -8,11 +8,11 @@
  * create chat history. Capability gating is the single chokepoint.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const REPO_ROOT = join(import.meta.dir, '../../../')
+const REPO_ROOT = join(import.meta.dirname, '../../../')
 const HANDLERS_DIR = join(REPO_ROOT, 'server/ai/handlers')
 
 const CAPABILITY_GATE_RE = /\brequireCapability\s*\(|\brequireAnyCapability\s*\(/

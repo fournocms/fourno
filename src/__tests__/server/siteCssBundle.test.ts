@@ -11,7 +11,7 @@
  * - Different sites produce different hashes for the layer that changed.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   frameworkColorClassId,
   generateFrameworkColorUtilityClasses,

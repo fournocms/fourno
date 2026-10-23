@@ -7,7 +7,7 @@
  * the node needing to remember a binding it never had a UI to set.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { makeModule, makePage, makeRegistry, makeSite } from './helpers'
 import { publishPage } from '@core/publisher'
 import { effectiveNodeBindings, resolveDynamicProps } from '@core/templates/dynamicBindings'
@@ -24,7 +24,7 @@ const bodyModule = makeModule('base.body', {
 const outletModule = makeModule('base.outlet', {
   schema: { html: { type: 'richtext', label: 'Content', hidden: true } },
   render: (props) => ({
-    html: `<section data-instatic-content-region>${String((props as { html?: string }).html ?? '')}</section>`,
+    html: `<section data-fourno-content-region>${String((props as { html?: string }).html ?? '')}</section>`,
   }),
 })
 
@@ -46,7 +46,7 @@ describe('entry outlet body binding', () => {
       templateContext: { entryStack: [entry('## Heading\n\nHello world')] },
     })
 
-    expect(html).toContain('data-instatic-content-region')
+    expect(html).toContain('data-fourno-content-region')
     expect(html).toContain('<h2>Heading</h2>')
     expect(html).toContain('Hello world')
   })
@@ -64,7 +64,7 @@ describe('entry outlet body binding', () => {
       templateContext: { entryStack: [] },
     })
 
-    expect(html).toContain('data-instatic-content-region')
+    expect(html).toContain('data-fourno-content-region')
     expect(html).not.toContain('Hello world')
   })
 })

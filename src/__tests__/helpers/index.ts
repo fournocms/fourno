@@ -1,5 +1,5 @@
 /**
- * Shared test helpers for the instatic test suite.
+ * Shared test helpers for the fourno test suite.
  *
  * Exports:
  *   - renderModule()              — safe wrapper around ModuleDefinition.render()
@@ -7,7 +7,7 @@
  *   - runModuleConformanceSuite() — registers full contract tests for any ModuleDefinition
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import type { AnyModuleDefinition, PropertyControl } from '@core/module-engine'
 
 // ---------------------------------------------------------------------------

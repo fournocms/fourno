@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import React, { type ReactNode } from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from '@admin/lib/routing'
@@ -98,7 +98,7 @@ describe('Data table step-up flow', () => {
     let createAttempts = 0
     const stepUpRequests: Array<Record<string, unknown>> = []
 
-    globalThis.fetch = mock(async (input: RequestInfo | URL, init?: RequestInit) => {
+    globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input)
 
       if (url === '/admin/api/cms/data/tables' && init?.method !== 'POST') {

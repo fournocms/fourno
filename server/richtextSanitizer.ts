@@ -19,6 +19,7 @@ import {
   configureRichtextSanitizer,
   type DOMPurifyRuntime,
 } from '@core/sanitize'
+import { configureHtmlParser } from '@core/htmlImport'
 
 type DOMPurifyFactory = (window: Window) => DOMPurifyRuntime
 
@@ -33,6 +34,10 @@ export function installServerRichtextSanitizer(): void {
   const createDOMPurify = DOMPurify as unknown as DOMPurifyFactory
   const purifier = createDOMPurify(window)
   configureRichtextSanitizer(purifier)
+  // The agent HTML importer (`importHtml`) parses with a DOM too; the server
+  // has no global DOMParser, so it borrows this same jsdom window.
+  const { DOMParser: JsdomParser } = window as unknown as { DOMParser: typeof DOMParser }
+  configureHtmlParser((source) => new JsdomParser().parseFromString(source, 'text/html'))
   installed = true
 }
 

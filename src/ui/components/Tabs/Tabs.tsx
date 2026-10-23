@@ -22,7 +22,7 @@
  * children hold state that must survive tab switches.
  *
  * Lives under src/ui/components/ so plugins can import it via
- * @instatic/host-ui.
+ * @fourno/host-ui.
  */
 import {
   createContext,

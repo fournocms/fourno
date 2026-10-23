@@ -33,11 +33,11 @@
  * @see src/admin/pages/site/code-editor/CodeEditorPanel.tsx — React.lazy boundary
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 
 // ---------------------------------------------------------------------------
 // File walker (shared pattern from no-anthropic-sdk.test.ts / no-third-party-icons.test.ts)

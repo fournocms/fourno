@@ -130,7 +130,7 @@ export async function activateInstalledEditorPlugins(
     // Cache key for this plugin's bundle URLs. In production it's
     // stable per install (version + updatedAt) so the browser caches
     // the plugin bundle across editor visits. In dev mode, the helper
-    // overrides with a timestamp so `instatic-plugin dev` rebuilds reload
+    // overrides with a timestamp so `fourno-plugin dev` rebuilds reload
     // immediately. See `cacheBuster.ts`.
     const cacheKey = pluginCacheKey(plugin)
 

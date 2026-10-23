@@ -4,7 +4,7 @@
  * editor bridge relays the tool to the (simulated) open editor, which returns
  * an AiToolOutput carrying `images`; the MCP server must surface them.
  */
-import { describe, expect, it, beforeEach } from 'bun:test'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { InMemoryTransport } from '@modelcontextprotocol/server'
 import { Client } from '@modelcontextprotocol/client'
 import { createSqliteClient } from '../../db/sqlite'

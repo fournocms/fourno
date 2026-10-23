@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   PLUGIN_CAPABILITIES,
   isPluginPermission,
@@ -10,7 +10,7 @@ import {
 describe('plugin capability registry', () => {
   it('contains author-facing metadata for every permission', () => {
     for (const capability of PLUGIN_CAPABILITIES) {
-      expect(capability.permission).toBeString()
+      expect(capability.permission).toBeTypeOf('string')
       expect(capability.label.length).toBeGreaterThan(0)
       expect(capability.description.length).toBeGreaterThan(0)
       expect(['low', 'medium', 'high', 'dangerous']).toContain(capability.risk)

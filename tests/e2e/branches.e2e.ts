@@ -145,7 +145,7 @@ test('share a preview link and open it as a visitor (BRANCH-004)', async ({ page
   const issued = page.waitForResponse((res) => res.url().includes('/preview') && res.request().method() === 'POST')
   await page.getByTestId('branch-strip-share').click()
   const { url } = (await (await issued).json()) as { url: string }
-  expect(url).toContain('/_instatic/preview/')
+  expect(url).toContain('/_fourno/preview/')
   await expect(page.getByTestId('branch-strip-preview-active')).toBeVisible()
   await page.waitForTimeout(400)
   await shot(page, '6-preview-shared')

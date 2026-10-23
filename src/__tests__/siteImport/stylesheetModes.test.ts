@@ -1,7 +1,7 @@
 /**
  * Per-stylesheet import modes + cross-sheet class semantics.
  *
- * Covers the model that replaced the automatic `instatic-import-scope-*`
+ * Covers the model that replaced the automatic `fourno-import-scope-*`
  * generation:
  *   - `mode: 'file'` keeps a stylesheet verbatim as an ImportStylesheet
  *     (flattened @import graph, Google imports stripped, url() normalised),
@@ -14,7 +14,7 @@
  *     repeated class fragments to ambient rules after renames.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import '@modules/base'
 import { buildImportPlan, applyConflictResolutions } from '@core/siteImport'
 import type { FileMap, ImportPlan } from '@core/siteImport'

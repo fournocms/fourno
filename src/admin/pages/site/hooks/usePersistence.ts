@@ -181,7 +181,7 @@ export function usePersistence(
       if (pendingCmsSiteReload) consumePendingCmsSiteReload()
 
       // Bootstrap a fresh draft once for new installs that have an admin/site
-      // row but no instatic document yet. The one HTTP save creates the
+      // row but no fourno document yet. The one HTTP save creates the
       // storage rows; the provider connect below then binds the server-seeded
       // docs for them.
       const created = createSite('My Site')

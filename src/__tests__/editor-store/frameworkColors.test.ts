@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { frameworkColorClassId } from '@core/framework'
 import type { FrameworkColorToken } from '@core/framework-schema'
@@ -48,7 +48,7 @@ describe('framework color store actions', () => {
       lightValue: 'hsla(238, 100%, 62%, 1)',
       darkModeEnabled: true,
     })
-    expect(token.darkValue).toStartWith('hsla(')
+    expect(token.darkValue).toMatch(/^hsla\(/)
     expect(token.darkValue).not.toBe(token.lightValue)
 
     const textClass = state.site!.styleRules[frameworkColorClassId(token.id, 'base', 'text')]

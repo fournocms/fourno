@@ -2,11 +2,11 @@
  * Store isolation for the test suite.
  *
  * Every app store is a module-level Zustand singleton, so one instance is shared
- * by every test file in the run. `setState(partial)` MERGES, which means a file
- * that seeds a store with a hand-written partial silently inherits every field
- * it did not mention from whichever file happened to run before it. `bun test`
- * walks test files in filesystem order, and that order differs between APFS and
- * ext4, so the inherited value differs between a local run and CI.
+ * by every test in a file. `setState(partial)` MERGES, which means a test that
+ * seeds a store with a hand-written partial silently inherits every field it
+ * did not mention from whichever test ran before it. (Under Bun's single-process
+ * runner this leaked across files too, in filesystem order, which differs between
+ * APFS and ext4; Vitest isolates files, but the within-file leak remains.)
  *
  * That is not hypothetical. A leaked `canvasView: 'live'` made
  * `canvasFormControls.test.tsx` fail on nearly every CI run for weeks while

@@ -1,8 +1,8 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 import { expectEditorReady } from './helpers'
 
-const EDITOR_PREFS_KEY = 'instatic-editor-prefs'
-const EDITOR_LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
+const EDITOR_PREFS_KEY = 'fourno-editor-prefs'
+const EDITOR_LAYOUT_STORAGE_KEY = 'fourno-editor-layout-v2'
 
 /**
  * ADMIN-001 — move between the primary admin workspaces and confirm the active

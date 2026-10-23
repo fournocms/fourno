@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -41,7 +41,7 @@ describe('plugin media ingestion', () => {
         networkAllowedHosts: ['cdn.example.com'],
       })})
     `
-    uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-remote-media-'))
+    uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-remote-media-'))
     pluginAssetRoot = join(uploadsDir, 'plugins', PLUGIN_ID, '1.0.0')
     await mkdir(join(pluginAssetRoot, 'assets'), { recursive: true })
     mediaStorageRegistry.configureLocalDisk({ uploadsDir })

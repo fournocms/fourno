@@ -68,7 +68,7 @@ interface LoopEntitySource {
    * request (live API, time-of-day data). Loops using a request-dependent source
    * become Layer C "holes" — the publisher emits a placeholder + a ~1.1 KB client
    * runtime fetches the rendered fragment lazily via
-   * `/_instatic/hole/<nodeId>?v=<publishVersion>&u=<page-url>`.
+   * `/_fourno/hole/<nodeId>?v=<publishVersion>&u=<page-url>`.
    *
    * A `requestDependent` (non-perVisitor) hole is rendered at request time and
    * cached by Layer B per `(nodeId, query, publishVersion)`.
@@ -277,11 +277,11 @@ See [docs/features/publisher.md](publisher.md) → "renderLoop" for the broader 
 
 `renderLoop` emits one wrapper around the iterations, and the canvas
 (`LoopEditor.tsx`) mirrors it attribute for attribute so user CSS targeting
-`[data-instatic-loop] > article` matches in both places.
+`[data-fourno-loop] > article` matches in both places.
 
 | Source | Attributes |
 |---|---|
-| Runtime | `data-instatic-loop`, `data-instatic-loop-page`, plus `data-instatic-loop-mode` / `-has-more` / `-page-size` in infinite mode |
+| Runtime | `data-fourno-loop`, `data-fourno-loop-page`, plus `data-fourno-loop-mode` / `-has-more` / `-page-size` in infinite mode |
 | Author | `tag` / `customTag` choose the element; `htmlAttributes` adds arbitrary attributes, same control as `base.container` |
 | Node | `classIds` → class names, `inlineStyles` → `style` |
 
@@ -289,7 +289,7 @@ The `htmlAttributes` bag is what lets a repeated list be *addressed*: `role="lis
 and `aria-label` for assistive technology, or a `data-*` hook for a carousel,
 filter, or marquee script that has to find the collection wrapper. Values pass
 through the shared sanitiser (`src/core/htmlAttributes/`), which reserves the
-`data-instatic-*` and `data-canvas-*` prefixes — so the loop's own bookkeeping
+`data-fourno-*` and `data-canvas-*` prefixes — so the loop's own bookkeeping
 cannot be redirected from the attributes panel.
 
 ---
@@ -375,17 +375,17 @@ Subscription granularity: the hook never subscribes to the whole `site` document
 
 ### Build a loop with the AI agent
 
-The site-scope AI agent stays on the HTML-native edit surface. It calls `list_loop_sources` to get valid source ids, table ids, order options, and `{currentEntry.field}` tokens, then inserts an `<instatic-loop>` marker through `insertHtml` / `replaceNodeHtml`:
+The site-scope AI agent stays on the HTML-native edit surface. It calls `list_loop_sources` to get valid source ids, table ids, order options, and `{currentEntry.field}` tokens, then inserts an `<fourno-loop>` marker through `insertHtml` / `replaceNodeHtml`:
 
 ```html
-<instatic-loop data-source-id="data.rows" data-table-id="tbl_posts" data-order-by="publishedAt" data-direction="desc" data-limit="3">
+<fourno-loop data-source-id="data.rows" data-table-id="tbl_posts" data-order-by="publishedAt" data-direction="desc" data-limit="3">
   <article>
     <a href="{currentEntry.permalink}">
       <img src="{currentEntry.featuredMedia}">
       <h3>{currentEntry.title}</h3>
     </a>
   </article>
-</instatic-loop>
+</fourno-loop>
 ```
 
 The HTML importer maps the marker to a real `base.loop` node, preserving classes and styles the same way it does for ordinary imported HTML. Token syntax is single-brace `{currentEntry.field}`; `{{post.title}}` and other alias-style tokens are not valid.
@@ -442,7 +442,7 @@ export function activate(api) {
 Plugin config:
 
 ```ts
-import { definePlugin, permissions } from '@instatic/plugin-sdk'
+import { definePlugin, permissions } from '@fourno/plugin-sdk'
 
 export default definePlugin({
   id: 'acme.catalog',
@@ -478,12 +478,12 @@ Two modes are available via the loop node's `pagination` prop:
 
 **`pagination: 'none'` (default)** — renders up to `limit` items at publish time. No load-more affordance.
 
-**`pagination: 'infinite'`** — renders the first `pageSize` items and appends a **"Load more"** button. Each click fetches the next page from `/_instatic/loop/<loopId>?page=N&pagePath=<path>` and appends the returned HTML before the button. When `hasMore` is false the button is removed automatically.
+**`pagination: 'infinite'`** — renders the first `pageSize` items and appends a **"Load more"** button. Each click fetches the next page from `/_fourno/loop/<loopId>?page=N&pagePath=<path>` and appends the returned HTML before the button. When `hasMore` is false the button is removed automatically.
 
 To enable infinite loading:
 1. Set `props.pagination = 'infinite'` on the loop node.
 2. Set `props.pageSize` (items per click; defaults to 10).
-3. The publisher auto-injects `<script type="module" src="/_instatic/assets/loop-runtime.js">` when at least one infinite loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime is < 2 KB and ships only when needed.
+3. The publisher auto-injects `<script type="module" src="/_fourno/assets/loop-runtime.js">` when at least one infinite loop exists on the page (see `server/publish/loopRuntime.ts`). The runtime is < 2 KB and ships only when needed.
 
 For static multi-page navigation (no JS required):
 - Set `pagination: 'infinite'` and link the pages with the query parameter below — the server renders each page. See "Deep-link to a loop page".
@@ -508,7 +508,7 @@ Four constraints bound what this can express:
 | `pagination` must be `'infinite'` | `loopPrefetch.ts:229` consults the URL only in that mode. Under `'none'` the parameter is ignored silently and the loop always renders page 1. |
 | Contextual sources are excluded | `entry.field` never resolves a page number (`loopPrefetch.ts:292-299`, `src/core/publisher/renderLoop.ts:155-159`). |
 | Out-of-range pages render nothing | Zero items makes `renderLoop` return the empty string (`src/core/publisher/renderLoop.ts:78-80`) — no wrapper element, no attributes, no fallback text at the loop's position. |
-| No total is exposed | The wrapper carries `data-instatic-loop-page` and `data-instatic-loop-has-more` (`renderLoop.ts:111-116`), and `/_instatic/loop/<loopId>` returns `{ html, hasMore, pageNumber }` (`server/handlers/cms/loop.ts:131`, `:169`). Neither carries an item or page count, so "Page 3 of 12" is not derivable. |
+| No total is exposed | The wrapper carries `data-fourno-loop-page` and `data-fourno-loop-has-more` (`renderLoop.ts:111-116`), and `/_fourno/loop/<loopId>` returns `{ html, hasMore, pageNumber }` (`server/handlers/cms/loop.ts:131`, `:169`). Neither carries an item or page count, so "Page 3 of 12" is not derivable. |
 
 Link the pages with ordinary anchors, and bound the upper page number from the authored data rather than probing for it:
 

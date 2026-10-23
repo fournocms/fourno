@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteDocument } from '@core/page-tree'
 import { publishPage, collectHoleSubtreeModuleIds } from '@core/publisher'
 import { makeModule, makePage, makeRegistry, makeSite } from './helpers'
@@ -37,7 +37,7 @@ describe('publishPage jsModuleIds', () => {
     })
     const site = makeSite({ pages: [page] })
     const { html, jsModuleIds } = publishPage(page, site, registry)
-    expect(html).toContain('<instatic-hole')
+    expect(html).toContain('<fourno-hole')
     expect(jsModuleIds).toEqual(['test.jsy', 'test.live'])
   })
 

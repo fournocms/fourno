@@ -230,7 +230,7 @@ export function AddCustomFontDialog({
   // Stable, session-unique preview family so the transient @font-face can't
   // collide with a real installed family or another open dialog. `useId` is a
   // render-safe source of a unique token (no module counter, no ref reads).
-  const previewFamily = `instaticCustomFontPreview${useId().replace(/[^a-zA-Z0-9]/g, '')}`
+  const previewFamily = `fournoCustomFontPreview${useId().replace(/[^a-zA-Z0-9]/g, '')}`
 
   const fontAssets = (assets ?? []).filter((a) => a.mimeType.startsWith('font/'))
   const pickedIds = Object.keys(picked)

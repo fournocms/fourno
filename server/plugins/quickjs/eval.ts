@@ -152,7 +152,7 @@ export function evalStringSync(
   ctx: QuickJSContext,
   code: string,
   timeoutMs: number,
-  sourceName = 'instatic-eval.js',
+  sourceName = 'fourno-eval.js',
 ): string {
   return withSyncDeadline(ctx, timeoutMs, () => {
     const handle = ctx.unwrapResult(ctx.evalCode(code, sourceName))
@@ -204,7 +204,7 @@ function evalResolved<T>(
   // with a QuickJS `InternalError: interrupted` rather than blocking
   // the worker forever.
   return withDeadline(ctx, timeoutMs, async () => {
-    const evalHandle = ctx.unwrapResult(ctx.evalCode(code, 'instatic-eval.js'))
+    const evalHandle = ctx.unwrapResult(ctx.evalCode(code, 'fourno-eval.js'))
     return settleResolved(ctx, evalHandle, read)
   })
 }

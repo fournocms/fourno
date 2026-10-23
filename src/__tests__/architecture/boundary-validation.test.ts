@@ -58,11 +58,11 @@
  * @see src/__tests__/architecture/db-postgres-isms.test.ts — mirror for DB rules
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 
 // ---------------------------------------------------------------------------
 // File walker — .ts and .tsx files, recursive
@@ -447,7 +447,7 @@ describe('Boundary validation — HTTP and JSON parse boundaries must use TypeBo
     //     not a consumer.
     //   - src/core/persistence/ uses an injectable fetchImpl (the
     //     sanctioned boundary for that layer) and is excluded.
-    //   - server/ uses Bun.serve request handling, not client fetch.
+    //   - server/ handles Web Requests from the server adapter, not client fetch.
     const violations = scan(
       [ADMIN_ROOT],
       ALLOWLIST_FETCH,

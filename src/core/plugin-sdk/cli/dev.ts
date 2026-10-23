@@ -1,5 +1,5 @@
 /**
- * `instatic-plugin dev` — watch source files, rebuild, and sync into the host's
+ * `fourno-plugin dev` — watch source files, rebuild, and sync into the host's
  * `<uploadsDir>/plugins/<id>/<version>/` directly.
  *
  * Mechanics:
@@ -14,7 +14,7 @@
  * and frontend bundles still need a manual page reload (browser cache).
  */
 import { watch } from 'node:fs'
-import { cp, mkdir, readdir, rm, stat } from 'node:fs/promises'
+import { cp, mkdir, readFile, readdir, rm, stat } from 'node:fs/promises'
 import { basename, join, relative, resolve } from 'node:path'
 import { buildPlugin } from './build'
 import {
@@ -35,7 +35,7 @@ export async function runPluginDev(options: PluginDevOptions): Promise<void> {
     uploadsDirFlag: options.uploadsDirFlag,
   })
 
-  console.log(`▶ instatic-plugin dev`)
+  console.log(`▶ fourno-plugin dev`)
   console.log(`  source: ${pluginDir}`)
   console.log(`  uploads: ${targets.uploadsDir} (${targets.source})`)
   console.log()
@@ -59,7 +59,7 @@ export async function runPluginDev(options: PluginDevOptions): Promise<void> {
   await new Promise<void>((resolveProcess) => {
     process.on('SIGINT', () => {
       watcher.close()
-      console.log('\n▶ instatic-plugin dev — stopped.')
+      console.log('\n▶ fourno-plugin dev — stopped.')
       resolveProcess()
     })
   })
@@ -133,7 +133,7 @@ async function resolveVersionDir(
   distDir: string,
 ): Promise<string> {
   const manifestPath = join(distDir, 'plugin.json')
-  const manifest = JSON.parse(await Bun.file(manifestPath).text()) as { version: string }
+  const manifest = JSON.parse(await readFile(manifestPath, 'utf8')) as { version: string }
   return join(targets.uploadsDir, 'plugins', pluginId, manifest.version)
 }
 

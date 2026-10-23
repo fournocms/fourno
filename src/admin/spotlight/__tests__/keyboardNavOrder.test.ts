@@ -16,7 +16,7 @@
  * returning it. This test locks that invariant in.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { orderScoredByVisualGroup } from '../spotlightSearch'
 import type { ScoredCommand } from '../matcher'
 import type { Command, CommandGroup } from '../types'

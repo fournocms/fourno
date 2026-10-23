@@ -22,7 +22,7 @@
  * @see Contribution #431 — Phase 2 Performance Spec (Hot Path 1 — applyZoom formula)
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import * as canvasMath from '@site/canvas/math'
 import {
   MIN_ZOOM,

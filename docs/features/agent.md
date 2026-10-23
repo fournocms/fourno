@@ -372,7 +372,7 @@ Resolved server-side from the posted `SiteAgentSnapshot` or the data repositorie
 | `site_list_modules`    | Module registry (id, name, category, props schema, defaults); `category` filter |
 | `site_list_breakpoints`| Configured breakpoints + active id                                      |
 | `site_list_post_types` | Routable collections eligible as a `postTypes` template target — `{ slug, label, routeBase, kind }` per entry, filtered to a non-empty `routeBase`. Queries the data repositories via `ctx.db` |
-| `site_list_loop_sources` | Loop source ids, source fields, order/filter options, and data-table field catalogs with valid `{currentEntry.field}` tokens. For post/custom table loops, use source id `data.rows`, the returned table `id` as `<instatic-loop data-table-id>`, and the returned tokens inside the loop body |
+| `site_list_loop_sources` | Loop source ids, source fields, order/filter options, and data-table field catalogs with valid `{currentEntry.field}` tokens. For post/custom table loops, use source id `data.rows`, the returned table `id` as `<fourno-loop data-table-id>`, and the returned tokens inside the loop body |
 | `site_list_tokens`     | Design tokens: colors (with shades/tints), typography/spacing scale steps, font tokens — each with CSS variable + utility classes; optional `family` filter (`colors`\|`typography`\|`spacing`\|`fonts`) |
 
 ### Site browser tools — 29, browser-bridged
@@ -390,7 +390,7 @@ All 29 tools carry `execution: 'browser'` in their `AiTool` definition. The serv
 
 | Tool              | Input                                  | Success `data`                        | What it does                                           |
 |-------------------|----------------------------------------|---------------------------------------|--------------------------------------------------------|
-| `site_insert_html`      | `{ parentId, index?, html }`           | `{ nodeIds }` or `{ cssRulesCreated, cssRulesUpdated }` | Parse HTML (+ any `<style>` CSS) → import as `PageNode`s under `parentId`. Custom `<instatic-loop>` elements import as real Loop nodes; `<instatic-outlet>` imports as a template outlet. A `<style>`-only payload (no elements) upserts CSS rules without inserting nodes (prefer `site_apply_css` for that) |
+| `site_insert_html`      | `{ parentId, index?, html }`           | `{ nodeIds }` or `{ cssRulesCreated, cssRulesUpdated }` | Parse HTML (+ any `<style>` CSS) → import as `PageNode`s under `parentId`. Custom `<fourno-loop>` elements import as real Loop nodes; `<fourno-outlet>` imports as a template outlet. A `<style>`-only payload (no elements) upserts CSS rules without inserting nodes (prefer `site_apply_css` for that) |
 | `site_get_node_html`     | `{ nodeId }`                           | `{ html }`                            | Render subtree to HTML via the publisher's `renderNode`|
 | `site_replace_node_html` | `{ nodeId, html }`                     | `{ nodeIds }` or `{ cssRulesCreated, cssRulesUpdated }` | Delete existing children; re-import HTML under the same parent. A `<style>`-only payload upserts CSS rules WITHOUT touching the children |
 
@@ -416,14 +416,14 @@ Selectors are matched by their exact emitted text across rule kinds. `.grad`, `.
 **Loops through HTML.** A repeated list is authored with the custom importer marker:
 
 ```html
-<instatic-loop data-source-id="data.rows" data-table-id="<table id>" data-order-by="publishedAt" data-direction="desc" data-limit="3">
+<fourno-loop data-source-id="data.rows" data-table-id="<table id>" data-order-by="publishedAt" data-direction="desc" data-limit="3">
   <article>
     <a href="{currentEntry.permalink}">
       <img src="{currentEntry.featuredMedia}">
       <h3>{currentEntry.title}</h3>
     </a>
   </article>
-</instatic-loop>
+</fourno-loop>
 ```
 
 The agent calls `site_list_loop_sources` first to get the valid source id, data table id, order options, and field tokens. The token grammar is single-brace `{currentEntry.field}`; aliases such as `{{post.title}}` are invalid and should never be generated.
@@ -485,7 +485,7 @@ Agents should not use npm CDN URLs such as `esm.sh`, `unpkg`, or jsDelivr for pa
 
 **Templates (CMS layouts)**
 
-A template is a page carrying a `target` plus a single `<instatic-outlet>` where matched content flows in. These bridge to the editor's `convertPageToTemplate` / `convertTemplateToPage` store actions. The outlet itself is placed via `site_insert_html` — the importer maps the custom `<instatic-outlet>` element to a `base.outlet` node (see [html-import.md](html-import.md) and [templates.md](templates.md)). No save-time outlet guard: a template with no outlet simply doesn't apply at render time.
+A template is a page carrying a `target` plus a single `<fourno-outlet>` where matched content flows in. These bridge to the editor's `convertPageToTemplate` / `convertTemplateToPage` store actions. The outlet itself is placed via `site_insert_html` — the importer maps the custom `<fourno-outlet>` element to a `base.outlet` node (see [html-import.md](html-import.md) and [templates.md](templates.md)). No save-time outlet guard: a template with no outlet simply doesn't apply at render time.
 
 | Tool                | Input                                                                 | Success `data` | What it does                                              |
 |---------------------|----------------------------------------------------------------------|----------------|----------------------------------------------------------|
@@ -710,7 +710,7 @@ Conversations and their message history are persisted server-side in `ai_convers
 
 **Persisted images, browser history, and provider replay are deliberately different views.** Every accepted user JPEG is stored inline in `ai_messages.content_json`; conversations have no image-count quota. A conversation-detail response replaces each base64 block with `GET /admin/api/ai/conversations/:conversationId/messages/:messageId/images/:blockIndex`. The ownership-guarded endpoint returns only a canonical JPEG with `private, no-store`; native lazy image loading means reopening a large collection does not embed all bytes in one JSON response. Before a provider call, `projectUserImagesForModel` creates a non-mutating outbound projection:
 
-- a vision model first receives every persisted image in conversation order; there is no Instatic replay count cap;
+- a vision model first receives every persisted image in conversation order; there is no Fourno replay count cap;
 - a non-vision model receives no image bytes at all; every persisted image becomes a text breadcrumb, so switching models cannot poison the conversation;
 - the database rows are never rewritten by projection, so the UI history remains intact and switching back to a vision model restores the complete persisted image history.
 
@@ -783,7 +783,7 @@ unblocks deletion of the credential that had been protected by the default FK.
 | Pattern | Use instead |
 |---|---|
 | Importing any provider SDK (`@anthropic-ai/sdk`, `@anthropic-ai/claude-agent-sdk`, `@openai/agents`, `@openrouter/agent`) | Banned repo-wide — no exceptions, including inside `server/ai/drivers/`. Drivers talk directly to the REST API. Gated by `ai-driver-isolation.test.ts`. |
-| Importing the split `@modelcontextprotocol/*` v2 packages outside `server/ai/mcp/` | The MCP SDK packages are scoped to Instatic's MCP server implementation only. Drivers and browser code must not import them. Gated by `ai-driver-isolation.test.ts`. |
+| Importing the split `@modelcontextprotocol/*` v2 packages outside `server/ai/mcp/` | The MCP SDK packages are scoped to Fourno's MCP server implementation only. Drivers and browser code must not import them. Gated by `ai-driver-isolation.test.ts`. |
 | Importing `zod` anywhere | Banned repo-wide — TypeBox schemas pass directly as JSON Schema to every provider. Gated by `ai-driver-isolation.test.ts`. |
 | Writing a private `parseToolArguments` / `parseJsonOrEmpty` copy inside a driver | Import `parseToolArguments` from `./http/toolArgs`. Private copies diverge silently — the same malformed model output produces different outcomes per provider. Gated by `ai-driver-shared-helpers.test.ts`. |
 | Redefining `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` in a driver or prompt builder | Import it from `server/ai/runtime/types.ts`. One source — if a driver or builder drifts the literal, prompt caching silently breaks for that driver. Gated by `ai-driver-shared-helpers.test.ts`. |

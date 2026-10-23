@@ -11,7 +11,7 @@
  * Groups 1–2 use @testing-library/react DOM integration (same as settingsModal.test.tsx).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
+import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import React from 'react'
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react'
 import { readFileSync } from 'fs'
@@ -330,8 +330,8 @@ describe('publishPage — 2-node tree golden test (Phase 7)', () => {
   const headingModule = makeModule('base.text', {
     canHaveChildren: false,
     render: (props) => ({
-      html: `<h1 class="instatic-heading">${props['text'] ?? ''}</h1>`,
-      css: '/* base.text */\n.instatic-heading { font-family: sans-serif; margin: 0; }',
+      html: `<h1 class="fourno-heading">${props['text'] ?? ''}</h1>`,
+      css: '/* base.text */\n.fourno-heading { font-family: sans-serif; margin: 0; }',
     }),
   })
 
@@ -356,10 +356,10 @@ describe('publishPage — 2-node tree golden test (Phase 7)', () => {
     expect(html).toContain('</html>')
 
     // Page content
-    expect(html).toContain('<h1 class="instatic-heading">Hello World</h1>')
+    expect(html).toContain('<h1 class="fourno-heading">Hello World</h1>')
 
     // CSS injection (deduplicated)
-    expect(html).toContain('.instatic-heading { font-family: sans-serif; margin: 0; }')
+    expect(html).toContain('.fourno-heading { font-family: sans-serif; margin: 0; }')
 
     // Filename derivation
     expect(filename).toBe('index.html')

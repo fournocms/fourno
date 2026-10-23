@@ -71,7 +71,7 @@ const LOCK_MULTIPLIER = 2
 /** Auto-pause threshold. After this many consecutive failures, the row flips `paused=true`. */
 const FAILURE_CAP = 5
 /** Postgres advisory-lock key — must be a bigint. Derived from the string below for human readability. */
-const ADVISORY_LOCK_KEY = 712830541 // = djb2('instatic-plugin-scheduler') mod 2^31
+const ADVISORY_LOCK_KEY = 712830541 // = djb2('fourno-plugin-scheduler') mod 2^31
 /** Run-history rolling trim runs at most this often (don't churn every tick). */
 const HISTORY_TRIM_INTERVAL_MS = 5 * 60 * 1000
 

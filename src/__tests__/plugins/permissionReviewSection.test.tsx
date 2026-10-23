@@ -5,7 +5,7 @@
  * permissions, the UI must surface them prominently so the site owner
  * can spot a permission expansion before clicking "Update".
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import {
   PermissionReviewSection,

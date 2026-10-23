@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import { resetForTests } from '../../../server/publish/renderCache'
 import type { PublishedPageSnapshot } from '../../../server/repositories/publish'
@@ -341,7 +341,7 @@ describe('public rendering', () => {
       scripts: [
         {
           fileId: 'entry',
-          src: '/_instatic/assets/version_1/entries/entry.js',
+          src: '/_fourno/assets/version_1/entries/entry.js',
           placement: 'body-end',
           timing: 'dom-ready',
           priority: 10,
@@ -352,7 +352,7 @@ describe('public rendering', () => {
     const { html } = await renderPublishedSnapshot(published, { db: makeFakeDb(published) })
 
     expect(html).toContain("script-src 'self'")
-    expect(html).toContain('/_instatic/assets/version_1/entries/entry.js')
+    expect(html).toContain('/_fourno/assets/version_1/entries/entry.js')
   })
 
   it('serves / from the active published index snapshot', async () => {
@@ -366,10 +366,10 @@ describe('public rendering', () => {
   })
 
   it('serves immutable published runtime assets by public path', async () => {
-    const res = await handleServerRequest(new Request('http://localhost/_instatic/assets/version_1/entries/entry.js'), {
+    const res = await handleServerRequest(new Request('http://localhost/_fourno/assets/version_1/entries/entry.js'), {
       db: makeFakeDb(null, [
         {
-          public_path: '/_instatic/assets/version_1/entries/entry.js',
+          public_path: '/_fourno/assets/version_1/entries/entry.js',
           content_type: 'text/javascript; charset=utf-8',
           content_bytes: new TextEncoder().encode('console.log("runtime")'),
         },
@@ -389,10 +389,10 @@ describe('public rendering', () => {
   // with no CSP. It now serves only the asset kinds the publisher emits and
   // refuses everything else, even a file that is present.
   it('refuses to serve an SVG from the runtime-asset namespace', async () => {
-    const res = await handleServerRequest(new Request('http://localhost/_instatic/assets/version_1/poc.svg'), {
+    const res = await handleServerRequest(new Request('http://localhost/_fourno/assets/version_1/poc.svg'), {
       db: makeFakeDb(null, [
         {
-          public_path: '/_instatic/assets/version_1/poc.svg',
+          public_path: '/_fourno/assets/version_1/poc.svg',
           content_type: 'image/svg+xml',
           content_bytes: new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"></svg>'),
         },
@@ -413,19 +413,19 @@ describe('public rendering', () => {
   it('emits external CSS <link> tags pointing at the per-site bundle', async () => {
     const snap = snapshot('Hello')
     const { html } = await renderPublishedSnapshot(snap, { db: makeFakeDb(snap) })
-    expect(html).toMatch(/<link rel="stylesheet" href="\/_instatic\/css\/reset-[a-f0-9]{12}\.css">/)
+    expect(html).toMatch(/<link rel="stylesheet" href="\/_fourno\/css\/reset-[a-f0-9]{12}\.css">/)
     // No inline reset block — site-wide CSS lives in the external bundle.
     expect(html).not.toContain(':where(*, *::before, *::after)')
   })
 
-  it('serves the reset bundle file from /_instatic/css/<filename> with immutable cache', async () => {
+  it('serves the reset bundle file from /_fourno/css/<filename> with immutable cache', async () => {
     const published = snapshot('Hello')
     // First request the page to discover the current bundle filenames.
     const pageRes = await handleServerRequest(new Request('http://localhost/'), {
       db: makeFakeDb(published),
     })
     const pageHtml = await pageRes.text()
-    const resetMatch = pageHtml.match(/href="(\/_instatic\/css\/reset-[a-f0-9]{12}\.css)"/)
+    const resetMatch = pageHtml.match(/href="(\/_fourno\/css\/reset-[a-f0-9]{12}\.css)"/)
     expect(resetMatch).not.toBeNull()
 
     // Now fetch the bundle.
@@ -443,7 +443,7 @@ describe('public rendering', () => {
 
   it('returns 404 for stale CSS hashes so cached HTML refetches the page', async () => {
     const cssRes = await handleServerRequest(
-      new Request('http://localhost/_instatic/css/reset-deadbeefdead.css'),
+      new Request('http://localhost/_fourno/css/reset-deadbeefdead.css'),
       { db: makeFakeDb(snapshot('Hello')) },
     )
     expect(cssRes.status).toBe(404)
@@ -451,7 +451,7 @@ describe('public rendering', () => {
 
   it('returns 404 for malformed CSS bundle paths', async () => {
     const cssRes = await handleServerRequest(
-      new Request('http://localhost/_instatic/css/whatever.css'),
+      new Request('http://localhost/_fourno/css/whatever.css'),
       { db: makeFakeDb(snapshot('Hello')) },
     )
     expect(cssRes.status).toBe(404)

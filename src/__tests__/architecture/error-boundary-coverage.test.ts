@@ -25,11 +25,11 @@
  * @see CLAUDE.md "Error handling" — boundary + tagged logging conventions
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 
 interface BoundaryPlacement {
   /** Path relative to src/ */

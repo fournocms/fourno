@@ -11,12 +11,12 @@
 import { mkdtemp, mkdir, rm, readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { createSqliteClient } from '../../../server/db/sqlite'
 import { createTestDb } from '../helpers/createTestDb'
 
 async function withTempDir<T>(fn: (dir: string) => Promise<T>): Promise<T> {
-  const dir = await mkdtemp(join(tmpdir(), 'instatic-db-close-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fourno-db-close-'))
   try {
     return await fn(dir)
   } finally {

@@ -20,11 +20,11 @@
  * @see docs/plans/2026-05-29-super-import.md — Phase 1 spec
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import { join, extname, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 const SITE_IMPORT_DIR = join(SRC_ROOT, 'core/siteImport')
 
 // ---------------------------------------------------------------------------

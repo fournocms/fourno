@@ -29,14 +29,14 @@ function shouldProxyPublicSiteRequest(req: IncomingMessage): boolean {
   const { pathname } = new URL(req.url, CMS_DEV_SERVER_ORIGIN)
   if (isEditorAppPath(pathname)) return false
 
-  // Bun server namespaces — explicitly proxied even though they carry a file
+  // Server namespaces — explicitly proxied even though they carry a file
   // extension. The fallthrough rule below rejects anything with `.<ext>` to
   // avoid swallowing requests for editor static assets, which means we have
   // to opt in any backend route whose URL ends with `.something`.
-  //   /_instatic/assets/  → runtime script bundles (esbuild output)
-  //   /_instatic/css/     → per-site published CSS bundle (reset / framework / style)
-  if (pathname.startsWith('/_instatic/assets/')) return true
-  if (pathname.startsWith('/_instatic/css/')) return true
+  //   /_fourno/assets/  → runtime script bundles (esbuild output)
+  //   /_fourno/css/     → per-site published CSS bundle (reset / framework / style)
+  if (pathname.startsWith('/_fourno/assets/')) return true
+  if (pathname.startsWith('/_fourno/css/')) return true
 
   return pathname === '/' || !FILE_EXTENSION_RE.test(pathname)
 }
@@ -83,7 +83,7 @@ async function proxyPublicSiteRequest(
 
 function publicSiteDevProxyPlugin(): Plugin {
   return {
-    name: 'instatic-public-site-dev-proxy',
+    name: 'fourno-public-site-dev-proxy',
     apply: 'serve',
 
     configureServer(server) {
@@ -232,13 +232,11 @@ export default defineConfig({
     },
     proxy: {
       // The whole `/admin/api/` prefix (CMS + agent) is forwarded to the
-      // Bun backend. Agent endpoints live under `/admin/api/agent` (and
+      // CMS backend. Agent endpoints live under `/admin/api/agent` (and
       // `/admin/api/agent/tool-result`) so the admin session cookie, scoped
       // to `Path=/admin` to keep it off the public site, accompanies the
       // request. `ws: true` forwards the collab socket's upgrade too, so the
-      // dev server is same-origin exactly like production. (Before Bun 1.4.1
-      // the node:http client never emitted 'upgrade' and the socket had to
-      // dial the CMS port directly.)
+      // dev server is same-origin exactly like production.
       '/admin/api': {
         target: CMS_DEV_SERVER_ORIGIN,
         changeOrigin: true,
@@ -253,7 +251,7 @@ export default defineConfig({
       // explicit `proxy:` map (not just the GET-only middleware) because
       // the tracker uses POST and the GET-only `publicSiteDevProxyPlugin`
       // would otherwise drop those requests.
-      '/_instatic': {
+      '/_fourno': {
         target: CMS_DEV_SERVER_ORIGIN,
         changeOrigin: true,
       },

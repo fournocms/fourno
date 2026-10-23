@@ -1,5 +1,5 @@
 /**
- * Tests for the `/_instatic/hole/<nodeId>` and `/_instatic/hole-runtime.js` endpoints.
+ * Tests for the `/_fourno/hole/<nodeId>` and `/_fourno/hole-runtime.js` endpoints.
  *
  * Uses a minimal fake DbClient that intercepts `getLatestPublishedSiteSnapshot`
  * queries (the same pattern as publicRouterCache.test.ts).
@@ -13,7 +13,7 @@
  *   - Runtime asset endpoint serves HOLE_RUNTIME_JS with correct headers
  */
 
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import type { DbClient, DbResult } from '../../../server/db'
 import {
   handleHoleRequest,
@@ -198,15 +198,15 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('isHoleRuntimeAssetPath', () => {
-  it('returns true for /_instatic/hole-runtime.js', () => {
-    expect(isHoleRuntimeAssetPath('/_instatic/hole-runtime.js')).toBe(true)
+  it('returns true for /_fourno/hole-runtime.js', () => {
+    expect(isHoleRuntimeAssetPath('/_fourno/hole-runtime.js')).toBe(true)
   })
 
   it('returns false for other paths', () => {
-    expect(isHoleRuntimeAssetPath('/_instatic/hole/')).toBe(false)
-    expect(isHoleRuntimeAssetPath('/_instatic/hole-runtime')).toBe(false)
-    expect(isHoleRuntimeAssetPath('/_instatic/assets/loop-runtime.js')).toBe(false)
-    expect(isHoleRuntimeAssetPath('/_instatic/hole/some-node-id')).toBe(false)
+    expect(isHoleRuntimeAssetPath('/_fourno/hole/')).toBe(false)
+    expect(isHoleRuntimeAssetPath('/_fourno/hole-runtime')).toBe(false)
+    expect(isHoleRuntimeAssetPath('/_fourno/assets/loop-runtime.js')).toBe(false)
+    expect(isHoleRuntimeAssetPath('/_fourno/hole/some-node-id')).toBe(false)
   })
 })
 
@@ -238,7 +238,7 @@ describe('server router — hole namespace ownership', () => {
     const { db, wasQueried } = makeThrowingDb()
 
     const res = await handleServerRequest(
-      new Request('http://localhost/_instatic/hole-runtime.js'),
+      new Request('http://localhost/_fourno/hole-runtime.js'),
       { db },
     )
 
@@ -254,7 +254,7 @@ describe('server router — hole namespace ownership', () => {
     const version = getPublishVersion()
 
     const res = await handleServerRequest(
-      new Request(`http://localhost/_instatic/hole/text-node?v=${version}`),
+      new Request(`http://localhost/_fourno/hole/text-node?v=${version}`),
       { db },
     )
 
@@ -267,7 +267,7 @@ describe('server router — hole namespace ownership', () => {
     const { db, wasQueried } = makeThrowingDb()
 
     const res = await handleServerRequest(
-      new Request('http://localhost/_instatic/hole/?v=0'),
+      new Request('http://localhost/_fourno/hole/?v=0'),
       { db },
     )
 
@@ -286,7 +286,7 @@ describe('handleHoleRequest — method guard', () => {
     const db = makeFakeDb(null)
 
     for (const method of ['POST', 'PUT', 'DELETE', 'PATCH']) {
-      const url = new URL('http://localhost/_instatic/hole/text-node?v=0')
+      const url = new URL('http://localhost/_fourno/hole/text-node?v=0')
       const req = new Request(url, { method })
       const res = await handleHoleRequest(req, url, { db })
       expect(res.status).toBe(405)
@@ -302,7 +302,7 @@ describe('handleHoleRequest — site not published', () => {
   it('returns 404 when no published snapshot exists', async () => {
     const db = makeFakeDb(null)
     const currentVersion = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=${currentVersion}`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=${currentVersion}`)
     const req = new Request(url)
     const res = await handleHoleRequest(req, url, { db })
     expect(res.status).toBe(404)
@@ -323,13 +323,13 @@ describe('handleHoleRequest — stale version', () => {
     const currentVersion = getPublishVersion() // = 1
 
     // Request with the old version (0, now stale)
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=0`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=0`)
     const req = new Request(url)
     const res = await handleHoleRequest(req, url, { db })
 
     const body = await res.text()
-    expect(body).toContain('instatic-hole-stale')
-    expect(body).toContain('data-instatic-stale="true"')
+    expect(body).toContain('fourno-hole-stale')
+    expect(body).toContain('data-fourno-stale="true"')
     expect(res.headers.get('cache-control')).toBe('no-store')
     // Stale responses must NOT be 404 or 500 — the browser replaces the
     // placeholder with the stale sentinel and the user can still see content
@@ -346,11 +346,11 @@ describe('handleHoleRequest — stale version', () => {
     bumpPublishVersion()
 
     // Old version
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=0`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=0`)
     const req = new Request(url)
     const res = await handleHoleRequest(req, url, { db })
 
-    expect((await res.text())).toContain('instatic-hole-stale')
+    expect((await res.text())).toContain('fourno-hole-stale')
   })
 })
 
@@ -364,7 +364,7 @@ describe('handleHoleRequest — node not found', () => {
     const db = makeFakeDb(snapshot)
 
     const currentVersion = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/no-such-node?v=${currentVersion}`)
+    const url = new URL(`http://localhost/_fourno/hole/no-such-node?v=${currentVersion}`)
     const req = new Request(url)
     const res = await handleHoleRequest(req, url, { db })
     expect(res.status).toBe(404)
@@ -381,7 +381,7 @@ describe('handleHoleRequest — successful render', () => {
     const db = makeFakeDb(snapshot)
 
     const currentVersion = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=${currentVersion}`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=${currentVersion}`)
     const req = new Request(url)
     const res = await handleHoleRequest(req, url, { db })
 
@@ -398,7 +398,7 @@ describe('handleHoleRequest — successful render', () => {
     const db = makeFakeDb(snapshot)
 
     const currentVersion = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=${currentVersion}`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=${currentVersion}`)
 
     const res1 = await handleHoleRequest(new Request(url), url, { db })
     const body1 = await res1.text()
@@ -417,13 +417,13 @@ describe('handleHoleRequest — successful render', () => {
     const version = getPublishVersion()
 
     // Attacker renders the fragment under an arbitrary originating path.
-    const evilUrl = new URL(`http://localhost/_instatic/hole/text-node?v=${version}&u=${encodeURIComponent('/evil-path')}`)
+    const evilUrl = new URL(`http://localhost/_fourno/hole/text-node?v=${version}&u=${encodeURIComponent('/evil-path')}`)
     const evil = await handleHoleRequest(new Request(evilUrl), evilUrl, { db })
     expect(await evil.text()).toContain('/evil-path')
 
     // A normal visitor of a different path (same query) must render its own
     // path, not be served the attacker's fragment from a shared cache slot.
-    const realUrl = new URL(`http://localhost/_instatic/hole/text-node?v=${version}&u=${encodeURIComponent('/')}`)
+    const realUrl = new URL(`http://localhost/_fourno/hole/text-node?v=${version}&u=${encodeURIComponent('/')}`)
     const real = await handleHoleRequest(new Request(realUrl), realUrl, { db })
     expect(await real.text()).not.toContain('/evil-path')
   })
@@ -436,12 +436,12 @@ describe('handleHoleRequest — successful render', () => {
     bumpPublishVersion() // now = 1
 
     // Old version is now stale
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=${oldVersion}`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=${oldVersion}`)
     const req = new Request(url)
     const res = await handleHoleRequest(req, url, { db })
 
     const body = await res.text()
-    expect(body).toContain('instatic-hole-stale')
+    expect(body).toContain('fourno-hole-stale')
   })
 })
 
@@ -453,7 +453,7 @@ describe('handleHoleRequest — snapshot single-flight', () => {
   it('loads the published snapshot once for concurrent requests at the same version', async () => {
     const { db, count } = makeCountingDb(makeSnapshot())
     const currentVersion = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=${currentVersion}`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=${currentVersion}`)
 
     // Fire several concurrent requests for the same (nodeId, version). The
     // version-keyed single-flight memo must collapse them into one DB load.
@@ -472,13 +472,13 @@ describe('handleHoleRequest — snapshot single-flight', () => {
     const { db, count } = makeCountingDb(makeSnapshot())
 
     const v0 = getPublishVersion()
-    const url0 = new URL(`http://localhost/_instatic/hole/text-node?v=${v0}`)
+    const url0 = new URL(`http://localhost/_fourno/hole/text-node?v=${v0}`)
     await handleHoleRequest(new Request(url0), url0, { db })
     expect(count()).toBe(1)
 
     bumpPublishVersion()
     const v1 = getPublishVersion()
-    const url1 = new URL(`http://localhost/_instatic/hole/text-node?v=${v1}`)
+    const url1 = new URL(`http://localhost/_fourno/hole/text-node?v=${v1}`)
     await handleHoleRequest(new Request(url1), url1, { db })
     expect(count()).toBe(2)
   })
@@ -493,7 +493,7 @@ describe('hole fragments and CMS forms', () => {
     registry.registerOrReplace(
       makeModule('test.cmsform', {
         render: () => ({
-          html: '<form data-instatic-form-mode="cms" data-instatic-form-id="contact"></form>',
+          html: '<form data-fourno-form-mode="cms" data-fourno-form-id="contact"></form>',
         }),
       }),
     )
@@ -501,12 +501,12 @@ describe('hole fragments and CMS forms', () => {
     snapshot.site.pages[0].nodes['text-node'].moduleId = 'test.cmsform'
 
     const version = getPublishVersion()
-    const url = new URL(`http://localhost/_instatic/hole/text-node?v=${version}`)
+    const url = new URL(`http://localhost/_fourno/hole/text-node?v=${version}`)
     const res = await handleHoleRequest(new Request(url), url, { db: makeFakeDb(snapshot) })
 
     expect(res.status).toBe(200)
     const html = await res.text()
-    expect(html).toContain('data-instatic-page-token=')
-    expect(html).toContain('data-instatic-page-id="page_1"')
+    expect(html).toContain('data-fourno-page-token=')
+    expect(html).toContain('data-fourno-page-id="page_1"')
   })
 })

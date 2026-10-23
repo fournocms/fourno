@@ -1,7 +1,7 @@
 /**
  * Clipboard slice — copy/cut/paste for layer subtrees.
  *
- * The clipboard is editor-wide and owns the `instatic-clipboard-v1` localStorage
+ * The clipboard is editor-wide and owns the `fourno-clipboard-v1` localStorage
  * key. Every read/write goes through this slice. The persisted shape is
  * validated via TypeBox (`ClipboardPayloadSchema`) on load; corruption
  * silently resolves to "no clipboard" rather than throwing.

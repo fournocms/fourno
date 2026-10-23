@@ -2,18 +2,18 @@
 
 End-to-end description of the plugin system: what plugins are, how they ship, how they run sandboxed, what they can do, and how to author them.
 
-A plugin is a zip package containing a `plugin.json` manifest and one or more bundled JavaScript entrypoints. The SDK CLI usually authors that zip from `instatic-plugin.config.ts`, then the CMS host loads installed plugins at boot. Each server entrypoint runs in its own Bun `Worker`, and that worker hosts a **QuickJS-WASM sandbox** — no Node, no Bun, no host file system, no environment variables, no network unless explicitly granted. Plugins reach the CMS through SDK surfaces scoped to where they run: `api.plugin.*`, `api.cms.*`, `api.editor.*`, and `api.dashboard.*`.
+A plugin is a zip package containing a `plugin.json` manifest and one or more bundled JavaScript entrypoints. The SDK CLI usually authors that zip from `fourno-plugin.config.ts`, then the CMS host loads installed plugins at boot. Each server entrypoint runs in its own worker thread, and that worker hosts a **QuickJS-WASM sandbox** — no Node, no Bun, no host file system, no environment variables, no network unless explicitly granted. Plugins reach the CMS through SDK surfaces scoped to where they run: `api.plugin.*`, `api.cms.*`, `api.editor.*`, and `api.dashboard.*`.
 
 ---
 
 ## TL;DR
 
-- **Package shape:** the CLI reads `instatic-plugin.config.ts` and emits a zip containing `plugin.json` plus entrypoint bundles (`server/index.js`, `editor/index.js`, admin app bundles, `modules/index.js`, `frontend/*.js`, optional `pack/site.json`).
-- **Runtime:** each server plugin has a Bun `Worker` (`server/plugins/pluginWorker.ts`) that owns one QuickJS VM (`server/plugins/quickjs/vm.ts`). Canvas module packs run in a separate QuickJS VM on the server (`server/plugins/modulePackVm.ts`) and as ESM in the browser editor. No host APIs leak into QuickJS.
+- **Package shape:** the CLI reads `fourno-plugin.config.ts` and emits a zip containing `plugin.json` plus entrypoint bundles (`server/index.js`, `editor/index.js`, admin app bundles, `modules/index.js`, `frontend/*.js`, optional `pack/site.json`).
+- **Runtime:** each server plugin has a worker thread (`server/plugins/pluginWorker.ts`) that owns one QuickJS VM (`server/plugins/quickjs/vm.ts`). Canvas module packs run in a separate QuickJS VM on the server (`server/plugins/modulePackVm.ts`) and as ESM in the browser editor. No host APIs leak into QuickJS.
 - **SDK:** every API call goes through `api` — `api.plugin.*` for metadata + logging, `api.cms.*` for routes, storage, hooks, loops, settings, schedule, content, and media; `api.editor.*` for editor extensions; `api.dashboard.*` for dashboard widgets.
 - **Lifecycle:** `install` → `activate` → (optionally `deactivate` / `migrate`) → `uninstall`. Each hook is async-capable and isolated; if one throws, the host rolls back and parks the plugin in `error`.
-- **Permissions:** declared in `instatic-plugin.config.ts` / `plugin.json`, approved by the site owner at install time, enforced by the SDK at runtime. Outbound network also requires a `networkAllowedHosts` allowlist.
-- **CLI:** `bun instatic-plugin init|lint|build|dev` covers scaffolding, manifest/source validation, bundle build, zip creation, and hot-sync to a running CMS.
+- **Permissions:** declared in `fourno-plugin.config.ts` / `plugin.json`, approved by the site owner at install time, enforced by the SDK at runtime. Outbound network also requires a `networkAllowedHosts` allowlist.
+- **CLI:** `pnpm fourno-plugin init|lint|build|dev` covers scaffolding, manifest/source validation, bundle build, zip creation, and hot-sync to a running CMS.
 - **Source of truth for permissions:** `src/core/plugin-sdk/capabilities.ts`. Source of truth for manifest shape: `src/core/plugins/manifest.ts`.
 
 ---
@@ -23,7 +23,7 @@ A plugin is a zip package containing a `plugin.json` manifest and one or more bu
 | Concern                        | Lives in                                  |
 |--------------------------------|-------------------------------------------|
 | SDK (author-facing API surface)| `src/core/plugin-sdk/`                    |
-| `instatic-plugin` CLI                | `src/core/plugin-sdk/cli/`                |
+| `fourno-plugin` CLI                | `src/core/plugin-sdk/cli/`                |
 | Manifest schema + parser       | `src/core/plugins/manifest.ts`            |
 | Admin-page route helpers       | `src/core/plugins/manifestAdminPages.ts`  |
 | Host-side plugin runtime       | `src/core/plugins/`                       |
@@ -32,7 +32,7 @@ A plugin is a zip package containing a `plugin.json` manifest and one or more bu
 | QuickJS VM factory (server entrypoint)| `server/plugins/quickjs/vm.ts`       |
 | Sandbox host (module pack VMs) | `server/plugins/modulePackVm.ts`          |
 | VM bootstrap source (typed)    | `server/plugins/quickjs/bootstrap/src/`   |
-| VM bootstrap generated artifacts | `server/plugins/quickjs/bootstrap/generated/` (run `bun run bootstrap:sync`) |
+| VM bootstrap generated artifacts | `server/plugins/quickjs/bootstrap/generated/` (run `pnpm bootstrap:sync`) |
 | Host RPC dispatcher            | `server/plugins/host/apiDispatch.ts`, `server/plugins/host/rpc.ts` |
 | Gated outbound fetch + SSRF guards | `server/plugins/host/network.ts`       |
 | Byte-safe body wire format     | `server/plugins/protocol/bodyEncoding.ts` |
@@ -76,11 +76,11 @@ pack/site.json           <- Visual Components / pages / classes / layouts pack (
 assets/                  <- static assets shipped in the zip (optional)
 ```
 
-`bun instatic-plugin build` produces this runtime layout from `instatic-plugin.config.ts`. Bundle formats are intentionally different per surface:
+`pnpm fourno-plugin build` produces this runtime layout from `fourno-plugin.config.ts`. Bundle formats are intentionally different per surface:
 
 | Bundle | Format | Loaded by |
 |---|---|---|
-| `server/index.js` | IIFE facade assigning `globalThis.__plugin_exports` | Bun worker → QuickJS VM |
+| `server/index.js` | IIFE facade assigning `globalThis.__plugin_exports` | Worker thread → QuickJS VM |
 | `modules/index.js` | ESM default export | Browser editor via dynamic import; server QuickJS after `server/plugins/modulePackVm.ts` rewrites the default export to `globalThis.__module_pack` |
 | `editor/index.js` | ESM | Unsandboxed admin window via dynamic import |
 | Admin app bundles | ESM | Unsandboxed admin window via `adminPages[].content.kind === "app"` |
@@ -92,7 +92,7 @@ Sandboxed bundles are scanned for forbidden literals during `build`, during `lin
 
 ## Manifest (`plugin.json`)
 
-Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the CLI emits the runtime `plugin.json`. The runtime manifest is still the install-time contract, and `parsePluginManifest` in `src/core/plugins/manifest.ts` is the source of truth.
+Authors normally write `fourno-plugin.config.ts` with `definePlugin(...)`; the CLI emits the runtime `plugin.json`. The runtime manifest is still the install-time contract, and `parsePluginManifest` in `src/core/plugins/manifest.ts` is the source of truth.
 
 ```jsonc
 {
@@ -196,7 +196,7 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
 | Pack `classes[].id`         | Namespaced under the plugin ID                             | `acme.workflow/hero-root` |
 | Pack `layouts[].id`         | Namespaced under the plugin ID                             | `acme.workflow/hero-section` |
 
-`parsePluginManifest` validates all of these and produces a clear error message. `bun instatic-plugin lint` runs the same checks before upload. Coherence checks also enforce permission-dependent shape:
+`parsePluginManifest` validates all of these and produces a clear error message. `pnpm fourno-plugin lint` runs the same checks before upload. Coherence checks also enforce permission-dependent shape:
 
 - `entrypoints.editor` and app-kind admin pages require `editor.code`.
 - `entrypoints.modules` requires `modules.register`.
@@ -204,7 +204,7 @@ Authors normally write `instatic-plugin.config.ts` with `definePlugin(...)`; the
 - `frontend.assets[]` requires `frontend.assets`.
 - Public routes require both `cms.routes` and `cms.routes.public`.
 - Server `fetch()` requires `network.outbound` and a matching `networkAllowedHosts[]` entry.
-- Any `cms.content.*` permission requires a non-empty `contentAccess[]`, and every mode an entry declares requires its permission (`CONTENT_ACCESS_MODE_PERMISSIONS` in `src/core/plugin-sdk/contentSchemas.ts` is the one mode-to-permission table both checks read). `instatic-plugin lint` additionally warns when a `cms.content.*` permission is requested but no entry declares its mode, since the host fails closed per table and mode and every call under it would be rejected.
+- Any `cms.content.*` permission requires a non-empty `contentAccess[]`, and every mode an entry declares requires its permission (`CONTENT_ACCESS_MODE_PERMISSIONS` in `src/core/plugin-sdk/contentSchemas.ts` is the one mode-to-permission table both checks read). `fourno-plugin lint` additionally warns when a `cms.content.*` permission is requested but no entry declares its mode, since the host fails closed per table and mode and every call under it would be rejected.
 
 ---
 
@@ -305,13 +305,13 @@ Editor entrypoints (`entrypoints.editor`) and app-kind admin pages (`adminPages[
 
 That trust level is gated by one permission: **`editor.code`** (risk: dangerous).
 
-- The manifest parser rejects an editor entrypoint or app-kind admin page that doesn't declare `editor.code` (`parsePluginManifest` coherence checks; `instatic-plugin lint` reports the same error pre-upload).
+- The manifest parser rejects an editor entrypoint or app-kind admin page that doesn't declare `editor.code` (`parsePluginManifest` coherence checks; `fourno-plugin lint` reports the same error pre-upload).
 - The editor loader (`src/core/plugins/editorPluginLoader.ts`) refuses to import an editor entrypoint without the `editor.code` *grant*, and records a visible "permission not granted" failure on the plugin card instead of skipping silently. Module packs get the same treatment for `modules.register`.
 - The admin-app loader (`src/core/plugins/adminRuntime.ts`) refuses to import an app page without the grant; the page body renders the refusal.
 - `adminPages[].content.assetPath` is pinned to the plugin's own `/uploads/plugins/{id}/{version}` subtree so a manifest can't point the dynamic import at foreign code.
 - The install review dialog (always shown — even for zero-permission plugins) calls out `editor.code` with a dedicated unsandboxed-code warning.
 
-Inside the admin window, plugin React surfaces (panels, app pages, canvas overlays) mount under a `PluginContext` carrying the granted permission set; permission-gated host hooks enforce against it — `useEditorStore` from `@instatic/host-hooks` requires `editor.store.read` and exposes no write accessor (writes go through `api.editor.store.transaction`, which requires `editor.store.write`).
+Inside the admin window, plugin React surfaces (panels, app pages, canvas overlays) mount under a `PluginContext` carrying the granted permission set; permission-gated host hooks enforce against it — `useEditorStore` from `@fourno/host-hooks` requires `editor.store.read` and exposes no write accessor (writes go through `api.editor.store.transaction`, which requires `editor.store.write`).
 
 ### What's available inside
 
@@ -339,8 +339,8 @@ These produce a build-time error and a runtime error if attempted:
 
 ### Three layers of enforcement
 
-1. **`instatic-plugin build`** emits the correct bundle format for each surface and scans sandboxed bundles for the forbidden literals above.
-2. **`instatic-plugin lint`** runs the same scan plus manifest + permission/allowlist coherence checks. Run this before upload.
+1. **`fourno-plugin build`** emits the correct bundle format for each surface and scans sandboxed bundles for the forbidden literals above.
+2. **`fourno-plugin lint`** runs the same scan plus manifest + permission/allowlist coherence checks. Run this before upload.
 3. **Install handler** (`server/plugins/package.ts → assertSandboxSafe`) scans **again** when the zip is uploaded — defense in depth in case the dev skipped `lint`.
 
 Sandbox invariants are gated by `src/__tests__/architecture/plugin-sandbox-invariants.test.ts`.
@@ -382,7 +382,7 @@ is a build artifact, not the authoring surface.
   …) are declared in `globals.d.ts`.
 - **Bundled** to committed IIFE-string artifacts under
   `server/plugins/quickjs/bootstrap/generated/` by `scripts/sync-plugin-bootstrap.ts`
-  (via `Bun.build`). The shared `boundary.ts` is inlined into both — one
+  (via esbuild). The shared `boundary.ts` is inlined into both — one
   source-level definition, no divergent inline copies.
 - **Consumed** by `bootstrap/index.ts` (concatenated after the polyfill shims for
   the full-plugin VM) and `modulePackVm.ts` (module-pack VM).
@@ -390,8 +390,8 @@ is a build artifact, not the authoring surface.
 **Regenerate after editing anything under `bootstrap/src/`:**
 
 ```sh
-bun run bootstrap:sync     # rewrite the generated artifacts
-bun run bootstrap:check    # CI-style drift check (no writes)
+pnpm bootstrap:sync     # rewrite the generated artifacts
+pnpm bootstrap:check    # CI-style drift check (no writes)
 ```
 
 The architecture gate `src/__tests__/architecture/plugin-bootstrap-fresh.test.ts`
@@ -478,7 +478,7 @@ Editor surfaces are permission-split:
 Dashboard widgets are registered from the same unsandboxed browser entrypoint through `api.dashboard.widgets.register(...)` and require `dashboard.widgets.register`:
 
 ```jsx
-import { StatValue, Widget } from '@instatic/host-ui'
+import { StatValue, Widget } from '@fourno/host-ui'
 
 function ApprovalWidget({ span, editing }) {
   return (
@@ -567,7 +567,7 @@ api.cms.loops.registerSource({
   // Optional. Default false. Marks the source request-dependent: any
   // `base.loop` using it becomes a Layer C "hole" — the page bakes a
   // placeholder and a tiny client runtime fetches the rendered loop
-  // fragment lazily via /_instatic/hole/<nodeId>. SHARED tier: the fragment is
+  // fragment lazily via /_fourno/hole/<nodeId>. SHARED tier: the fragment is
   // cached per (nodeId, page-query, publishVersion), so `fetch()` runs at
   // most once per publish per distinct query. Use for live external APIs.
   requestDependent: true,
@@ -598,13 +598,13 @@ At publish time (built-in, non-dynamic loops) `ctx.request` is `undefined` and t
 
 ### How a hole hydrates
 
-When a `base.loop` is bound to a `requestDependent` / `perVisitor` source, the publisher does NOT bake it. It emits a `<instatic-hole>` placeholder (`display: contents`, so it adds no wrapper box) and injects the ~1.1 KB hole runtime once per page (`/_instatic/hole-runtime.js?v=<publishVersion>` — versioned so a CMS update busts the cache). The runtime fetches each fragment from `/_instatic/hole/<nodeId>?v=<version>&u=<page-url>` — lazily via `IntersectionObserver` when the placeholder has visible skeleton content, eagerly on load otherwise — then swaps it in. It forwards the visitor's page path + query, and cookies ride along for `perVisitor` holes. Fully-static pages ship zero JS from the publisher.
+When a `base.loop` is bound to a `requestDependent` / `perVisitor` source, the publisher does NOT bake it. It emits a `<fourno-hole>` placeholder (`display: contents`, so it adds no wrapper box) and injects the ~1.1 KB hole runtime once per page (`/_fourno/hole-runtime.js?v=<publishVersion>` — versioned so a CMS update busts the cache). The runtime fetches each fragment from `/_fourno/hole/<nodeId>?v=<version>&u=<page-url>` — lazily via `IntersectionObserver` when the placeholder has visible skeleton content, eagerly on load otherwise — then swaps it in. It forwards the visitor's page path + query, and cookies ride along for `perVisitor` holes. Fully-static pages ship zero JS from the publisher.
 
 See [docs/features/publisher.md](publisher.md) for the full three-layer pipeline.
 
 ### Module JS on published pages — requires `frontend.assets`
 
-A plugin module's `render()` may return `js` (see `PluginRenderOutput`). It crosses the QuickJS boundary string-typed (non-strings are dropped by the VM normalizer) and is then gated host-side in `moduleAdapter.ts`: unless the plugin's **granted** permissions include `frontend.assets` — the same authority that already controls script tags via `frontend.assets[]` — the `js` is dropped with one `console.warn` per module. Enforcement always checks `grantedPermissions`, never the declared `permissions` array. With the grant, the JS is deduped per moduleId and served at `/_instatic/module-js/<moduleId>.js` on pages that use the module. Manifest format is unchanged.
+A plugin module's `render()` may return `js` (see `PluginRenderOutput`). It crosses the QuickJS boundary string-typed (non-strings are dropped by the VM normalizer) and is then gated host-side in `moduleAdapter.ts`: unless the plugin's **granted** permissions include `frontend.assets` — the same authority that already controls script tags via `frontend.assets[]` — the `js` is dropped with one `console.warn` per module. Enforcement always checks `grantedPermissions`, never the declared `permissions` array. With the grant, the JS is deduped per moduleId and served at `/_fourno/module-js/<moduleId>.js` on pages that use the module. Manifest format is unchanged.
 
 ### Frontend assets — requires `frontend.assets`
 
@@ -630,7 +630,7 @@ Supported `kind` values are `script`, `script-inline`, `style`, `style-inline`, 
 
 The injection pipeline derives CSP changes from the plan. Inline scripts/styles add the matching `'unsafe-inline'` directive. `networkAllowedHosts[]` contributes published-page `connect-src` origins for plugins with frontend assets, which is why frontend trackers that call their own or third-party ingest endpoints must list those hosts as well as declare `frontend.assets`.
 
-### Settings — declared in `instatic-plugin.config.ts` / `plugin.json`
+### Settings — declared in `fourno-plugin.config.ts` / `plugin.json`
 
 ```js
 const key = api.cms.settings.get('apiKey')
@@ -642,13 +642,13 @@ Settings are typed with the current manifest field kinds: `text`, `textarea`, `n
 
 Settings writes go live immediately. When an operator saves the admin form (or the plugin calls `settings.replace`), the host persists the record, refreshes its load-time cache, pushes the merged runtime values into the running VM's mirror (an `update-settings` worker message — a no-op when the plugin isn't loaded), and only then emits the `settings.changed` hook. `api.cms.settings.get(...)` therefore returns the new value without a plugin reload — including inside a `settings.changed` listener.
 
-**Secrets are encrypted at rest.** A setting declared with `secret: true` never enters `installed_plugins.settings_json`. Both write paths — the admin settings PUT and the plugin's own `api.cms.settings.replace` — converge on one repository choke point (`setPluginSettings` in `server/repositories/plugins.ts`), which splits the record: secret fields are AES-256-GCM-encrypted with the process master key (`INSTATIC_SECRET_KEY` — the same key that protects AI provider credentials and TOTP MFA seeds; mandatory in production, dev fallback at `.tmp/secret.key`) and stored in the dedicated `plugin_secrets` table (`server/repositories/pluginSecrets.ts`), one row per `(plugin_id, setting_id)` with a fresh IV and the master key's fingerprint. Manifest-declared secret defaults are encrypted the same way at install time. Uninstall removes the rows via the FK cascade; upgrades preserve them (the seed is insert-if-absent, so a rotated secret survives the upgrade upsert).
+**Secrets are encrypted at rest.** A setting declared with `secret: true` never enters `installed_plugins.settings_json`. Both write paths — the admin settings PUT and the plugin's own `api.cms.settings.replace` — converge on one repository choke point (`setPluginSettings` in `server/repositories/plugins.ts`), which splits the record: secret fields are AES-256-GCM-encrypted with the process master key (`FOURNO_SECRET_KEY` — the same key that protects AI provider credentials and TOTP MFA seeds; mandatory in production, dev fallback at `.tmp/secret.key`) and stored in the dedicated `plugin_secrets` table (`server/repositories/pluginSecrets.ts`), one row per `(plugin_id, setting_id)` with a fresh IV and the master key's fingerprint. Manifest-declared secret defaults are encrypted the same way at install time. Uninstall removes the rows via the FK cascade; upgrades preserve them (the seed is insert-if-absent, so a rotated secret survives the upgrade upsert).
 
 **Secrets never reach the browser — structurally.** Reads of the plugin row surface `''` for every secret field; browser-bound payloads (the plugins list, install/upgrade/enable/disable/restart responses, the settings GET/PUT responses, admin-page route snapshots via `usePluginSettings`, and editor-panel settings snapshots) project each secret field through `projectSecretSettings` (`server/handlers/cms/plugins/shared.ts`): `'***'` when an encrypted row exists, `''` when not. Only server-side plugin code running in the QuickJS worker reads the real value, via `api.cms.settings.get` / `getAll` — the worker mirror and the `settings.changed` hook payload are seeded from `server/plugins/settingsCache.ts`, the one sanctioned consumer of the decrypting `resolvePluginSecretsForRuntime` projection (gated by `plugin-secrets-never-leak.test.ts`). Editor-side and admin-app plugin code that needs a secret-derived capability must proxy through a plugin server route instead of reading the value directly.
 
 The settings form round-trips the mask: a PUT where a secret field still carries the `'***'` sentinel keeps the stored encrypted row, a PUT with a new string rotates it, and a PUT with an empty string deletes it (which also means a secret can never literally be `'***'`). The sentinel constant lives in `src/core/plugin-sdk/builders/settings.ts` (`SECRET_SETTING_MASK`); the persistence semantics live in `applyPluginSecretSettings` (`server/repositories/pluginSecrets.ts`).
 
-**Master-key rotation.** If `INSTATIC_SECRET_KEY` changes, stored plugin secrets can no longer be decrypted. The host does not crash plugin load — the worker simply sees those fields empty, and the server logs a `[plugin:<id>]` re-entry notice. The settings GET reports the affected field ids in `secretsNeedingReentry`, and the settings dialog shows a warning prompting the operator to re-enter them. Re-saving a value heals the row under the new key.
+**Master-key rotation.** If `FOURNO_SECRET_KEY` changes, stored plugin secrets can no longer be decrypted. The host does not crash plugin load — the worker simply sees those fields empty, and the server logs a `[plugin:<id>]` re-entry notice. The settings GET reports the affected field ids in `secretsNeedingReentry`, and the settings dialog shows a warning prompting the operator to re-enter them. Re-saving a value heals the row under the new key.
 
 ### Scheduled jobs — requires `cms.schedule`
 
@@ -810,7 +810,7 @@ const result = await api.cms.media.upsert({
 // Store result.asset.id in the content's media field.
 ```
 
-Remote sources additionally require `network.outbound`. The URL must use HTTPS and every redirect host must match `networkAllowedHosts`. The Bun host downloads through the shared DNS-pinned SSRF guard and caps the response at 50 MB.
+Remote sources additionally require `network.outbound`. The URL must use HTTPS and every redirect host must match `networkAllowedHosts`. The Node host downloads through the shared DNS-pinned SSRF guard and caps the response at 50 MB.
 
 Plugins can also promote a bundled file into managed media without network authority:
 
@@ -999,14 +999,14 @@ Full descriptions and labels live in `src/core/plugin-sdk/capabilities.ts` — t
 
 ## CLI workflow
 
-`bun instatic-plugin <command>` runs the SDK CLI at `src/core/plugin-sdk/cli/` (`bun run instatic-plugin <command>` works too inside this repo). The CLI's primary input is `instatic-plugin.config.ts`.
+`pnpm fourno-plugin <command>` runs the SDK CLI at `src/core/plugin-sdk/cli/` (`pnpm fourno-plugin <command>` works too inside this repo). The CLI's primary input is `fourno-plugin.config.ts`.
 
 ```sh
-bun instatic-plugin init acme.hero    # scaffold a module plugin
-bun instatic-plugin init acme.seo --kind content-editor
-bun instatic-plugin lint              # validate config + manifest + sources + bundles
-bun instatic-plugin build             # produce dist/ + .plugin.zip
-bun instatic-plugin dev               # watch + sync into a running CMS
+pnpm fourno-plugin init acme.hero    # scaffold a module plugin
+pnpm fourno-plugin init acme.seo --kind content-editor
+pnpm fourno-plugin lint              # validate config + manifest + sources + bundles
+pnpm fourno-plugin build             # produce dist/ + .plugin.zip
+pnpm fourno-plugin dev               # watch + sync into a running CMS
 ```
 
 The default scaffold kind is `module` (one canvas module). `--kind content-editor` scaffolds a server plugin that subscribes to content events and uses `api.cms.content.*`.
@@ -1014,7 +1014,7 @@ The default scaffold kind is `module` (one canvas module). `--kind content-edito
 Minimal typed config:
 
 ```ts
-import { definePlugin, permissions } from '@instatic/plugin-sdk'
+import { definePlugin, permissions } from '@fourno/plugin-sdk'
 
 export default definePlugin({
   id: 'acme.workflow',
@@ -1051,19 +1051,19 @@ The build script auto-wires entrypoints from source folders: `server/index.{ts,j
 
 ### Local dev with hot sync
 
-`instatic-plugin dev` writes built files **directly** into the host's `uploads/plugins/<id>/<version>/`. Subsequent rebuilds are picked up on the next activation cycle.
+`fourno-plugin dev` writes built files **directly** into the host's `uploads/plugins/<id>/<version>/`. Subsequent rebuilds are picked up on the next activation cycle.
 
-When running inside the instatic monorepo, the CLI auto-detects the host's `uploads/` by walking up the tree. From a separate plugin repo:
+When running inside the fourno monorepo, the CLI auto-detects the host's `uploads/` by walking up the tree. From a separate plugin repo:
 
 ```sh
-INSTATIC_UPLOADS_DIR=../instatic/uploads bun instatic-plugin dev
+FOURNO_UPLOADS_DIR=../fourno/uploads pnpm fourno-plugin dev
 # or
-bun instatic-plugin dev --uploads ../instatic/uploads
+pnpm fourno-plugin dev --uploads ../fourno/uploads
 ```
 
-First install still goes through the admin UI (`/admin/plugins` → Upload Plugin) so the owner approves permissions. Every `instatic-plugin dev` rebuild after that flows in without another upload.
+First install still goes through the admin UI (`/admin/plugins` → Upload Plugin) so the owner approves permissions. Every `fourno-plugin dev` rebuild after that flows in without another upload.
 
-**The SDK import specifier is monorepo-only today.** `@instatic/plugin-sdk` is not a published package, and `@core/plugin-sdk` (what `instatic-plugin init` scaffolds) resolves through this repo's `tsconfig.json` `paths`, so neither works from a plugin repo that does not sit inside an Instatic checkout. Until the SDK ships to a registry, an out-of-tree plugin has to point at the SDK itself — for example a single indirection module re-exporting `<instatic>/src/core/plugin-sdk/index.ts`, with the path written from an env var at build time so it lives in exactly one place. The CLI, the lint pass and the sandbox scan all work fine that way; only the bare specifier does not resolve.
+**The SDK import specifier is monorepo-only today.** `@fourno/plugin-sdk` is not a published package, and `@core/plugin-sdk` (what `fourno-plugin init` scaffolds) resolves through this repo's `tsconfig.json` `paths`, so neither works from a plugin repo that does not sit inside an Fourno checkout. Until the SDK ships to a registry, an out-of-tree plugin has to point at the SDK itself — for example a single indirection module re-exporting `<fourno>/src/core/plugin-sdk/index.ts`, with the path written from an env var at build time so it lives in exactly one place. The CLI, the lint pass and the sandbox scan all work fine that way; only the bare specifier does not resolve.
 
 ---
 
@@ -1071,22 +1071,22 @@ First install still goes through the admin UI (`/admin/plugins` → Upload Plugi
 
 1. **Scaffold:**
    ```sh
-   bun instatic-plugin init my-plugin
+   pnpm fourno-plugin init my-plugin
    cd my-plugin
    ```
-2. **Edit `instatic-plugin.config.ts`.** Pick a namespaced ID (`vendor.product`), declare only the permissions you use, and add resources, settings, admin pages, modules, frontend assets, content access, or packs there.
+2. **Edit `fourno-plugin.config.ts`.** Pick a namespaced ID (`vendor.product`), declare only the permissions you use, and add resources, settings, admin pages, modules, frontend assets, content access, or packs there.
 3. **Write entrypoint source files.** Add `server/index.ts` for sandboxed server hooks/routes/schedules/media, `editor/index.tsx` for unsandboxed editor/dashboard surfaces, top-level `frontend/*.ts` files for published-page scripts, and app entries referenced by `adminPages[].content.entry` for custom admin pages.
-4. **Use SDK builders.** Import from `@instatic/plugin-sdk` for `definePlugin`, `permissions`, `defineModule`, `definePack`, controls, and types. The CLI emits `plugin.json` and runtime bundles into `dist/`.
+4. **Use SDK builders.** Import from `@fourno/plugin-sdk` for `definePlugin`, `permissions`, `defineModule`, `definePack`, controls, and types. The CLI emits `plugin.json` and runtime bundles into `dist/`.
 5. **Lint:**
    ```sh
-   bun instatic-plugin lint
+   pnpm fourno-plugin lint
    ```
 6. **Build:**
    ```sh
-   bun instatic-plugin build
+   pnpm fourno-plugin build
    ```
 7. **Install via admin UI** (`/admin/plugins` → Upload Plugin), approve permissions.
-8. **Iterate** with `bun instatic-plugin dev`.
+8. **Iterate** with `pnpm fourno-plugin dev`.
 
 ### Cookbook: a server route + storage collection
 
@@ -1109,8 +1109,8 @@ export function activate(api) {
 Manifest:
 
 ```ts
-// instatic-plugin.config.ts
-import { definePlugin, permissions } from '@instatic/plugin-sdk'
+// fourno-plugin.config.ts
+import { definePlugin, permissions } from '@fourno/plugin-sdk'
 
 export default definePlugin({
   id: 'acme.subscribers',
@@ -1143,12 +1143,12 @@ export default definePlugin({
 | `require('module')`                                                      | ES module `import` (resolved at build time)                  |
 | `globalThis.fetch(...)` without permission                               | Declare `network.outbound` + `networkAllowedHosts`           |
 | `eval(...)` / `new Function(...)`                                        | Blocked — no replacement                                     |
-| Calling a host capability without the matching permission                | Declare it in `instatic-plugin.config.ts` / `plugin.json` permissions |
+| Calling a host capability without the matching permission                | Declare it in `fourno-plugin.config.ts` / `plugin.json` permissions |
 | Reaching the DB directly from a plugin                                   | Use `api.cms.storage.*`                                      |
 | IP literals or `localhost` in `networkAllowedHosts`                      | Use a hostname — rejected at manifest parse time             |
 | `FormData`, `Blob`, `URLSearchParams`, or streams as sandbox `fetch` bodies | Serialize to `string`, `ArrayBuffer`, or a typed-array view |
 | `entrypoints.admin` for custom admin pages                               | Use `adminPages[].content.kind === "app"` with `content.entry` |
-| Skipping `instatic-plugin lint` before upload                                  | Always lint — the host scans anyway and refuses the upload   |
+| Skipping `fourno-plugin lint` before upload                                  | Always lint — the host scans anyway and refuses the upload   |
 | Calling host APIs from inside a constructor / module top-level           | Use lifecycle hooks (`activate(api)`) — host APIs are only bound there |
 
 ---
@@ -1167,12 +1167,12 @@ export default definePlugin({
   - `src/core/plugin-sdk/builders/definePlugin.ts` — typed config builder
   - `src/core/plugin-sdk/builders/permissions.ts` — permission aliases for plugin authors
   - `src/core/plugin-sdk/builders/settings.ts` — setting field shapes and secret sentinel
-  - `src/core/plugin-sdk/cli/` — `instatic-plugin` CLI
+  - `src/core/plugin-sdk/cli/` — `fourno-plugin` CLI
   - `src/core/plugins/manifest.ts` — manifest parser + validator
   - `src/core/plugins/events.ts` — `PluginEventSchema`, `PluginEvent` type, `PLUGIN_EVENT_KINDS`
   - `src/core/plugins/` — host-side runtime
   - `server/plugins/runtime.ts` — boot-time plugin activation
-  - `server/plugins/pluginWorker.ts` — Bun worker bridge that hosts QuickJS per plugin
+  - `server/plugins/pluginWorker.ts` — Worker-thread bridge that hosts QuickJS per plugin
   - `server/plugins/host/workerPool.ts` — per-plugin worker lifecycle and RPC timeouts
   - `server/plugins/host/apiDispatch.ts` — centralized host-side RPC permission enforcement
   - `server/plugins/protocol/apiCallSchema.ts` — RPC target schemas
@@ -1188,7 +1188,7 @@ export default definePlugin({
   - `server/plugins/protocol/targets.ts` — `TARGET_PERMISSIONS` map (SSOT for RPC target→permission pairs; consumed by both the host dispatcher and VM bootstrap)
   - `server/plugins/quickjs/vm.ts` — server entrypoint sandbox (QuickJS VM factory)
   - `server/plugins/quickjs/bootstrap/src/` — bootstrap TypeScript source (authored, typed, lintable)
-  - `server/plugins/quickjs/bootstrap/generated/` — committed bootstrap artifacts (regenerate with `bun run bootstrap:sync`)
+  - `server/plugins/quickjs/bootstrap/generated/` — committed bootstrap artifacts (regenerate with `pnpm bootstrap:sync`)
   - `scripts/sync-plugin-bootstrap.ts` — bundler that writes the generated artifacts
   - `server/plugins/modulePackVm.ts` — module pack VM constructor
   - `src/core/plugins/modulePackLoader.ts` — module pack lifecycle coordinator (activate, deactivate, reset, VM tracking)
@@ -1212,7 +1212,7 @@ export default definePlugin({
   - `src/__tests__/architecture/plugin-secrets-never-leak.test.ts`
   - `src/__tests__/architecture/no-plugin-tab-shells.test.ts`
   - `src/__tests__/architecture/sandbox-crypto-bridge.test.ts`
-  - `src/__tests__/architecture/plugin-bootstrap-fresh.test.ts` — generated bootstrap artifacts match source; fails if `bun run bootstrap:sync` is needed
+  - `src/__tests__/architecture/plugin-bootstrap-fresh.test.ts` — generated bootstrap artifacts match source; fails if `pnpm bootstrap:sync` is needed
   - `src/__tests__/architecture/module-js-asset-route.test.ts`
   - `src/__tests__/architecture/media-storage-no-bytes-in-sandbox.test.ts`
   - `src/__tests__/architecture/media-storage-panel.test.ts`

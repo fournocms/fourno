@@ -1,6 +1,6 @@
 # Architecture Tests
 
-Catalog of every test in `src/__tests__/architecture/`. These are structural gates — they run as part of `bun test` and fail the build when a rule is broken. When *your* change drifts a structural rule, fix the matching test in the **same** change.
+Catalog of every test in `src/__tests__/architecture/`. These are structural gates — they run as part of `pnpm test` and fail the build when a rule is broken. When *your* change drifts a structural rule, fix the matching test in the **same** change.
 
 ---
 
@@ -8,7 +8,7 @@ Catalog of every test in `src/__tests__/architecture/`. These are structural gat
 
 - 95 gate files across structural domains: SQL, JSON columns, migrations, CSS, icons, primitives, page tree, sandbox, agent, router, content storage, boundary validation, module size, AI, auth, error handling, etc.
 - Naming convention: `<topic>.test.ts` (kebab-case) or `<group>-<topic>.test.ts`. A few legacy `task<N>-*` ids remain for live invariants; new gates should use topic names.
-- Run them all: `bun test src/__tests__/architecture/`.
+- Run them all: `pnpm test src/__tests__/architecture/`.
 - Most are **import / source scans** — they parse the files in scope and assert / reject patterns. Some are unit-style (a small in-test database, a synthesized page tree).
 
 ---
@@ -108,7 +108,7 @@ See [docs/design.md](../design.md), [docs/reference/design-tokens.md](design-tok
 | `no-native-title-tooltips.test.ts`            | No `title=` for hover hints. Use `<Tooltip>`.                                    |
 | `no-third-party-icons.test.ts`                | No `lucide-react`, `heroicons`, etc. Only `pixel-art-icons`.                     |
 | `direct-icon-imports.test.ts`                 | Icons imported deep (`pixel-art-icons/icons/<name>`), not from the package root. |
-| `vendor-icons-fresh.test.ts`                  | The vendored icon set is up-to-date (run `bun run icons:sync`).                  |
+| `vendor-icons-fresh.test.ts`                  | The vendored icon set is up-to-date (run `pnpm icons:sync`).                  |
 | `icon-catalog-integrity.test.ts`              | Every icon import resolves; the vendored package's index is consistent.          |
 | `close-icon-correctness.test.ts`              | Close affordances use the standard close icon glyph.                             |
 | `no-plugin-tab-shells.test.ts`                | `role="tablist"` is only allowed inside `src/ui/components/Tabs/` and a small §T-allowlisted set of pre-existing custom controls. Every other tablist in `src/admin/` or `src/editor/` must use `<Tabs>` / `<TabList>` from `@ui/components/Tabs`. |
@@ -146,7 +146,7 @@ See [docs/features/spotlight.md](../features/spotlight.md).
 | Test                                          | What it enforces                                                                 |
 |-----------------------------------------------|----------------------------------------------------------------------------------|
 | `plugin-rpc-target-registry.test.ts`          | Three-part lock on the RPC registry: (1) every `ApiCallSchemas` target has exactly one handler in `apiDispatch.ts`; (2) every key in `TARGET_PERMISSIONS` is a real api-call target; (3) the full target→permission table is frozen to the signed security contract — changing any pairing is a deliberate, visible security decision. |
-| `plugin-bootstrap-fresh.test.ts`              | Generated bootstrap artifacts in `bootstrap/generated/` match a fresh bundle of `bootstrap/src/`. Fails if `bun run bootstrap:sync` is needed. |
+| `plugin-bootstrap-fresh.test.ts`              | Generated bootstrap artifacts in `bootstrap/generated/` match a fresh bundle of `bootstrap/src/`. Fails if `pnpm bootstrap:sync` is needed. |
 | `plugin-sandbox-invariants.test.ts`           | No `node:`, `bun:`, `require(`, `process.binding` in plugin bundles; network permission gate is centralized in `apiDispatch.ts` and driven by `TARGET_PERMISSIONS`. |
 | `plugin-boot-resilience.test.ts`              | One bad plugin doesn't bring the server down. Crashes are isolated.              |
 | `plugin-cms-content-surface.test.ts`          | All five `cms.content.*` permissions are wired across all sync-points (permission values, capability matrix, permission alias builder, SDK type surface, host-side dispatch). |
@@ -189,7 +189,7 @@ See [docs/features/agent.md](../features/agent.md).
 |-----------------------------------------------|----------------------------------------------------------------------------------|
 | `media-migration-invariants.test.ts`          | Migrating an asset between adapters preserves all variants and references.       |
 | `media-presentation-pipeline.test.ts`         | Publisher's `<picture>` / `srcset` materialization is correct.                   |
-| `media-signed-redirect-serving.test.ts`       | `/_instatic/media/<adapterId>/<storagePath>` redirects with a fresh signed URL.  |
+| `media-signed-redirect-serving.test.ts`       | `/_fourno/media/<adapterId>/<storagePath>` redirects with a fresh signed URL.  |
 | `media-storage-no-bytes-in-sandbox.test.ts`   | Plugin sandboxes can't read raw media bytes; only host adapters can.             |
 | `media-storage-panel.test.ts`                 | Media storage panel UI matches the registered adapter set.                       |
 
@@ -203,8 +203,8 @@ See [docs/features/media.md](../features/media.md).
 | `publish-html-filter-context.test.ts`         | Plugin `publish.html` filters receive the right context shape.                   |
 | `static-artefact-served-before-render.test.ts`| `publicRouter.ts` calls `readArtefact` BEFORE `resolvePublicRoute`; the fast-path fires when `canonicalRenderQuery(url.searchParams) === ''` — junk params (UTM, etc.) collapse to `''` and serve the artefact, only render-affecting loop-pagination params (`loop_<nodeId>_page`) fall through to the live renderer. |
 | `publish-bumps-cache-version.test.ts`         | Every publish / unpublish entry point (`publishDraftSite`, `publishDataRow`, `updateDataRowStatus`) calls `bumpPublishVersion()` imported from `publishState.ts` so Layer B evicts on every state change visitors can see. |
-| `hole-runtime-asset-route.test.ts`            | The router registers `tryServeHoleRuntimeAsset` and `tryServeHole` BEFORE `tryServePublicRoute`. The `/_instatic/hole/*` namespace can never fall through to slug resolution. |
-| `module-js-asset-route.test.ts`               | The router registers `tryServeModuleJsAsset` BEFORE `tryServePublicRoute`, and wires it from `server/handlers/cms/moduleJs`, so `/_instatic/module-js/*` requests cannot be swallowed by public-slug resolution. |
+| `hole-runtime-asset-route.test.ts`            | The router registers `tryServeHoleRuntimeAsset` and `tryServeHole` BEFORE `tryServePublicRoute`. The `/_fourno/hole/*` namespace can never fall through to slug resolution. |
+| `module-js-asset-route.test.ts`               | The router registers `tryServeModuleJsAsset` BEFORE `tryServePublicRoute`, and wires it from `server/handlers/cms/moduleJs`, so `/_fourno/module-js/*` requests cannot be swallowed by public-slug resolution. |
 
 The following test lives in `src/__tests__/server/` (not `architecture/`) but enforces a load-bearing publisher performance invariant:
 
@@ -251,7 +251,7 @@ See [docs/features/site-transfer.md](../features/site-transfer.md).
 | Test                                          | What it enforces                                                                 |
 |-----------------------------------------------|----------------------------------------------------------------------------------|
 | `admin-startup-imports.test.ts`               | Pre-auth code (`src/admin/preauth/`) does not import `@core/persistence` barrel — only narrow auth/boot entrypoints. Keeps the login-screen chunk free of data/media/plugin clients. |
-| `bundle-size-budgets.test.ts`                 | Per-chunk byte budgets after `bun run build`. Enforces that key chunks (AdminPageLayout, AdminWorkspaceCanvasLayout, SitePage, ContentPage, CodeMirrorEditor, …) stay within their measured caps. |
+| `bundle-size-budgets.test.ts`                 | Per-chunk byte budgets after `pnpm build`. Enforces that key chunks (AdminPageLayout, AdminWorkspaceCanvasLayout, SitePage, ContentPage, CodeMirrorEditor, …) stay within their measured caps. |
 | `module-size-budgets.test.ts`                 | Per-module line-count cap. No new source module over 700 lines; a grandfathered ledger of existing god-files is frozen and ratchets down only. Source-side sibling of `bundle-size-budgets`. |
 | `codemirror-lazy-only.test.ts`                | CodeMirror is loaded only via `lazy()` — it's heavy and shouldn't be in the entry bundle. |
 | `site-editor-shell-lazy-body.test.ts`         | Enforces that `SitePage` renders the real shell via `AdminCanvasLayout` (no bespoke startup skeleton), that the heavy editor body (DnD, canvas, panels, first-party modules) stays behind a post-paint lazy boundary, that `ImportHtmlModal` stays behind its open-state lazy boundary, and that `CanvasFrameSkeletonFrame` from `@admin/shared/CanvasFrameSkeleton` is used for startup and no-site states. |
@@ -263,7 +263,7 @@ The following test lives in `src/__tests__/server/` (not `architecture/`) but en
 
 | Test (server/)                                | What it enforces                                                                 |
 |-----------------------------------------------|----------------------------------------------------------------------------------|
-| `dockerConfig.test.ts`                        | Dockerfile uses a multi-stage build (build → production-deps → runtime), `ARG INSTATIC_VERSION` and OCI version label are present, TypeScript path aliases (`tsconfig*.json`) are copied into the runtime stage, `esbuild` is in `dependencies` (not `devDependencies`) so the runtime script bundler is available in production. `compose.prod.yml` uses the GHCR image, has healthchecks, persistent volumes, and `depends_on: condition: service_healthy`. `POSTGRES_PASSWORD` carries a `CHANGEME` placeholder default (no `:?` guard) so the file loads in SQLite mode without a `.env`. `INSTATIC_SECRET_KEY` is documented in `.env.production.example` and referenced in `compose.prod.yml`. |
+| `dockerConfig.test.ts`                        | Dockerfile uses a multi-stage build (build → production-deps → runtime), `ARG FOURNO_VERSION` and OCI version label are present, TypeScript path aliases (`tsconfig*.json`) are copied into the runtime stage, `esbuild` is in `dependencies` (not `devDependencies`) so the runtime script bundler is available in production. `compose.prod.yml` uses the GHCR image, has healthchecks, persistent volumes, and `depends_on: condition: service_healthy`. `POSTGRES_PASSWORD` carries a `CHANGEME` placeholder default (no `:?` guard) so the file loads in SQLite mode without a `.env`. `FOURNO_SECRET_KEY` is documented in `.env.production.example` and referenced in `compose.prod.yml`. |
 
 See [docs/deployment/](../deployment/).
 
@@ -277,7 +277,7 @@ Walks files under a root, applies a regex, asserts no matches (or specific match
 
 ```ts
 import { readFileSync } from 'fs'
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 
 describe('No `as Foo` at JSON boundaries', () => {
   it('every JSON.parse goes through a TypeBox schema', () => {

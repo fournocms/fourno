@@ -14,7 +14,7 @@
  * slug as '' — turning live entry routes into redirects with no error
  * anywhere.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { mkdtemp, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -33,7 +33,7 @@ import {
 import { MAIN_SCOPE } from '../../../server/branches/scope'
 
 async function setupDb(): Promise<{ db: DbClient; cleanup: () => Promise<void> }> {
-  const dir = await mkdtemp(join(tmpdir(), 'instatic-posttype-'))
+  const dir = await mkdtemp(join(tmpdir(), 'fourno-posttype-'))
   const db = createSqliteClient(join(dir, 'test.db'))
   await runMigrations(db, sqliteMigrations)
   return {

@@ -11,7 +11,7 @@
  * wrapper layer still type-checks, this test is the last line of defense
  * against a runtime regression for plugin admin UIs.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { render } from '@testing-library/react'
 import { pluginAdminUi } from '../../admin/pages/plugins/components/PluginAdminUi'
 

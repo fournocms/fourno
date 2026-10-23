@@ -3,7 +3,7 @@
   "name": "Template Plugin",
   "version": "1.0.0",
   "apiVersion": 1,
-  "description": "Starter template demonstrating the Instatic plugin SDK — server lifecycle hooks, editor commands, and Command Spotlight (⌘K) integration.",
+  "description": "Starter template demonstrating the Fourno plugin SDK — server lifecycle hooks, editor commands, and Command Spotlight (⌘K) integration.",
   "permissions": [
     "cms.routes",
     "editor.code",

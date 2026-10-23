@@ -1,15 +1,16 @@
-import { Database } from 'bun:sqlite'
+import Database from 'better-sqlite3'
 import type { DbClient, DbResult } from './client'
 
-type BindableValue = string | number | null | Uint8Array
+type BindableValue = string | number | bigint | null | Buffer
 
 /**
- * Convert an arbitrary JS value into something bun:sqlite can bind as a
+ * Convert an arbitrary JS value into something better-sqlite3 can bind as a
  * positional parameter.
  *
  * - Plain objects / arrays → JSON.stringify (stored as TEXT)
  * - Date → ISO 8601 string
- * - Uint8Array / Buffer → pass through (stored as BLOB)
+ * - Uint8Array / Buffer → Buffer view over the same bytes (stored as BLOB;
+ *   better-sqlite3 binds only Buffers as blobs)
  * - boolean → 1 / 0
  * - string, number → pass through
  * - null / undefined → null
@@ -17,10 +18,11 @@ type BindableValue = string | number | null | Uint8Array
 function toBindable(value: unknown): BindableValue {
   if (value === null || value === undefined) return null
   if (typeof value === 'string') return value
-  if (typeof value === 'number') return value
+  if (typeof value === 'number' || typeof value === 'bigint') return value
   if (typeof value === 'boolean') return value ? 1 : 0
   if (value instanceof Date) return value.toISOString()
-  if (value instanceof Uint8Array) return value
+  if (Buffer.isBuffer(value)) return value
+  if (value instanceof Uint8Array) return Buffer.from(value.buffer, value.byteOffset, value.byteLength)
   if (typeof value === 'object') return JSON.stringify(value)
   return String(value as never)
 }
@@ -92,16 +94,44 @@ function normalizeSqliteRow<Row>(row: Row): Row {
 }
 
 /**
- * Returns true for SQL that produces rows: SELECT queries and any statement
- * containing RETURNING (used by INSERT/UPDATE/DELETE … RETURNING in repos).
+ * Prepared statements are cached by their exact SQL text. Tagged-template
+ * call sites render an identical SQL string per site, so steady-state queries
+ * skip compilation entirely; params are still bound fresh on every call. The
+ * cap only guards against a caller that builds unbounded distinct SQL through
+ * `unsafe` — the call-site set itself is small.
  */
-function isSelectishStatement(sql: string): boolean {
-  const trimmed = sql.trimStart()
-  return /^select/i.test(trimmed) || /\breturning\b/i.test(sql)
-}
+const STATEMENT_CACHE_LIMIT = 1_000
 
 export function createSqliteClient(filename: string): DbClient {
   const db = new Database(filename)
+  const statementCache = new Map<string, Database.Statement>()
+
+  function prepareCached(sql: string): Database.Statement {
+    const cached = statementCache.get(sql)
+    if (cached) return cached
+    const statement = db.prepare(sql)
+    if (statementCache.size >= STATEMENT_CACHE_LIMIT) {
+      const oldestSql = statementCache.keys().next().value
+      if (oldestSql !== undefined) statementCache.delete(oldestSql)
+    }
+    statementCache.set(sql, statement)
+    return statement
+  }
+
+  /**
+   * Run one prepared statement. Row-producing statements (SELECT, PRAGMA
+   * reads, anything with RETURNING) are the ones better-sqlite3 marks as
+   * `reader`; every other statement reports its affected-row count.
+   */
+  function execute<Row>(sql: string, params: BindableValue[]): DbResult<Row> {
+    const statement = prepareCached(sql)
+    if (statement.reader) {
+      const rows = statement.all(...params) as Row[]
+      return { rows: rows.map(normalizeSqliteRow), rowCount: rows.length }
+    }
+    const info = statement.run(...params)
+    return { rows: [], rowCount: info.changes }
+  }
 
   db.exec('PRAGMA journal_mode = WAL')
   db.exec('PRAGMA foreign_keys = ON')
@@ -113,17 +143,7 @@ export function createSqliteClient(filename: string): DbClient {
     ...values: unknown[]
   ): Promise<DbResult<Row>> => {
     const { sql, params } = renderTemplate(strings, values)
-    // db.query() returns a prepared statement cached by the exact SQL string
-    // (db.prepare() recompiles on every call). Tagged-template call sites
-    // render an identical SQL string per site, so steady-state queries skip
-    // compilation entirely; params are still bound fresh on each .all()/.run().
-    const stmt = db.query(sql)
-    if (isSelectishStatement(sql)) {
-      const rows = stmt.all(...params) as Row[]
-      return { rows: rows.map(normalizeSqliteRow), rowCount: rows.length }
-    }
-    const info = stmt.run(...params)
-    return { rows: [], rowCount: info.changes ?? 0 }
+    return execute<Row>(sql, params)
   }) as DbClient
 
   fn.unsafe = async <Row = Record<string, unknown>>(
@@ -131,20 +151,16 @@ export function createSqliteClient(filename: string): DbClient {
     params?: unknown[],
   ): Promise<DbResult<Row>> => {
     // Multi-statement migration blocks arrive as a single SQL string with
-    // semicolons. db.exec() handles them correctly; a prepared statement
-    // (db.query) only runs the first statement.
+    // semicolons. db.exec() runs them all; a prepared statement holds
+    // exactly one statement.
     if (params === undefined && rawSql.includes(';')) {
       db.exec(rawSql)
       return { rows: [], rowCount: 0 }
     }
-    // Cached prepared statement — same rationale as the template path above.
-    const stmt = db.query(rawSql)
-    const bindParams = (params ?? []).map(toBindable)
-    const rows = stmt.all(...bindParams) as Row[]
-    return { rows: rows.map(normalizeSqliteRow), rowCount: rows.length }
+    return execute<Row>(rawSql, (params ?? []).map(toBindable))
   }
 
-  // bun:sqlite is synchronous, but a transaction body may `await` real async
+  // better-sqlite3 is synchronous, but a transaction body may `await` real async
   // work while its BEGIN is still open. Since every statement runs on this one
   // shared connection, two transactions must never overlap — otherwise the
   // second BEGIN throws "cannot start a transaction within a transaction" and

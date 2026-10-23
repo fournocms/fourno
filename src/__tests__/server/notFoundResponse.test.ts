@@ -11,7 +11,7 @@
  *   - No notFound template in the published site → null (the dispatcher's
  *     bare JSON 404 takes over), and nothing is cached.
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -156,7 +156,7 @@ describe('renderNotFoundResponse — Layer A baked artefact', () => {
   let uploadsDir: string
 
   beforeEach(async () => {
-    uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-404-'))
+    uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-404-'))
     const slotDir = join(uploadsDir, 'published', 'a')
     await mkdir(slotDir, { recursive: true })
     await writeFile(join(slotDir, '404.html'), '<!DOCTYPE html><h1>baked 404</h1>', 'utf-8')

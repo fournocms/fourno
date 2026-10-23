@@ -1,8 +1,8 @@
 /**
  * `definePluginAdminApp` — type-safe plugin admin app entrypoint.
  *
- *   import { definePluginAdminApp } from '@instatic/plugin-sdk'
- *   import { Stack, Heading, Button, Card, Text } from '@instatic/host-ui'
+ *   import { definePluginAdminApp } from '@fourno/plugin-sdk'
+ *   import { Stack, Heading, Button, Card, Text } from '@fourno/host-ui'
  *   import { useState } from 'react'
  *
  *   export default definePluginAdminApp(function Dashboard() {
@@ -23,8 +23,8 @@
  * What plugins get:
  *
  *   • Real React + JSX. `import { useState } from 'react'`.
- *   • `@instatic/host-ui` for design-system primitives (Button, Stack, …).
- *   • `@instatic/host-hooks` for editor / settings / routes hooks.
+ *   • `@fourno/host-ui` for design-system primitives (Button, Stack, …).
+ *   • `@fourno/host-hooks` for editor / settings / routes hooks.
  *
  * The plugin's bundle externalizes those names — at runtime the browser's
  * import map resolves them to the host's React instance and design system,

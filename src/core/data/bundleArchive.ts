@@ -2,7 +2,7 @@
  * CMS site-transfer archive format.
  *
  * User-facing exports are ZIP files:
- *   - .instatic/site-bundle.json  metadata manifest
+ *   - .fourno/site-bundle.json  metadata manifest
  *   - media/<storagePath>         raw media bytes
  *
  * The manifest is the first stored entry so preview can read it with a small
@@ -20,7 +20,7 @@ import {
   MediaAssetMetadataSchema,
 } from './bundleSchema'
 
-export const BUNDLE_ARCHIVE_MANIFEST_PATH = '.instatic/site-bundle.json'
+export const BUNDLE_ARCHIVE_MANIFEST_PATH = '.fourno/site-bundle.json'
 export const BUNDLE_ARCHIVE_MEDIA_PREFIX = 'media/'
 
 export function mediaArchivePath(storagePath: string): string {

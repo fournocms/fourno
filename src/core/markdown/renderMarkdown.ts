@@ -41,7 +41,7 @@ const marked = new Marked({ gfm: true, breaks: false })
 marked.use({
   extensions: [
     {
-      name: 'instaticVideo',
+      name: 'fournoVideo',
       level: 'block',
       start(src: string) {
         return src.indexOf('@[video](')
@@ -49,7 +49,7 @@ marked.use({
       tokenizer(src: string) {
         const match = src.match(/^@\[video\]\(([^)\s]+)\)\s*(?:\n|$)/)
         if (!match) return undefined
-        return { type: 'instaticVideo', raw: match[0], href: match[1].trim() }
+        return { type: 'fournoVideo', raw: match[0], href: match[1].trim() }
       },
       renderer(token: Tokens.Generic) {
         const href = typeof token.href === 'string' ? token.href : ''

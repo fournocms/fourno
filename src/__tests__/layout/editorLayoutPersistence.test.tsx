@@ -6,7 +6,7 @@
  * closed panels without using the top toolbar.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { readFileSync } from 'fs'
@@ -21,8 +21,8 @@ import type { CmsCurrentUser } from '@core/persistence'
 import { pageToCells } from '@core/data/pageFromRow'
 import '@modules/base/index'
 
-const LAYOUT_STORAGE_KEY = 'instatic-editor-layout-v2'
-const SRC_ROOT = join(import.meta.dir, '../..')
+const LAYOUT_STORAGE_KEY = 'fourno-editor-layout-v2'
+const SRC_ROOT = join(import.meta.dirname, '../..')
 
 const originalFetch = globalThis.fetch
 
@@ -554,7 +554,8 @@ describe('AdminCanvasLayout — permanent panel rail', () => {
       name: /resize ai assistant panel/i,
     })).toBeNull()
 
-    fireEvent.click(within(agentHost).getByRole('button', { name: /undock ai assistant panel/i }))
+    // The panel header renders once the agent's credentials resource settles.
+    fireEvent.click(await within(agentHost).findByRole('button', { name: /undock ai assistant panel/i }))
 
     expect(sidebar.getAttribute('data-expanded')).toBe('false')
     expect(agentHost.getAttribute('data-mode')).toBe('floating')

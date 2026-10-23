@@ -394,7 +394,7 @@ export async function buildSiteRuntimeScripts(
     buildPromise.catch(() => {
       // Promise.race can return the timeout first. esbuild has no public abort
       // API for one-shot builds, so drain its eventual rejection instead of
-      // letting Bun report it as an unhandled test/process error.
+      // letting Node report it as an unhandled test/process error.
     })
 
     // Race esbuild against a timeout so a pathological build cannot stall the

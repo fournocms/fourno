@@ -9,7 +9,7 @@
  * Drives the real store commit through `createSiteImportAdapter`.
  */
 
-import { beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import '@modules/base'
 import { useEditorStore } from '@site/store/store'
 import { applyConflictResolutions, buildImportPlan, commitImportPlan } from '@core/siteImport'

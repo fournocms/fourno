@@ -13,7 +13,7 @@
  * multipart file markers materialize into file facades, and binary
  * `__response` bodies leave the VM base64-tagged.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createPluginVm, type PluginVmEnv } from '../../../server/plugins/quickjs/vm'
 import { base64ToBytes, bytesToBase64 } from '../../../server/plugins/protocol/bodyEncoding'
 

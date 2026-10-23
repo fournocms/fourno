@@ -13,7 +13,7 @@
  *   re-executing on every keystroke.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { CanvasModeToggle } from '@site/canvas/CanvasModeToggle'
 import { useRuntimeScriptBuild } from '@site/canvas/useRuntimeScriptBuild'

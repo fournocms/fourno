@@ -6,7 +6,7 @@
  *   POST /admin/api/cms/export/estimate   → { bytes } (size only, no download)
  *
  * Returns a ZIP archive that captures a full or partial site state:
- *   - `.instatic/site-bundle.json` with the portable manifest
+ *   - `.fourno/site-bundle.json` with the portable manifest
  *   - `media/<storagePath>` raw files when media is included
  *
  * The manifest contains:

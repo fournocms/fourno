@@ -1,6 +1,6 @@
-# Instatic Docs
+# Fourno Docs
 
-The documentation tree for Instatic. This index tells you what to read, in what order, and where to look for what.
+The documentation tree for Fourno. This index tells you what to read, in what order, and where to look for what.
 
 If you're an agent: start at `CLAUDE.md` (repo root) for the rules, then come here for the explanations.
 If you're a human contributor: start with [`architecture.md`](architecture.md), then read whichever feature or reference page is closest to what you're changing.
@@ -87,7 +87,7 @@ Three categories, three voices:
 1. Skim [`architecture.md`](architecture.md) → "Where things live — decision table".
 2. Read the feature doc closest to what you're adding (e.g. [`features/plugin-system.md`](features/plugin-system.md) for a plugin SDK extension).
 3. Read the relevant reference doc(s) for the primitives you'll touch ([`reference/page-tree.md`](reference/page-tree.md), [`reference/database-dialects.md`](reference/database-dialects.md), [`reference/typebox-patterns.md`](reference/typebox-patterns.md)).
-4. Make the change. Verify with `bun test && bun run build && bun run lint`.
+4. Make the change. Verify with `pnpm test && pnpm build && pnpm lint`.
 
 ### "I want to change the visual design"
 
@@ -151,7 +151,7 @@ Three categories, three voices:
 | [features/dashboard.md](features/dashboard.md)                   | Dashboard workspace, widgets, grid, customize mode                  |
 | [features/spotlight.md](features/spotlight.md)                   | Cmd+K command palette                                                |
 | [features/agent.md](features/agent.md)                           | AI agent integration and provider-agnostic runtime                   |
-| [features/mcp-connectors.md](features/mcp-connectors.md)         | Instatic as an MCP server — external AI clients drive the CMS over MCP |
+| [features/mcp-connectors.md](features/mcp-connectors.md)         | Fourno as an MCP server — external AI clients drive the CMS over MCP |
 | [features/templates.md](features/templates.md)                   | Entry templates + dynamic bindings + token interpolation             |
 | [features/loops.md](features/loops.md)                           | `base.loop` + loop entity sources                                    |
 | [features/cms-native-forms.md](features/cms-native-forms.md)     | Visual form primitives and secure public submissions                 |

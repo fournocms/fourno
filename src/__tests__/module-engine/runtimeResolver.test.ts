@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { createModuleImportMap, resolveDependencyUrl } from '@core/module-engine'
 import type { AnyModuleDefinition } from '@core/module-engine'
 import type { RuntimePackageImportmap } from '@core/site-runtime'
@@ -22,9 +22,9 @@ function makeModule(dependencies: AnyModuleDefinition['dependencies']): AnyModul
 const SITE_IMPORTMAP: RuntimePackageImportmap = {
   lockHash: 'abc123def456ghi789jkl012',
   imports: {
-    three: '/_instatic/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js',
-    'three/': '/_instatic/runtime/cache/abc123def456ghi789jkl012/three/',
-    typescript: '/_instatic/runtime/cache/abc123def456ghi789jkl012/typescript/lib/typescript.js',
+    three: '/_fourno/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js',
+    'three/': '/_fourno/runtime/cache/abc123def456ghi789jkl012/three/',
+    typescript: '/_fourno/runtime/cache/abc123def456ghi789jkl012/typescript/lib/typescript.js',
   },
 }
 
@@ -32,7 +32,7 @@ describe('runtime dependency resolver', () => {
   it('looks up a single package URL in the site importmap', () => {
     expect(
       resolveDependencyUrl({ name: 'three' }, { siteImportmap: SITE_IMPORTMAP }),
-    ).toBe('/_instatic/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js')
+    ).toBe('/_fourno/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js')
   })
 
   it('returns null when no site importmap is provided', () => {
@@ -45,10 +45,10 @@ describe('runtime dependency resolver', () => {
       { siteImportmap: SITE_IMPORTMAP },
     )
     expect(importMap.imports.three).toBe(
-      '/_instatic/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js',
+      '/_fourno/runtime/cache/abc123def456ghi789jkl012/three/build/three.module.js',
     )
     expect(importMap.imports['three/']).toBe(
-      '/_instatic/runtime/cache/abc123def456ghi789jkl012/three/',
+      '/_fourno/runtime/cache/abc123def456ghi789jkl012/three/',
     )
     // typescript is in the site importmap but not in this module's deps —
     // it stays out so the iframe surface is focused.

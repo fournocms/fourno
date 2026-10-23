@@ -346,7 +346,7 @@ async function removeCurrentEntry(path: string): Promise<void> {
  * then read `<slot>/<relPath>`.
  *
  * **Races and retry:** the pointer resolve and the file read are two IO
- * operations, and the writer's rename/wipe runs in parallel on the Bun IO
+ * operations, and the writer's rename/wipe runs in parallel on the libuv
  * thread pool, so transient misses are possible:
  *
  *   - The reader resolves the pointer to the OLD slot just before a swap.
@@ -462,8 +462,8 @@ export async function removeArtefactInPlace(
 // ---------------------------------------------------------------------------
 // Static asset IO (CSS bundles + runtime JS) — complete static publishing
 //
-// Published pages reference their CSS at `/_instatic/css/<bundle>-<hash>.css` and
-// their JS at `/_instatic/assets/<versionId>/...`. To make the published slot a
+// Published pages reference their CSS at `/_fourno/css/<bundle>-<hash>.css` and
+// their JS at `/_fourno/assets/<versionId>/...`. To make the published slot a
 // self-contained, server-independent static export, the full publish writes
 // those exact files into the slot under the same path. The visitor router
 // then serves them straight off disk (no DB, no per-request rebuild). The
@@ -473,7 +473,7 @@ export async function removeArtefactInPlace(
 
 /**
  * Write an asset (CSS/JS) into a slot directory at the relative path derived
- * from its public URL path (e.g. `/_instatic/css/style-abc123.css`). Mirrors
+ * from its public URL path (e.g. `/_fourno/css/style-abc123.css`). Mirrors
  * `writeArtefact`'s tmp + `rename(2)` atomicity. No-op-safe to call repeatedly
  * with identical content-hashed filenames across pages.
  */

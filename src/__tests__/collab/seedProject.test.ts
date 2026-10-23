@@ -10,7 +10,7 @@
  * `import '@modules/base'` populates the module registry so `base.text`'s
  * inline-text prop (`text`) seeds as Y.Text — the character-merge substrate.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
 import '@modules/base'
 import {

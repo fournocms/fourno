@@ -6,11 +6,11 @@
  * expose the token or its hash. A connector token is shown to the operator
  * exactly once, in the create response — never in any list/read shape.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const STORE = join(import.meta.dir, '../../../server/ai/mcp/connectors/store.ts')
+const STORE = join(import.meta.dirname, '../../../server/ai/mcp/connectors/store.ts')
 
 describe('MCP connector secrets never leak', () => {
   it('toConnectionView does not reference the token hash', () => {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, renderHook, waitFor } from '@testing-library/react'
 import { useMcpWorkspaceBridge } from '@admin/ai/useMcpWorkspaceBridge'
 import { readFileSync } from 'node:fs'

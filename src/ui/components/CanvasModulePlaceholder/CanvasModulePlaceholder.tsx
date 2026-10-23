@@ -82,19 +82,19 @@ export function CanvasModulePlaceholder({
       data-variant={variant}
       data-layout={layout}
     >
-      <div className={styles.content} data-instatic-placeholder-content="">
+      <div className={styles.content} data-fourno-placeholder-content="">
         {icon ? (
           <span
             className={styles.icon}
-            data-instatic-placeholder-icon=""
+            data-fourno-placeholder-icon=""
             aria-hidden="true"
           >
             {icon}
           </span>
         ) : null}
-        <span className={styles.label} data-instatic-placeholder-label="">{label}</span>
+        <span className={styles.label} data-fourno-placeholder-label="">{label}</span>
         {variant === 'block' && description ? (
-          <span className={styles.description} data-instatic-placeholder-description="">{description}</span>
+          <span className={styles.description} data-fourno-placeholder-description="">{description}</span>
         ) : null}
         {variant === 'block' && actions ? (
           // `data-canvas-interactive` opts the action row out of the canvas
@@ -103,7 +103,7 @@ export function CanvasModulePlaceholder({
           // node and stopping propagation.
           <div
             className={styles.actions}
-            data-instatic-placeholder-actions=""
+            data-fourno-placeholder-actions=""
             data-canvas-interactive="true"
           >
             {actions}

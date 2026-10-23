@@ -7,11 +7,11 @@
  * not used by the app and should not be recreated.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readdirSync, readFileSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../..')
+const SRC_ROOT = join(import.meta.dirname, '../..')
 const UI_COMPONENTS_ROOT = join(SRC_ROOT, 'ui/components')
 const EDITOR_ROOT = join(SRC_ROOT, 'editor')
 

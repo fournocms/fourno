@@ -10,7 +10,7 @@
  * rect (and the canvas zoom) before driving the menu's `x` / `y` props.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { clientPointToEditorDoc } from '@site/canvas/canvasDomGeometry'
 
 /**

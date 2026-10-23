@@ -1,8 +1,7 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createCapabilityTestHarness, type CapabilityTestHarness } from '../../../src/__tests__/helpers/capabilityHarness'
 import { createDataRow } from '../../repositories/data'
 import { authorizeMcpContentTool } from './contentAuthorization'
-import { MAIN_SCOPE } from '../../branches/scope'
 import { MAIN_SCOPE } from '../../branches/scope'
 
 describe('MCP content row authorization', () => {

@@ -13,7 +13,7 @@
  * @see docs/plans/2026-05-19-site-transfer-ux.md
  */
 
-import { describe, test, expect, beforeAll } from 'bun:test'
+import { describe, test, expect, beforeAll } from 'vitest'
 import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -92,7 +92,7 @@ async function seedAuth(db: DbClient): Promise<string> {
 function makeGetRequest(path: string, cookie: string): Request {
   const req = new Request(`http://localhost${path}`, { method: 'GET' })
   // The `cookie` header is a forbidden header per WHATWG Fetch spec and is
-  // stripped by Bun's Request constructor. Set it after construction instead.
+  // stripped by the Request constructor. Set it after construction instead.
   req.headers.set('cookie', cookie)
   return req
 }
@@ -340,11 +340,11 @@ describe('handleExportRoute — GET ?includeMedia=1', () => {
     expect(source).not.toContain('readFile(join(uploadsDir')
   })
 
-  test('returns a zip archive with media metadata in the Instatic manifest and bytes under media/', async () => {
+  test('returns a zip archive with media metadata in the Fourno manifest and bytes under media/', async () => {
     const mediaDb = createSqliteClient(':memory:')
     await runMigrations(mediaDb, sqliteMigrations)
     const mediaCookie = await seedAuth(mediaDb)
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-export-media-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-export-media-'))
     try {
       await writeFile(join(uploadsDir, 'logo.png'), Buffer.from('fake-png-bytes'))
       await createMediaAsset(mediaDb, {
@@ -514,7 +514,7 @@ describe('handleExportRoute — POST /export/estimate with embedded media', () =
     await runMigrations(mediaDb, sqliteMigrations)
     const mediaCookie = await seedAuth(mediaDb)
 
-    const uploadsDir = await mkdtemp(join(tmpdir(), 'instatic-export-estimate-'))
+    const uploadsDir = await mkdtemp(join(tmpdir(), 'fourno-export-estimate-'))
     try {
       // Seed one media asset whose bytes live on disk. 5000 raw bytes → a
       // Base64 payload that isn't a clean multiple of 3 (exercises padding).

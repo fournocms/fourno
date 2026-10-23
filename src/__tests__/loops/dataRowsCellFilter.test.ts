@@ -2,8 +2,8 @@
  * Behavior tests for the `data.rows` loop cell filter against a real
  * migrated SQLite database.
  *
- * Runs on either dialect: `bun test` uses SQLite, `DB=postgres
- * TEST_POSTGRES_URL=… bun test` runs the same assertions against a real
+ * Runs on either dialect: `pnpm test` uses SQLite, `DB=postgres
+ * TEST_POSTGRES_URL=… pnpm test` runs the same assertions against a real
  * Postgres, which is the only way the `#>> array[$n]` half gets executed.
  *
  * The pure half (parsing, SQL assembly) is covered in `cellFilter.test.ts`;
@@ -13,7 +13,7 @@
  * field some rows lack behaves the way an author expects.
  */
 
-import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
+import { describe, expect, it, beforeAll, afterAll } from 'vitest'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
 import { fetchPublishedDataRowItems } from '@core/loops/sources/dataRows'
 import type { CellFilter } from '@core/loops/cellFilter'

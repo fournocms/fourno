@@ -30,11 +30,11 @@
  * @see src/core/persistence/cmsData.ts — client helpers (replaces cmsContent)
  */
 
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { readdirSync, readFileSync, statSync, existsSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 
 const SCAN_ROOTS = [
   join(PROJECT_ROOT, 'src'),

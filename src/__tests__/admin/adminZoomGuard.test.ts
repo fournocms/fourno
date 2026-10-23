@@ -1,9 +1,9 @@
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { installAdminZoomGuard } from '@admin/shared/AdminZoomGuard'
 
-const GLOBALS_CSS_PATH = join(import.meta.dir, '../../styles/globals.css')
+const GLOBALS_CSS_PATH = join(import.meta.dirname, '../../styles/globals.css')
 
 let cleanup: (() => void) | null = null
 

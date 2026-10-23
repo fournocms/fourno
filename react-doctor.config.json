@@ -4,7 +4,7 @@
     "files": ["examples/**"]
   },
 
-  "//categories": "The 'React Compiler' category is react-doctor's port of the React Compiler's OWN diagnostics (the 'todo' bailout notices for syntax the compiler can't yet lower — e.g. try/finally; plus set-state-in-effect and hooks). The authoritative gate for these is eslint-plugin-react-compiler — the same compiler's official ESLint integration — which runs in `bun run lint`/CI. The bailouts are compiler limitations, not code defects, and react-hooks/set-state-in-effect is deliberately 'off' in eslint.config.js. Downgraded error→warn so they stay VISIBLE (never ignored) while enforcement lives in eslint, not in two places with different precision.",
+  "//categories": "The 'React Compiler' category is react-doctor's port of the React Compiler's OWN diagnostics (the 'todo' bailout notices for syntax the compiler can't yet lower — e.g. try/finally; plus set-state-in-effect and hooks). The authoritative gate for these is eslint-plugin-react-compiler — the same compiler's official ESLint integration — which runs in `pnpm lint`/CI. The bailouts are compiler limitations, not code defects, and react-hooks/set-state-in-effect is deliberately 'off' in eslint.config.js. Downgraded error→warn so they stay VISIBLE (never ignored) while enforcement lives in eslint, not in two places with different precision.",
   "categories": {
     "React Compiler": "warn"
   },
@@ -14,6 +14,6 @@
     "react-doctor/react-compiler-no-manual-memoization": "warn"
   },
 
-  "//failOn": "Fail (non-zero exit) only on error-severity diagnostics. With the React-Compiler noise downgraded to warnings above, the remaining error tier is high-signal (Security, Correctness, etc.), so `bun run doctor` is a trustworthy regression gate rather than perpetually red on compiler limitations.",
+  "//failOn": "Fail (non-zero exit) only on error-severity diagnostics. With the React-Compiler noise downgraded to warnings above, the remaining error tier is high-signal (Security, Correctness, etc.), so `pnpm doctor` is a trustworthy regression gate rather than perpetually red on compiler limitations.",
   "failOn": "error"
 }

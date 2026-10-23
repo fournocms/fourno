@@ -15,11 +15,11 @@
  * match without a DB query.
  */
 
-import { describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'vitest'
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const PROJECT_ROOT = join(import.meta.dir, '../../../')
+const PROJECT_ROOT = join(import.meta.dirname, '../../../')
 const LOOP_SOURCES_ROOT = join(PROJECT_ROOT, 'src/core/loops')
 
 function walk(dir: string, out: string[] = []): string[] {

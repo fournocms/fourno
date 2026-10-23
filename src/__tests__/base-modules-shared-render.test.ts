@@ -18,7 +18,7 @@
  * Editor-component agreement (canvas DOM matches the same helpers) lives in
  * `base-modules-shared-render.editor.test.tsx`.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 
 import { LinkModule } from '@modules/base/link'
 import { ButtonModule } from '@modules/base/button'

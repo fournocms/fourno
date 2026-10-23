@@ -9,7 +9,7 @@
  * (a rejected id fails before any row request, and the accepted cases assert
  * on the refresh rather than on document creation).
  */
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { renderHook, cleanup } from '@testing-library/react'
 import type { DataRow, DataTable } from '@core/data/schemas'
 import { useContentToolBridge } from '@admin/pages/content/agent/useContentToolBridge'
@@ -29,11 +29,11 @@ function table(id: string): DataTable {
 /** Workspace whose roster starts stale and only learns `recipes` on refresh. */
 function staleWorkspace() {
   let collections = [table('posts')]
-  const refreshCollections = mock(async () => {
+  const refreshCollections = vi.fn(async () => {
     collections = [table('posts'), table('recipes')]
     return collections
   })
-  const selectCollection = mock(() => {})
+  const selectCollection = vi.fn(() => {})
   return {
     surface: {
       get collections() { return collections },

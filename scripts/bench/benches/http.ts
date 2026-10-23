@@ -1,7 +1,7 @@
 /**
  * HTTP latency + throughput benchmark.
  *
- * Spawns a production-mode Bun server on a free port (or uses the
+ * Spawns a production-mode Node server on a free port (or uses the
  * caller-provided `--base-url`), then hammers a fixed set of endpoints
  * with both sequential and concurrent load.
  *
@@ -22,7 +22,7 @@ import { summarize, fmtMs, fmtNum } from '../lib/stats'
 import { log } from '../lib/log'
 import { startServer, type ServerHandle } from '../lib/server'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 const DIST_INDEX_HTML = resolve(REPO_ROOT, 'dist/index.html')
 
 interface Endpoint {

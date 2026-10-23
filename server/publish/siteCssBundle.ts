@@ -1,7 +1,7 @@
 /**
  * Site CSS bundle — server-side builder.
  *
- * Builds the three external CSS files served at `/_instatic/css/<filename>` for
+ * Builds the three external CSS files served at `/_fourno/css/<filename>` for
  * every published page. See `src/core/publisher/siteCssBundle.ts` for the type
  * definitions and the cache strategy rationale (hashed filenames + immutable
  * cache headers).

@@ -9,7 +9,7 @@
  * content-hashing. The plan models the CSP as data and `serializeCsp` sorts
  * directives + sources, so identical inputs always yield a byte-identical CSP.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import {
   addCspSources,
   createBaseCspPlan,

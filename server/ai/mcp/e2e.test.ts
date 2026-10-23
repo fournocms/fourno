@@ -10,7 +10,7 @@
  * jsdom preload. Bad-token rejection is covered by `auth.test.ts` and
  * `transports/http.test.ts`.
  */
-import { describe, expect, it, beforeEach } from 'bun:test'
+import { describe, expect, it, beforeEach } from 'vitest'
 import { createSqliteClient } from '../../db/sqlite'
 import { sqliteMigrations } from '../../db/migrations-sqlite'
 import { runMigrations } from '../../db/runMigrations'
@@ -68,7 +68,7 @@ async function rpc(method: string, params: unknown): Promise<{ status: number; j
   if (method === 'tools/call' && typeof modernParams.name === 'string') {
     headers['Mcp-Name'] = modernParams.name
   }
-  const req = new Request('http://localhost/_instatic/mcp', {
+  const req = new Request('http://localhost/_fourno/mcp', {
     method: 'POST',
     headers,
     body: JSON.stringify({ jsonrpc: '2.0', id: nextId++, method, params: modernParams }),
@@ -89,7 +89,7 @@ describe('MCP end-to-end (2026-07-28 stateless requests, real handler)', () => {
     const names = (list.json.result?.tools ?? []).map((t) => t.name)
     expect(names).toContain('content_list_collections') // headless content read
     expect(names).toContain('site_read_styles') // headless design-system read
-    expect(names).toContain('site_insert_html') // browser editing tool, relayed to the editor
+    expect(names).toContain('site_insert_html') // page editing tool, runs on the server (no editor needed)
 
     const read = await rpc('tools/call', { name: 'content_list_collections', arguments: {} })
     expect(read.json.result?.isError).toBeFalsy()
@@ -114,7 +114,7 @@ describe('MCP end-to-end (2026-07-28 stateless requests, real handler)', () => {
           'io.modelcontextprotocol/clientCapabilities': {},
         },
       }
-      return new Request('http://localhost/_instatic/mcp', {
+      return new Request('http://localhost/_fourno/mcp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

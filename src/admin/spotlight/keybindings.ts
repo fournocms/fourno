@@ -25,7 +25,7 @@
  *   1. Add an entry to KEYBINDINGS below.
  *   2. Wire the match predicate in the appropriate handler (PanelRail, CanvasRoot, etc.).
  *   3. If the commandId doesn't exist yet, add it to the spotlight commands registry.
- *   4. Re-run the architecture test: bun test src/__tests__/architecture/keybindings-registry-single-source.test.ts
+ *   4. Re-run the architecture test: pnpm test src/__tests__/architecture/keybindings-registry-single-source.test.ts
  */
 
 import type { CommandId, CommandShortcut } from './types'

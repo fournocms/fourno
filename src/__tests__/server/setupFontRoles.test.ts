@@ -3,7 +3,7 @@
  * a shell that already exists without settings keeps reading without them:
  * upgrading never injects tokens into a live site.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { DbClient } from '../../../server/db'
 import { handleCmsRequest } from '../../../server/handlers/cms'
 import { MAIN_SCOPE } from '../../../server/branches/scope'

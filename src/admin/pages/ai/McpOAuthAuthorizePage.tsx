@@ -65,7 +65,7 @@ export function McpOAuthAuthorizePage() {
       workspace="ai"
       title="Authorize MCP connection"
       titleId="mcp-oauth-title"
-      description="Review the client and choose exactly what it may do in this Instatic instance."
+      description="Review the client and choose exactly what it may do in this Fourno instance."
     >
       <div className={styles.pageBody}>
         {loading && <div className={styles.stateCard}>Loading authorization request…</div>}
@@ -85,7 +85,7 @@ export function McpOAuthAuthorizePage() {
                 <span className={styles.eyebrow}>Requesting client</span>
                 <h2 id="oauth-client-name">{data.clientName}</h2>
                 <p>
-                  After approval, Instatic sends a one-time authorization code to this registered callback:
+                  After approval, Fourno sends a one-time authorization code to this registered callback:
                 </p>
               </div>
               <code>{data.callbackUrl}</code>

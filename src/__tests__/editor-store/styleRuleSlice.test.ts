@@ -12,7 +12,7 @@
  * - No-op guards (Guideline #242)
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import type { NewStyleRule } from '@core/siteImport'
 import { classKindSelector } from '@core/page-tree'

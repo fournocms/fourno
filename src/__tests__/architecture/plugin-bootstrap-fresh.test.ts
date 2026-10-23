@@ -10,20 +10,20 @@
  *
  * This gate re-bundles the source in memory and asserts the committed
  * artifacts match byte-for-byte, exactly as `vendor-icons-fresh.test.ts` gates
- * the vendored icon set. Run `bun run bootstrap:sync` to refresh.
+ * the vendored icon set. Run `pnpm bootstrap:sync` to refresh.
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { existsSync, readFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { buildBootstrapArtifacts } from '../../../scripts/sync-plugin-bootstrap'
 
 const GENERATED_DIR = resolve(
-  import.meta.dir,
+  import.meta.dirname,
   '../../../server/plugins/quickjs/bootstrap/generated',
 )
 
 describe('generated plugin bootstrap artifacts', () => {
-  it('match a fresh bundle of bootstrap/src/ (run `bun run bootstrap:sync` if this fails)', async () => {
+  it('match a fresh bundle of bootstrap/src/ (run `pnpm bootstrap:sync` if this fails)', async () => {
     const built = await buildBootstrapArtifacts()
     expect(built.length).toBeGreaterThan(0)
 
@@ -34,7 +34,7 @@ describe('generated plugin bootstrap artifacts', () => {
       const current = readFileSync(path, 'utf8').replace(/\r\n/g, '\n')
       expect(
         current === content,
-        `generated/${outFile} is stale — run \`bun run bootstrap:sync\``,
+        `generated/${outFile} is stale — run \`pnpm bootstrap:sync\``,
       ).toBe(true)
     }
   })

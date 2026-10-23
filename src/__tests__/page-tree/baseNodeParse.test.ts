@@ -9,7 +9,7 @@
  * yields the same shared BaseNode shape, and both equal `parseBaseNodeFields`.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { parsePage, parseBaseNodeFields, type PageNode } from '@core/page-tree'
 import { parseVisualComponent } from '@core/visualComponents'
 

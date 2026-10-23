@@ -41,7 +41,7 @@ export function bumpPublishVersion(): number {
 
 /**
  * Return the current publish version. Used by Layer C hole placeholders
- * (`data-instatic-version`), the hole endpoint to detect stale requests, and
+ * (`data-fourno-version`), the hole endpoint to detect stale requests, and
  * the render cache for its staleness check.
  */
 export function getPublishVersion(): number {
@@ -72,7 +72,7 @@ let publishChain: Promise<unknown> = Promise.resolve()
 /**
  * Run a publish operation under a single in-process lock so no two publishes'
  * read-version → bake → bump-version windows overlap (ISS-038). Without this,
- * two concurrent publishes both read version N, stamp every `<instatic-hole>`
+ * two concurrent publishes both read version N, stamp every `<fourno-hole>`
  * shell with N+1, then each bump independently to N+2 — leaving baked shells
  * permanently mis-stamped (the hole endpoint serves them as stale). The lock
  * also serializes the two-slot artefact swap. JS is single-threaded, so a

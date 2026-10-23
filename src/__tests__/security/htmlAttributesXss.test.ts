@@ -17,7 +17,7 @@
  *
  * These tests prove the single shared gate and the tag denylist close it.
  */
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import {
   isRenderableHtmlAttributeName,
   sanitizeRenderableHtmlAttribute,

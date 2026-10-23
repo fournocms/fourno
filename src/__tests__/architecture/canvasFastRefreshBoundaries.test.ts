@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 
-const SRC_ROOT = join(import.meta.dir, '..', '..')
+const SRC_ROOT = join(import.meta.dirname, '..', '..')
 
 function readSource(path: string): string {
   return readFileSync(join(SRC_ROOT, path), 'utf8')

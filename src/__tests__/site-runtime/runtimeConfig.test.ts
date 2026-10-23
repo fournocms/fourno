@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { SiteFile } from '@core/files/schemas'
 import type { Page } from '@core/page-tree'
 import {

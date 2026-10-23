@@ -14,7 +14,7 @@
  *   - BreakpointFrame no longer mounts an inline-edit overlay (the node itself
  *     is the editor now).
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 
 const CANVAS_ROOT = new URL('../../admin/pages/site/canvas/CanvasRoot.tsx', import.meta.url)
@@ -49,7 +49,7 @@ describe('inline text editing wiring (in-place contentEditable)', () => {
     const src = readFileSync(NODE_RENDERER, 'utf-8')
     expect(src).toContain('inlineEdit={inlineEditBinding}')
     // No overlay, no per-frame hidden-text attribute — those were the old design.
-    expect(src).not.toContain("'data-instatic-inline-editing'")
+    expect(src).not.toContain("'data-fourno-inline-editing'")
     expect(src).not.toContain('InlineTextEditOverlay')
   })
 

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import sharp from 'sharp'
 import {
   AI_USER_IMAGE_MAX_EDGE,
@@ -29,10 +29,10 @@ function installBrowserImageMocks(blob: Blob | null = new Blob(
   const createBitmapDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'createImageBitmap')
   const getContextDescriptor = Object.getOwnPropertyDescriptor(canvasPrototype, 'getContext')
   const toBlobDescriptor = Object.getOwnPropertyDescriptor(canvasPrototype, 'toBlob')
-  const close = mock(() => {})
-  const drawImage = mock(() => {})
-  const fillRect = mock(() => {})
-  const createImageBitmap = mock(async () => ({
+  const close = vi.fn(() => {})
+  const drawImage = vi.fn(() => {})
+  const fillRect = vi.fn(() => {})
+  const createImageBitmap = vi.fn(async () => ({
     width: 2000,
     height: 1000,
     close,
@@ -194,7 +194,7 @@ describe('agent image attachment preparation', () => {
   })
 
   it('rejects unsupported clipboard formats before decoding', async () => {
-    const createImageBitmap = mock(async () => {
+    const createImageBitmap = vi.fn(async () => {
       throw new Error('should not decode')
     })
     const descriptor = Object.getOwnPropertyDescriptor(globalThis, 'createImageBitmap')

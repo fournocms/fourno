@@ -8,7 +8,7 @@
  * hooks; its shared brain — `youtubeEmbedUrl` — is locked in the sibling
  * `base-modules-shared-render.test.ts`.)
  */
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import React from 'react'
 import { render as renderReact } from '@testing-library/react'
 

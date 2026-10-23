@@ -7,7 +7,7 @@
  *      delegate (Cloudflare Images / Imgix / Bunny Optimizer / …) is
  *      elected we skip local sharp encoding entirely and emit
  *      URL-template variants pointing at the delegate's service.
- *   2. Hand the source bytes to a `Bun.Worker` (see
+ *   2. Hand the source bytes to a worker thread (see
  *      `imageVariantWorkerHost.ts`) which probes intrinsic dimensions,
  *      encodes a BlurHash placeholder, and — when the local ladder is
  *      in use — produces one WebP per target width.
@@ -17,7 +17,7 @@
  *
  * **Why the worker:** sharp + libvips on a typical 4 MP JPEG is ~200–500 ms
  * of CPU on the main thread, which blocks every visitor request and the
- * admin API for the duration. Offloading to a `Bun.Worker` keeps the main
+ * admin API for the duration. Offloading to a worker thread keeps the main
  * thread free while uploads serialise inside the pool. The host is still
  * the only side with a DB client and storage-adapter access — the worker
  * just does the CPU work.

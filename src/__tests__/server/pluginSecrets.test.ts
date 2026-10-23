@@ -9,7 +9,7 @@
  *     without crashing the runtime read
  *   - uninstall cascades the rows (FK `on delete cascade`)
  */
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import type { PluginManifest, PluginSettingDefinition } from '@core/plugin-sdk'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
 import {
@@ -49,15 +49,15 @@ describe('plugin secret settings repository', () => {
   let originalSecretKey: string | undefined
 
   beforeEach(async () => {
-    originalSecretKey = process.env.INSTATIC_SECRET_KEY
-    process.env.INSTATIC_SECRET_KEY = TEST_MASTER_KEY
+    originalSecretKey = process.env.FOURNO_SECRET_KEY
+    process.env.FOURNO_SECRET_KEY = TEST_MASTER_KEY
     __resetMasterKeyCacheForTesting()
     testDb = await createTestDb()
   })
 
   afterEach(async () => {
-    if (originalSecretKey === undefined) delete process.env.INSTATIC_SECRET_KEY
-    else process.env.INSTATIC_SECRET_KEY = originalSecretKey
+    if (originalSecretKey === undefined) delete process.env.FOURNO_SECRET_KEY
+    else process.env.FOURNO_SECRET_KEY = originalSecretKey
     __resetMasterKeyCacheForTesting()
     await testDb.cleanup()
   })

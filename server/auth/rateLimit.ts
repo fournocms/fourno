@@ -15,7 +15,7 @@
  * bump and a size check.
  *
  * Why in-memory instead of Redis or a DB table?
- *   - The CMS deploys as a single Bun process (the SQLite trade-off applies
+ *   - The CMS deploys as a single Node process (the SQLite trade-off applies
  *     equally to PG-backed deployments — admin login is rare, single-writer).
  *   - No external dep, no extra container.
  *   - Counter loss on restart is acceptable: an attacker who waits for a
@@ -157,7 +157,7 @@ export const loginRateLimit = new RateLimiter({
  * does, so a sustained credential-stuffing run from one IP gets shut off
  * while legitimate users (who only attempt their own account) never see it.
  *
- * IP-less requests (no proxy, Bun.serve doesn't surface client IP) bypass
+ * IP-less requests (no proxy and no socket peer address) bypass
  * this layer — the per-(IP, email) limiter still applies, with `'unknown'`
  * as the IP component, so a single email is still defended.
  */

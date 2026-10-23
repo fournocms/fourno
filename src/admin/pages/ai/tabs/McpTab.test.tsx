@@ -1,10 +1,10 @@
-import { afterEach, describe, expect, it, mock } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 
-mock.module('../../../ai/api', () => ({
+vi.mock('../../../ai/api', () => ({
   getMcpConnectionOverview: async () => ({
     connections: [],
-    endpoint: 'http://localhost/_instatic/mcp',
+    endpoint: 'http://localhost/_fourno/mcp',
     remoteAccess: 'local-only',
   }),
   createMcpAccessToken: async () => ({

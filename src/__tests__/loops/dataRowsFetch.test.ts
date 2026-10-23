@@ -17,7 +17,7 @@
  * independent of how the SQL text is assembled.
  */
 
-import { describe, expect, it, beforeAll, afterAll } from 'bun:test'
+import { describe, expect, it, beforeAll, afterAll } from 'vitest'
 import { createTestDb, type TestDb } from '../helpers/createTestDb'
 import { createUser } from '../../../server/repositories/users'
 import { fetchPublishedDataRowItems } from '@core/loops/sources/dataRows'
@@ -135,7 +135,7 @@ beforeAll(async () => {
     insert into media_assets
       (id, filename, mime_type, size_bytes, storage_path, public_path,
        storage_adapter_id, externally_hosted)
-    values ('m1', 'hero.png', 'image/png', 100, 'hero.png', '/uploads/hero.png', '', 0)
+    values ('m1', 'hero.png', 'image/png', 100, 'hero.png', '/uploads/hero.png', '', false)
   `
 
   // Post-type rows: distinct publishedAt / createdAt / updatedAt / slug
@@ -422,7 +422,7 @@ describe('fetchPublishedDataRowItems — custom media field resolution', () => {
         insert into media_assets
           (id, filename, mime_type, size_bytes, storage_path, public_path,
            storage_adapter_id, externally_hosted)
-        values (${id}, ${id + '.png'}, 'image/png', 100, ${id + '.png'}, ${path}, '', 0)
+        values (${id}, ${id + '.png'}, 'image/png', 100, ${id + '.png'}, ${path}, '', false)
       `
     }
 

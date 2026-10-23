@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import * as os from 'node:os'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
@@ -27,7 +27,7 @@ describe('removeDataRowArtefact', () => {
     cleanup: () => Promise<void>
   }> {
     const { db, cleanup: dbCleanup } = await createTestDb()
-    const uploadsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'instatic-uploads-'))
+    const uploadsDir = await fs.mkdtemp(path.join(os.tmpdir(), 'fourno-uploads-'))
     const rowId = crypto.randomUUID()
     const slug = 'ghost-post'
     // 'pages' is a seeded system table with route_base '' → public path "/<slug>".

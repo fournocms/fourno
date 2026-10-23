@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'bun:test'
+import { describe, it, expect, afterEach } from 'vitest'
 import { openaiCompatibleDriver } from './openaiCompatible'
 import type { AiResolvedCredential } from './types'
 

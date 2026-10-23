@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { CmsAuditEvent, CmsCurrentUser, CmsRole } from '@core/persistence'
 import { auditTitle } from '@users/utils/audit'
 

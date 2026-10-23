@@ -14,7 +14,7 @@
  *   FPO-5 — returns null when paramId not in vc.params
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { findParamOrigin } from '@core/visualComponents'
 import type { VisualComponent, VCNode, VCParam } from '@core/visualComponents'
 

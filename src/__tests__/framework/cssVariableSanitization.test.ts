@@ -10,7 +10,7 @@
  *    timestamp contract).
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type {
   FrameworkColorSettings,
   FrameworkSpacingSettings,

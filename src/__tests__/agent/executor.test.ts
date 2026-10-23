@@ -10,7 +10,7 @@
  * Constraint #299 — richtext props are sanitized via DOMPurify before storage.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { useEditorStore } from '@site/store/store'
 import { executeAgentTool } from '@site/agent'
 import type { AiToolOutput } from '@core/ai'
@@ -101,7 +101,7 @@ async function makeTemplateDocument(): Promise<{ homeId: string; templateId: str
   const templateRootId = activePage().rootNodeId
   await executeAgentTool('site_insert_html', {
     parentId: templateRootId,
-    html: '<nav><button>LGT</button><button>DRK</button></nav><instatic-outlet></instatic-outlet>',
+    html: '<nav><button>LGT</button><button>DRK</button></nav><fourno-outlet></fourno-outlet>',
   })
   useEditorStore.getState().openPageInCanvas(homeId)
   return { homeId, templateId }
@@ -1602,15 +1602,15 @@ describe('executeAgentTool — setPageTemplate / clearPageTemplate', () => {
 })
 
 // ---------------------------------------------------------------------------
-// insertHtml — <instatic-outlet> maps to a base.outlet node
+// insertHtml — <fourno-outlet> maps to a base.outlet node
 // ---------------------------------------------------------------------------
 
-describe('executeAgentTool — insertHtml <instatic-outlet>', () => {
-  it('imports <instatic-outlet> as a base.outlet node', async () => {
+describe('executeAgentTool — insertHtml <fourno-outlet>', () => {
+  it('imports <fourno-outlet> as a base.outlet node', async () => {
     const { rootId } = freshStore()
     const result = await executeAgentTool('site_insert_html', {
       parentId: rootId,
-      html: '<header>Chrome</header><instatic-outlet></instatic-outlet><footer>End</footer>',
+      html: '<header>Chrome</header><fourno-outlet></fourno-outlet><footer>End</footer>',
     })
     const nodeIds = expectNodeIds(result)
     expect(nodeIds.length).toBe(3)

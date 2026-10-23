@@ -3,11 +3,11 @@
  * utility class strings left over from the MVP implementation.
  */
 
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { existsSync, readFileSync, readdirSync, statSync } from 'fs'
 import { extname, join, relative } from 'path'
 
-const SRC_ROOT = join(import.meta.dir, '../../')
+const SRC_ROOT = join(import.meta.dirname, '../../')
 const SCAN_DIRS = [
   join(SRC_ROOT, 'admin'),
   join(SRC_ROOT, 'modules'),

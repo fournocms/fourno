@@ -25,7 +25,6 @@
  * the originator — Yjs update application is idempotent, so the echo is a
  * cheap no-op and the code stays free of per-connection exclusion plumbing.
  */
-import type { ServerWebSocket, WebSocketHandler } from 'bun'
 import * as Y from 'yjs'
 import * as encoding from 'lib0/encoding'
 import * as decoding from 'lib0/decoding'
@@ -55,6 +54,7 @@ import type { DbClient } from '../db/client'
 import { jsonResponse } from '../http'
 import { BranchGoneError } from './relayBranches'
 import type { CollabRelay, RelayDoc } from './relay'
+import type { RealtimeHandlers, RealtimeSocket } from '../runtime/httpServer'
 
 export { SITE_SOCKET_PATH }
 
@@ -63,7 +63,7 @@ const SITE_WRITE_CAPABILITIES = ['site.structure.edit', 'site.content.edit', 'si
 /** y-protocols/sync message types (the payload's first varUint). */
 const SYNC_STEP_1 = 0
 
-// Frame-size ceilings (belt and braces on top of Bun's maxPayloadLength):
+// Frame-size ceilings (belt and braces on top of the transport's maxPayloadLength):
 // presence states are a few hundred bytes; doc updates can legitimately be
 // large (a big paste, a whole-doc repopulate) but never tens of megabytes.
 const MAX_AWARENESS_PAYLOAD_BYTES = 64 * 1024
@@ -188,20 +188,14 @@ export interface CollabSocketData {
   awarenessClients: Set<number>
 }
 
-interface UpgradeCapableServer {
-  upgrade(req: Request, options: { data: CollabSocketData }): boolean
-}
-
 /**
- * Gate + upgrade the socket request. Returns `null` when the connection was
- * upgraded (the caller must then return `undefined` from `fetch`), or an
- * error `Response` (401/403/426) to send instead.
+ * Gate the socket handshake. Resolves to the connection's data when the
+ * upgrade may proceed, or to an error `Response` (401/403) to send instead.
  */
-export async function handleCollabSocketUpgrade(
+export async function authorizeCollabSocket(
   req: Request,
   db: DbClient,
-  server: UpgradeCapableServer,
-): Promise<Response | null> {
+): Promise<{ accept: CollabSocketData } | Response> {
   // CSWSH defense — a cookie-bearing cross-origin handshake is rejected
   // before auth even runs.
   if (!originAllowed(req)) {
@@ -210,8 +204,8 @@ export async function handleCollabSocketUpgrade(
   const user = await requireCapability(req, db, 'site.read')
   if (user instanceof Response) return user
   const fullSiteWriter = SITE_WRITE_CAPABILITIES.every((cap) => userHasCapability(user, cap))
-  const upgraded = server.upgrade(req, {
-    data: {
+  return {
+    accept: {
       userId: user.id,
       identity: {
         id: user.id,
@@ -225,12 +219,10 @@ export async function handleCollabSocketUpgrade(
       probedDocs: new Set(),
       awarenessClients: new Set(),
     },
-  })
-  if (!upgraded) {
-    return jsonResponse({ error: 'WebSocket upgrade required' }, { status: 426 })
   }
-  return null
 }
+
+type CollabSocket = RealtimeSocket<CollabSocketData>
 
 const docTopic = (docId: string): string => `collab:${docId}`
 
@@ -239,9 +231,9 @@ interface CollabPublisher {
 }
 
 /**
- * Wire the relay's fan-out to Bun pub/sub. Call once after `Bun.serve`
- * returns (the server handle is the publisher). Also owns the site-wide
- * awareness instance.
+ * Wire the relay's fan-out to the server's topic pub/sub. Call once; hand
+ * the started server to `setPublisher` (the server handle is the
+ * publisher). Also owns the site-wide awareness instance.
  */
 export function createCollabSocketLayer(relay: CollabRelay) {
   let publisher: CollabPublisher | null = null
@@ -269,7 +261,7 @@ export function createCollabSocketLayer(relay: CollabRelay) {
 
   /** Tell one connection its doc was dropped, and why. */
   function sendReset(
-    ws: ServerWebSocket<CollabSocketData>,
+    ws: CollabSocket,
     docId: string,
     reason: ResetReason,
   ): void {
@@ -282,7 +274,7 @@ export function createCollabSocketLayer(relay: CollabRelay) {
    * guard must NOT escape as an unhandled rejection.
    */
   async function dispatchFrame(
-    ws: ServerWebSocket<CollabSocketData>,
+    ws: CollabSocket,
     frame: CollabFrame,
   ): Promise<void> {
       // Liveness first: a ping carries no doc and must never reach
@@ -439,12 +431,12 @@ export function createCollabSocketLayer(relay: CollabRelay) {
       }
   }
 
-  const handlers: WebSocketHandler<CollabSocketData> = {
+  const handlers: RealtimeHandlers<CollabSocketData> = {
     // Transport-level ceiling — the per-frame-type caps in `message` are the
     // fine-grained guards; this stops oversized frames before they buffer.
     maxPayloadLength: MAX_SYNC_PAYLOAD_BYTES + 1024,
 
-    open(ws: ServerWebSocket<CollabSocketData>) {
+    open(ws: CollabSocket) {
       ws.subscribe(docTopic(PRESENCE_DOC_ID))
       // Late joiners need the current presence roster.
       const known = [...awareness.getStates().keys()]
@@ -454,7 +446,7 @@ export function createCollabSocketLayer(relay: CollabRelay) {
       }
     },
 
-    async message(ws: ServerWebSocket<CollabSocketData>, raw: string | Buffer) {
+    async message(ws: CollabSocket, raw: Uint8Array | string) {
       if (typeof raw === 'string') return // binary protocol only
       let frame: CollabFrame | null = null
       try {
@@ -485,7 +477,7 @@ export function createCollabSocketLayer(relay: CollabRelay) {
       }
     },
 
-    close(ws: ServerWebSocket<CollabSocketData>) {
+    close(ws: CollabSocket) {
       for (const docId of ws.data.boundDocs) relay.release(docId)
       ws.data.boundDocs.clear()
       if (ws.data.awarenessClients.size > 0) {

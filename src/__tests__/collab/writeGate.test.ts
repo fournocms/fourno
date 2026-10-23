@@ -7,7 +7,7 @@
  * the window nearly every time, and used to get a success result for a
  * mutation the relay never received.
  */
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import * as Y from 'yjs'
 import * as awarenessProtocol from 'y-protocols/awareness'
 import {

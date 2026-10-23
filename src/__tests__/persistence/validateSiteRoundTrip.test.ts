@@ -5,7 +5,7 @@
  * Negative: targeted failures each exercise a specific domain post-check rule.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import { validateSite, validatePages, validateVisualComponents, SiteValidationError } from '@core/persistence/validate'
@@ -14,7 +14,7 @@ import { validateSite, validatePages, validateVisualComponents, SiteValidationEr
 // Fixture loader
 // ---------------------------------------------------------------------------
 
-const fixturePath = join(import.meta.dir, 'roundTripFixture.json')
+const fixturePath = join(import.meta.dirname, 'roundTripFixture.json')
 const fixtureRaw = readFileSync(fixturePath, 'utf-8')
 
 function loadFixture(): unknown {

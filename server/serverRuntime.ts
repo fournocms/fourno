@@ -24,7 +24,7 @@ export interface ServerRuntime {
  * A route handler returns a `Response` if it owns the request, or `null` if
  * the URL/method doesn't match — the dispatcher walks the `routes` table and
  * returns the first non-null response. Prefix-namespaced handlers (e.g.
- * `/_instatic/css/`, `/_instatic/runtime/cache/`) absorb their entire namespace and emit
+ * `/_fourno/css/`, `/_fourno/runtime/cache/`) absorb their entire namespace and emit
  * a 404 themselves rather than falling through, so unknown paths under a
  * known prefix can't accidentally match a later route.
  */

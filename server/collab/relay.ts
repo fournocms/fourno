@@ -25,7 +25,7 @@
  *     doc evicted, reset broadcast — clients rebind and the doc reseeds from
  *     the fresh JSON.
  *
- * Single Bun process by product definition — an in-memory registry is
+ * Single Node process by product definition — an in-memory registry is
  * correct, not a shortcut (multi-process would need a shared bus; out of
  * scope, documented in docs/features/site-shell.md).
  */

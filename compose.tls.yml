@@ -64,7 +64,7 @@ services:
     ports: !reset []
     environment:
       # Caddy terminates TLS and proxies plain HTTP to app:3001, so the app's
-      # own request URL is http://app:3001. PUBLIC_ORIGIN tells Instatic the
+      # own request URL is http://app:3001. PUBLIC_ORIGIN tells Fourno the
       # real public origin for its CSRF check — derived from ${DOMAIN}.
       PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-https://${DOMAIN}}
       # Attribution only (audit logs / rate-limit keys), NOT CSRF: trust

@@ -85,7 +85,7 @@ const insertHtmlTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    'Insert semantic HTML as a subtree of editable nodes under an existing parent. Write structure as HTML (<section>, <h1>, <a>, <button>, <img>, <ul>, ...) and style it with CSS in the same call: put a <style> block in the HTML and/or class= attributes. Custom importer markers: <instatic-loop data-source-id="…" ...> creates a real Loop node (call site_list_loop_sources first for source/table ids and {currentEntry.*} tokens; never place the loop inside a <table>, <tbody> or <tr> — HTML parsing moves it out of the table and leaves its rows behind, publishing one blank row. Wrap the whole <table> in the loop, or use a list); <instatic-outlet data-tag="div"> creates a neutral template content outlet. On PAGE routes the outlet element is not rendered at all — the page content is spliced in at its position — so wrap the outlet in <main> yourself if pages should have a main landmark. data-tag only takes effect on ENTRY routes, where the outlet stays and wraps the entry body (use data-custom-tag for a safe custom element). The importer parses every rule — a bare `.foo {}` selector becomes a reusable Selectors-panel class bound to class="foo"; any other selector (`.hero a`, `a:hover`, `nav > li`) becomes an ambient rule. Inline style= attributes land on the node\'s inline styles. To author or edit CSS on its own — pseudo/hover/descendant selectors, or restyling existing rules — use the dedicated site_apply_css tool instead (site_insert_html is for inserting structure). Returns `nodeIds` (the inserted roots) and `created` — every inserted node as { id, moduleId, classes } — so you can target a nested node (e.g. the wrapper you just added) without re-reading the whole tree.',
+    'Insert semantic HTML as a subtree of editable nodes under an existing parent. Write structure as HTML (<section>, <h1>, <a>, <button>, <img>, <ul>, ...) and style it with CSS in the same call: put a <style> block in the HTML and/or class= attributes. Custom importer markers: <fourno-loop data-source-id="…" ...> creates a real Loop node (call site_list_loop_sources first for source/table ids and {currentEntry.*} tokens; never place the loop inside a <table>, <tbody> or <tr> — HTML parsing moves it out of the table and leaves its rows behind, publishing one blank row. Wrap the whole <table> in the loop, or use a list); <fourno-outlet data-tag="div"> creates a neutral template content outlet. On PAGE routes the outlet element is not rendered at all — the page content is spliced in at its position — so wrap the outlet in <main> yourself if pages should have a main landmark. data-tag only takes effect on ENTRY routes, where the outlet stays and wraps the entry body (use data-custom-tag for a safe custom element). The importer parses every rule — a bare `.foo {}` selector becomes a reusable Selectors-panel class bound to class="foo"; any other selector (`.hero a`, `a:hover`, `nav > li`) becomes an ambient rule. Inline style= attributes land on the node\'s inline styles. To author or edit CSS on its own — pseudo/hover/descendant selectors, or restyling existing rules — use the dedicated site_apply_css tool instead (site_insert_html is for inserting structure). Returns `nodeIds` (the inserted roots) and `created` — every inserted node as { id, moduleId, classes } — so you can target a nested node (e.g. the wrapper you just added) without re-reading the whole tree.',
   inputSchema: InsertHtmlInputSchema,
 }
 
@@ -124,7 +124,7 @@ const replaceNodeHtmlTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    "Replace a node subtree's children with new HTML. The target node is preserved as the parent; its existing children are rebuilt from the HTML. Style with CSS exactly as in site_insert_html: a <style> block and/or class= attributes; bare `.foo` selectors become reusable classes, other selectors become ambient rules. Custom importer markers work here too: <instatic-loop data-source-id=\"…\" ...> creates a real Loop node and <instatic-outlet data-tag=\"div\"> creates a neutral template content outlet (omit data-tag only when the outlet should render as main). To author or edit CSS on its own (without rebuilding children), use the dedicated site_apply_css tool instead.",
+    "Replace a node subtree's children with new HTML. The target node is preserved as the parent; its existing children are rebuilt from the HTML. Style with CSS exactly as in site_insert_html: a <style> block and/or class= attributes; bare `.foo` selectors become reusable classes, other selectors become ambient rules. Custom importer markers work here too: <fourno-loop data-source-id=\"…\" ...> creates a real Loop node and <fourno-outlet data-tag=\"div\"> creates a neutral template content outlet (omit data-tag only when the outlet should render as main). To author or edit CSS on its own (without rebuilding children), use the dedicated site_apply_css tool instead.",
   inputSchema: ReplaceNodeHtmlInputSchema,
 }
 
@@ -318,7 +318,7 @@ const duplicatePageTool: AiTool = {
 // Template write tools — convert a page to/from a CMS template.
 //
 // A template is a page carrying a `target` (an `everywhere` layout, or one/more
-// post types) plus a single `<instatic-outlet>` where matched content flows in.
+// post types) plus a single `<fourno-outlet>` where matched content flows in.
 // These mirror the editor's convertPageToTemplate / convertTemplateToPage store
 // actions; the browser bridge applies them. Targets mirror TemplateTargetSchema
 // in `@core/page-tree`.
@@ -330,7 +330,7 @@ const setPageTemplateTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    'Turn a page INTO a template (or update an existing template\'s target/priority). `target` is `{kind:"everywhere"}` for a site-wide layout that wraps every page+entry, `{kind:"postTypes", tableSlugs:[…]}` to wrap entries of those post types (slugs from site_list_post_types), or `{kind:"notFound"}` for the page served on public 404s (status 404, wrapped by the everywhere layout; needs no outlet). `priority` (default 100) breaks ties when several templates match at the same breadth level — higher wins. An everywhere/postTypes template needs exactly one `<instatic-outlet>` (insert it via site_insert_html) marking where matched content flows; a wrapper template with no outlet simply doesn\'t apply. Pass a real page id from the suffix / site_list_documents.',
+    'Turn a page INTO a template (or update an existing template\'s target/priority). `target` is `{kind:"everywhere"}` for a site-wide layout that wraps every page+entry, `{kind:"postTypes", tableSlugs:[…]}` to wrap entries of those post types (slugs from site_list_post_types), or `{kind:"notFound"}` for the page served on public 404s (status 404, wrapped by the everywhere layout; needs no outlet). `priority` (default 100) breaks ties when several templates match at the same breadth level — higher wins. An everywhere/postTypes template needs exactly one `<fourno-outlet>` (insert it via site_insert_html) marking where matched content flows; a wrapper template with no outlet simply doesn\'t apply. Pass a real page id from the suffix / site_list_documents.',
   inputSchema: SetPageTemplateInputSchema,
 }
 
@@ -340,7 +340,7 @@ const clearPageTemplateTool: AiTool = {
   execution: 'browser',
   requiredCapabilities: SITE_STRUCTURE_CAPS,
   description:
-    'Revert a template back to an ordinary page: drops its template target and any dynamic bindings. The `<instatic-outlet>` node (if any) stays — delete it separately if unwanted. No-op error if the page is not a template.',
+    'Revert a template back to an ordinary page: drops its template target and any dynamic bindings. The `<fourno-outlet>` node (if any) stays — delete it separately if unwanted. No-op error if the page is not a template.',
   inputSchema: ClearPageTemplateInputSchema,
 }
 

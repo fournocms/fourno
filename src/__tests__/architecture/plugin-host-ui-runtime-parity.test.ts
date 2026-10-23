@@ -1,5 +1,5 @@
 /**
- * Architecture gate: @instatic/host-ui runtime parity.
+ * Architecture gate: @fourno/host-ui runtime parity.
  *
  * Enforces that the three surfaces which constitute the plugin UI contract
  * are always in sync:
@@ -9,7 +9,7 @@
  *      `export type` lines are ignored).
  *
  *   2. `src/admin/pluginRuntimeBootstrap.ts` — the host-side bootstrap that
- *      populates `globalThis.__instatic.hostUi` at editor startup.
+ *      populates `globalThis.__fourno.hostUi` at editor startup.
  *
  *   3. `public/runtime/host-ui.js` — the ESM shim plugins actually import
  *      at runtime; reads from the global and re-exports named bindings.
@@ -21,11 +21,11 @@
  * the shim must also be updated, OR this test fails loudly.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const ROOT = join(import.meta.dir, '../../..')
+const ROOT = join(import.meta.dirname, '../../..')
 const read = (rel: string) => readFileSync(join(ROOT, rel), 'utf-8')
 
 // ---------------------------------------------------------------------------

@@ -85,9 +85,9 @@ interface PublishPageOptions {
   mediaAssets?: Map<string, RenderResolvedMedia>
   /**
    * Optional URL hint for the loop runtime — used to construct
-   * "Load more" endpoint URLs in `data-instatic-loop-endpoint` attributes
+   * "Load more" endpoint URLs in `data-fourno-loop-endpoint` attributes
    * when the page contains an infinite-mode loop. Defaults to
-   * `/_instatic/loop/`.
+   * `/_fourno/loop/`.
    */
   loopEndpointBaseUrl?: string
   /**
@@ -99,7 +99,7 @@ interface PublishPageOptions {
    *   class CSS. Best for self-contained exports, the iframe runtime preview,
    *   and tests.
    * - `'external'`: emits up to four `<link rel="stylesheet">` tags pointing at the
-   *   pre-built site CSS bundle (`/_instatic/css/<filename>`). The HTML stays small,
+   *   pre-built site CSS bundle (`/_fourno/css/<filename>`). The HTML stays small,
    *   the bundles are content-hashed for `Cache-Control: immutable` reuse
    *   across page navigations. Pass `cssBundle` + `cssAssetBaseUrl` to use this
    *   mode.
@@ -112,7 +112,7 @@ interface PublishPageOptions {
   cssEmission?: 'inline' | 'external'
   /**
    * How request-dependent nodes render. `'holes'` (default) emits
-   * `<instatic-hole>` placeholders the Layer C runtime hydrates per request;
+   * `<fourno-hole>` placeholders the Layer C runtime hydrates per request;
    * `'inline'` renders them in place from the supplied `loopData` — for a
    * one-off render that already carries its request context (branch previews).
    */
@@ -124,7 +124,7 @@ interface PublishPageOptions {
   cssBundle?: SiteCssBundle
   /**
    * Base URL prepended to each bundle filename to form the `<link href>`
-   * value, e.g. `'/_instatic/css/'`. Defaults to `'/_instatic/css/'`.
+   * value, e.g. `'/_fourno/css/'`. Defaults to `'/_fourno/css/'`.
    */
   cssAssetBaseUrl?: string
   /**
@@ -133,14 +133,14 @@ interface PublishPageOptions {
    * Emitted in `<head>` and the hash is added to the page's CSP
    * `script-src` so the inline tag passes a strict policy. Built on the
    * server side from the site's locked runtime dependencies + the populated
-   * `bun install` cache — plugins use bare imports like
+   * `npm install` cache — plugins use bare imports like
    * `import * as THREE from 'three'` and the browser resolves them to
-   * `/_instatic/runtime/cache/<hash>/...` paths served from the host.
+   * `/_fourno/runtime/cache/<hash>/...` paths served from the host.
    */
   runtimePackageImportmap?: PublishedRuntimePackageImportmap
   /**
    * Monotonic publish version from `server/publish/publishState.ts`.
-   * Stamped into every `<instatic-hole data-instatic-version>` attribute so the hole
+   * Stamped into every `<fourno-hole data-fourno-version>` attribute so the hole
    * runtime can detect stale placeholders after a re-publish. Pass
    * `getPublishVersion()` from `publishState.ts` at the call site — this
    * keeps `src/core/publisher/` free of imports from `server/`.
@@ -210,7 +210,7 @@ function buildStyleHead(
     if (!options.cssBundle) {
       throw new Error('publishPage: cssEmission "external" requires options.cssBundle')
     }
-    const baseUrl = options.cssAssetBaseUrl ?? '/_instatic/css/'
+    const baseUrl = options.cssAssetBaseUrl ?? '/_fourno/css/'
     // Order matters — source order resolves specificity ties. User-authored
     // global stylesheets load LAST so they win against the class registry,
     // and the class registry wins against framework utilities.
@@ -390,7 +390,7 @@ interface RuntimeAssetsBlock {
   headRuntimeScripts: string
   bodyEndRuntimeScripts: string
   loopRuntimeScript: string
-  /** `<script type="module" src="/_instatic/hole-runtime.js" defer>` or empty string. */
+  /** `<script type="module" src="/_fourno/hole-runtime.js" defer>` or empty string. */
   holeRuntimeScript: string
   importmapTag: string
   importmap: PublishedRuntimePackageImportmap | undefined
@@ -411,9 +411,9 @@ function buildRuntimeAssetsBlock(
   // pagination='infinite'. This keeps the "no JS by default" line for
   // pages that don't need it.
   const hasInfiniteLoops = acc.infiniteLoopIds.size > 0
-  const loopEndpointBaseUrl = options.loopEndpointBaseUrl ?? '/_instatic/loop/'
+  const loopEndpointBaseUrl = options.loopEndpointBaseUrl ?? '/_fourno/loop/'
   const loopRuntimeScript = hasInfiniteLoops
-    ? `  <script type="module" src="/_instatic/assets/loop-runtime.js" data-instatic-loop-endpoint="${escapeHtml(loopEndpointBaseUrl)}"></script>`
+    ? `  <script type="module" src="/_fourno/assets/loop-runtime.js" data-fourno-loop-endpoint="${escapeHtml(loopEndpointBaseUrl)}"></script>`
     : ''
 
   // Hole runtime — injected into <head> (not body-end) so IntersectionObserver
@@ -425,7 +425,7 @@ function buildRuntimeAssetsBlock(
   // browser cache (the asset is served `max-age=3600`); the runtime endpoint
   // ignores the query string.
   const holeRuntimeScript = hasHoles
-    ? `  <script type="module" src="/_instatic/hole-runtime.js?v=${options.publishVersion ?? 0}" defer></script>`
+    ? `  <script type="module" src="/_fourno/hole-runtime.js?v=${options.publishVersion ?? 0}" defer></script>`
     : ''
 
   // Site-dependency importmap. When present we emit a `<script type="importmap">`
@@ -493,7 +493,7 @@ interface AssembledDocumentParts {
   styleHeadHtml: string
   importmapTag: string
   headRuntimeScripts: string
-  /** `<script type="module" src="/_instatic/hole-runtime.js" defer>` or empty. */
+  /** `<script type="module" src="/_fourno/hole-runtime.js" defer>` or empty. */
   holeRuntimeScript: string
   bodyOpenTag: string
   bodyHtml: string
@@ -546,7 +546,7 @@ export function publishPage(
 ): PublishedPage {
   // Layer C: classify every node as static or dynamic before walking the tree.
   // Dynamic node ids are threaded into the RenderConfig so renderNode can
-  // emit <instatic-hole> placeholders instead of recursing.
+  // emit <fourno-hole> placeholders instead of recursing.
   const dynamicNodeIds = options.dynamicNodes === 'inline'
     ? new Set<string>()
     : findDynamicNodeIds(page, site, registry)
@@ -576,7 +576,7 @@ export function publishPage(
   // walk. All five are initialised up-front (no lazy undefined): the walk
   // appends module CSS to `cssMap`, module JS to `jsMap`, infinite-loop ids
   // to `infiniteLoopIds`, and the ids of nodes that actually emitted a
-  // `<instatic-hole>` to `holeNodeIds`. After the walk, the head builders
+  // `<fourno-hole>` to `holeNodeIds`. After the walk, the head builders
   // read their `.size`.
   const acc: RenderAccumulators = {
     cssMap: new Map<string, string>(),

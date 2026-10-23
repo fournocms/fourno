@@ -1,8 +1,8 @@
 # MCP connections
 
-MCP connections let external AI clients operate an Instatic instance through the [Model Context Protocol](https://modelcontextprotocol.io). Instatic is the MCP server: clients list its capability-filtered tools, run headless reads, relay editing tools to the connection owner's open workspace, and explicitly publish completed drafts.
+MCP connections let external AI clients operate an Fourno instance through the [Model Context Protocol](https://modelcontextprotocol.io). Fourno is the MCP server: clients list its capability-filtered tools, run headless reads, relay editing tools to the connection owner's open workspace, and explicitly publish completed drafts.
 
-This is the inverse of the **Providers** tab. Providers let Instatic call model APIs; MCP connections let outside clients call Instatic.
+This is the inverse of the **Providers** tab. Providers let Fourno call model APIs; MCP connections let outside clients call Fourno.
 
 The wire server uses the stable split `@modelcontextprotocol/server` v2 package. That dependency remains allowed only under `server/ai/mcp/`; provider drivers continue to use their direct REST implementations.
 
@@ -12,7 +12,7 @@ The UI exposes two credential lifecycles instead of a cosmetic local/remote swit
 
 | Mode | Intended client | Authentication | Lifecycle |
 |---|---|---|---|
-| Hosted OAuth | Claude custom connectors and other remote MCP clients | OAuth authorization code with S256 PKCE | The client discovers the authorization server, dynamically registers, and sends the user to Instatic for consent. Access tokens last up to one hour; refresh tokens rotate; the grant expires after 90 days. |
+| Hosted OAuth | Claude custom connectors and other remote MCP clients | OAuth authorization code with S256 PKCE | The client discovers the authorization server, dynamically registers, and sends the user to Fourno for consent. Access tokens last up to one hour; refresh tokens rotate; the grant expires after 90 days. |
 | Personal access token | Claude Code, Codex, Cursor, local bridges, and clients that accept an explicit header | `Authorization: Bearer imcp_pat_…` | Created after step-up authentication, shown once, scoped to selected capabilities, configurable expiry, independently revocable. |
 
 Both modes resolve to the same persistent connection grant and the same `toolAllowedForCapabilities` gate. OAuth does not create a wider tool path.
@@ -20,10 +20,10 @@ Both modes resolve to the same persistent connection grant and the same `toolAll
 The MCP endpoint is always:
 
 ```text
-https://<your-host>/_instatic/mcp
+https://<your-host>/_fourno/mcp
 ```
 
-Hosted clients run in their provider's infrastructure. They cannot reach `localhost`, a private LAN address, or an HTTP-only deployment. The MCP tab detects this and warns until Instatic's canonical public origin is HTTPS.
+Hosted clients run in their provider's infrastructure. They cannot reach `localhost`, a private LAN address, or an HTTP-only deployment. The MCP tab detects this and warns until Fourno's canonical public origin is HTTPS.
 
 ## Wire protocol
 
@@ -36,24 +36,24 @@ The endpoint uses the official v2 `createMcpHandler` Web-standard entry and serv
 
 The same handler keeps the SDK's `legacy: 'stateless'` fallback enabled. Clients speaking a 2025-era revision may still send an `initialize` request and then make independent authenticated POSTs, but no protocol session is created. This compatibility path can be removed when supported clients have all migrated.
 
-Every request is bearer-authenticated before the SDK dispatches it. Browser-originated requests are also checked against Instatic's configured public-origin policy before authentication or dispatch; requests without `Origin` remain valid for native and server-to-server MCP clients.
+Every request is bearer-authenticated before the SDK dispatches it. Browser-originated requests are also checked against Fourno's configured public-origin policy before authentication or dispatch; requests without `Origin` remain valid for native and server-to-server MCP clients.
 
 See the official [TypeScript SDK v2 migration guide](https://github.com/modelcontextprotocol/typescript-sdk/blob/main/docs/migration/support-2026-07-28.md), [stable MCP 2026-07-28 specification](https://modelcontextprotocol.io/specification/2026-07-28), and [release changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog) for the wire revision.
 
 ## Hosted OAuth flow
 
-Instatic implements the MCP authorization-server surface directly:
+Fourno implements the MCP authorization-server surface directly:
 
 | Endpoint | Purpose |
 |---|---|
 | `/.well-known/oauth-protected-resource` | RFC 9728 protected-resource metadata for the MCP resource. |
-| `/.well-known/oauth-protected-resource/_instatic/mcp` | Path-aware protected-resource discovery alias. |
+| `/.well-known/oauth-protected-resource/_fourno/mcp` | Path-aware protected-resource discovery alias. |
 | `/.well-known/oauth-authorization-server` | Authorization-server metadata. |
-| `/_instatic/oauth/register` | Dynamic client registration for public clients. |
+| `/_fourno/oauth/register` | Dynamic client registration for public clients. |
 | `/admin/ai/oauth/authorize` | Signed-in consent screen. |
-| `/_instatic/oauth/token` | Form-encoded authorization-code and refresh-token exchange. |
+| `/_fourno/oauth/token` | Form-encoded authorization-code and refresh-token exchange. |
 
-The issuer, the `resource` value, and every URL in these documents come from the configured public origin (`PUBLIC_ORIGIN`, auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` on Render and Railway), never from the inbound `Host` header. Remote OAuth connectors therefore require `PUBLIC_ORIGIN`. Without it, both discovery endpoints answer `503` with `{ "error": "MCP OAuth needs PUBLIC_ORIGIN to be configured for this deployment." }`, the token endpoint answers `503` with `temporarily_unavailable`, the `401` challenge on `/_instatic/mcp` carries `scope="mcp"` but no `resource_metadata`, and OAuth access tokens do not authenticate. Personal access tokens keep working. Requests addressed to a loopback host (`localhost`, `127.0.0.1`, `::1`) are exempt and use their own origin so local development keeps working; the server warns at boot when no public origin is configured.
+The issuer, the `resource` value, and every URL in these documents come from the configured public origin (`PUBLIC_ORIGIN`, auto-detected from `RENDER_EXTERNAL_URL` / `RAILWAY_PUBLIC_DOMAIN` on Render and Railway), never from the inbound `Host` header. Remote OAuth connectors therefore require `PUBLIC_ORIGIN`. Without it, both discovery endpoints answer `503` with `{ "error": "MCP OAuth needs PUBLIC_ORIGIN to be configured for this deployment." }`, the token endpoint answers `503` with `temporarily_unavailable`, the `401` challenge on `/_fourno/mcp` carries `scope="mcp"` but no `resource_metadata`, and OAuth access tokens do not authenticate. Personal access tokens keep working. Requests addressed to a loopback host (`localhost`, `127.0.0.1`, `::1`) are exempt and use their own origin so local development keeps working; the server warns at boot when no public origin is configured.
 
 The authorization sequence is:
 
@@ -63,9 +63,9 @@ Hosted MCP client
   → dynamically registers its exact callback URI
   → opens /admin/ai/oauth/authorize with resource + state + S256 challenge
   → user signs in, reviews the client, selects capabilities, and completes step-up
-  → Instatic redirects a one-time code to the registered callback
+  → Fourno redirects a one-time code to the registered callback
   → client exchanges code + verifier for opaque access and refresh tokens
-  → client calls /_instatic/mcp with the access token
+  → client calls /_fourno/mcp with the access token
 ```
 
 Security properties:
@@ -83,13 +83,13 @@ Security properties:
 
 ### Claude Desktop / Claude custom connector
 
-1. Deploy Instatic at a public HTTPS origin and set `PUBLIC_ORIGIN` to it (auto-detected on Render and Railway). The OAuth issuer is built only from this value.
-2. In Instatic, open **AI → MCP** and copy the **Remote MCP URL**.
+1. Deploy Fourno at a public HTTPS origin and set `PUBLIC_ORIGIN` to it (auto-detected on Render and Railway). The OAuth issuer is built only from this value.
+2. In Fourno, open **AI → MCP** and copy the **Remote MCP URL**.
 3. In Claude, open **Settings → Connectors**, add a custom connector, choose a name, and paste the URL.
 4. Leave **OAuth Client ID** and **OAuth Client Secret** empty. Claude can dynamically register as a public PKCE client.
-5. Choose **Connect**. The browser returns to Instatic, where the user selects capabilities and approves the connection.
+5. Choose **Connect**. The browser returns to Fourno, where the user selects capabilities and approves the connection.
 
-The resulting OAuth connection appears automatically under **Authorized connections**. No Instatic token is copied into Claude.
+The resulting OAuth connection appears automatically under **Authorized connections**. No Fourno token is copied into Claude.
 
 ## Personal access tokens
 
@@ -98,7 +98,7 @@ In **AI → MCP**, choose **Create access token**, name the device/client, choos
 Claude Code example:
 
 ```sh
-claude mcp add instatic --transport http http://localhost:3000/_instatic/mcp \
+claude mcp add fourno --transport http http://localhost:3000/_fourno/mcp \
   --header "Authorization: Bearer imcp_pat_…"
 ```
 
@@ -114,7 +114,7 @@ MCP client
   ▼
 server/router.ts
   ├─ OAuth metadata / registration / token endpoints
-  └─ /_instatic/mcp
+  └─ /_fourno/mcp
        ▼
 server/ai/mcp/auth.ts
   bearer → OAuth access token or personal token → connection capability set
@@ -124,7 +124,8 @@ server/ai/mcp/server.ts + registry.ts
        ▼
 executeAiTool(...) / live editor bridge
   ├─ repositories and publisher for headless tools
-  └─ connection owner's open Site or Content workspace for browser tools
+  ├─ server/collab/siteEditor.ts → live Yjs docs (page edits, no editor needed)
+  └─ connection owner's open Site or Content workspace for the remaining browser tools
 ```
 
 ### Module layout
@@ -145,6 +146,7 @@ executeAiTool(...) / live editor bridge
 | `transports/http.ts` | Authenticated, Origin-validated `createMcpHandler` entry for MCP 2026-07-28 plus the stateless 2025 fallback. |
 | `server.ts` / `registry.ts` | Low-level SDK server, TypeBox input schemas, catalog deduplication, and capability filtering. |
 | `editorBridge.ts` | Per-user, per-scope live workspace bridge. The stream carries an **idle lease** (120s, re-armed by every relayed tool request) so an active batch is never cut mid-flight; only quiet streams recycle. The workspace's reconnect loop (`useMcpWorkspaceBridge`) reopens a recycled healthy stream immediately off the stream-end network event — deliberately timer-free, because hidden webviews (backgrounded browser tabs) clamp timers to minutes while network events still fire — and a tab becoming visible short-circuits any pending retry delay. |
+| `tools/siteEditTools.ts` | Server-side page-editing tools (insert/replace HTML, node edits, page lifecycle, document reads). Re-homes the browser tool of the same name onto `server/collab/siteEditor.ts`. |
 | `tools/publishTool.ts` | Explicit canonical full-site publish with MCP audit metadata. |
 | `tools/uploadMediaTool.ts` | Server-resolved image upload (`media_upload`) — inline base64 or SSRF-guarded `sourceUrl` download, through the shared media pipeline. |
 
@@ -152,13 +154,27 @@ executeAiTool(...) / live editor bridge
 
 MCP exposes the full deduplicated tool catalog, filtered by the connection's capabilities.
 
-Server-resolved tools work without an editor open. They include content reads, `get_context`, `site_list_documents`, `site_read_styles`, `site_list_breakpoints`, `media_upload`, and explicit `site_publish`. Publishing requires `ai.tools.write` plus `pages.publish`, runs the canonical full-site pipeline, swaps the static slot atomically, and records the connection id in the publish audit event.
+Server-resolved tools work without an editor open. They include content reads, `get_context`, `site_list_documents`, `site_read_styles`, `site_list_breakpoints`, `media_upload`, explicit `site_publish`, and the **server-side page-editing tools** (next section). Publishing requires `ai.tools.write` plus `pages.publish`, runs the canonical full-site pipeline, swaps the static slot atomically, and records the connection id in the publish audit event.
 
 `media_upload` is the one server-resolved write that mutates outside the live editor draft: it adds an image to the Media library through the same `acceptUploadedMedia` core the HTTP route uses (magic-byte sniffing, SVG sanitisation, storage dispatch, responsive variants). Bytes arrive inline (base64) or via an https `sourceUrl` the host downloads under the plugin network layer's SSRF blocklist — https-only, DNS-resolved, per-redirect-hop re-validation, size-capped. It requires `ai.tools.write` plus `media.write`.
 
-Browser tools run against the connection owner's live workspace. Site structure, HTML/CSS, page lifecycle, design-token, content mutation, code-asset, and live-DOM tools route to the matching open Site or Content workspace. If that workspace is not open, the tool returns a scope-specific error while headless tools remain available. `tools/list` states that requirement in each browser tool's description, so a client learns the precondition when it picks the tool rather than from a failed call.
+### Editing pages without an open editor
 
-There is intentionally no headless page-tree mutation path. The open editor store is the single source of truth for draft edits; a second DB mutation path would desynchronize node state and overwrite the live document. Relayed edits need no post-tool save step: store mutations stream to the collab relay the moment they land, and every headless read (plus `site_publish`) flushes the relay server-side before it touches the DB — so a following read or publish always observes the edit. There is no client-side save flush, and no window in which the MCP caller can see stale data.
+PRD §8.6: an agent can build a page while nobody is in the admin. The page-editing tools run **on the server** against the same Yjs documents the editors hold — `site_read_document`, `site_get_node_html`, `site_insert_html`, `site_replace_node_html`, `site_delete_node`, `site_update_node_props`, `site_move_node`, `site_rename_node`, `site_duplicate_node`, the page lifecycle (`site_add_page`, `site_delete_page`, `site_rename_page`, `site_duplicate_page`, `site_set_page_template`, `site_clear_page_template`), the style registry (`site_apply_css`, `site_assign_class`, `site_remove_class`), and the colour and scale tokens (`site_set_color_tokens`, `site_set_type_scale`, `site_set_spacing_scale`). They inherit schema, description and capability requirements from the browser tool of the same name (`server/ai/mcp/tools/siteEditTools.ts`); the MCP registry lists them first, so they replace the editor-bridged version for MCP callers.
+
+The server is one more Yjs peer (`server/collab/siteEditor.ts`), not a second write path:
+
+1. The site (shell + page/component/layout docs) is projected from the relay's **live** docs — never from the database, so an edit still inside the persist debounce is visible.
+2. A pure recipe from `@core/siteEdit` / `@core/page-tree` — the same functions the editor store runs — mutates a Mutative draft.
+3. The recipe's patches are translated by the editor's own write translator (`applySitePatchesToDocs`) onto forks of the live docs, giving one update per touched doc.
+4. Each update passes `validateGuardedUpdate` with the **connection's capabilities** (structure / content / style, the check partial-capability sockets get). One refused update refuses the whole edit and nothing is written.
+5. The updates are applied to the live docs in one synchronous pass. The relay then persists them (debounced blob + derived row JSON) and broadcasts them, so every open editor sees the edit live.
+
+Steps 1–4 contain no `await`, so a human edit cannot interleave with a recipe. Every changed edit writes a `site.edit` audit event (tool, connector, touched docs). Richtext props are sanitised exactly like the editor executor does. CSS and class edits share their recipes with the editor store (`@core/siteEdit`: `applyCssRules`, `deleteCssRules`, `removeCssRuleProperties`, `setNodeClassAssigned`; tokens: `upsertFrameworkColorTokens`, `setScaleGroup`, which also run the framework class reconcile in the same edit); a call that cannot apply (unknown or framework-locked selector, unknown class, ambient rule passed to `site_assign_class`) is refused whole and writes nothing. Server edits address nodes by id (node ids are unique across all documents of a site) and run on the main branch; branch-scoped agent work belongs to the approval queue (PRD §8.8).
+
+Still relayed to an open workspace (not yet headless): `site_set_font_tokens` (installing a Google font runs over HTTP), code assets, `site_open_document`, `site_render_snapshot`, and the content-workspace write tools.
+
+Browser tools that remain run against the connection owner's live workspace. Code-asset, live-DOM, font-token and content-mutation tools route to the matching open Site or Content workspace. If that workspace is not open, the tool returns a scope-specific error while headless tools remain available. `tools/list` states that requirement in each remaining browser tool's description, so a client learns the precondition when it picks the tool rather than from a failed call.
 
 Writes remain drafts. Clients should finish and verify an edit sequence, then call `site_publish` once only when deployment was requested.
 
@@ -190,7 +206,7 @@ Create and manual revoke actions retain the existing `ai.mcp_connector.created` 
 - Management and consent require `ai.providers.manage`.
 - Token creation and OAuth approval require step-up authentication.
 - Mutating tools require `ai.tools.write`.
-- Page-tree edits require the matching site/page edit capabilities.
+- Page-tree edits require the matching site/page edit capabilities. Server-side edits are additionally checked per touched document by the collab update guard (the check partial-capability sockets get), so a tool that slips past selection-time gating still cannot write a change class the connection was not granted.
 - Full-site deployment additionally requires `pages.publish`.
 - Own-vs-any content permissions are checked again against the target row before browser relay.
 - The approver can grant only capabilities they hold.
@@ -203,5 +219,6 @@ Create and manual revoke actions retain the existing `ai.mcp_connector.created` 
 - `server/ai/mcp/auth.test.ts` covers personal and OAuth bearer resolution plus the protected-resource challenge with and without a trustworthy issuer.
 - `src/__tests__/ai/mcpOAuthAuthorizationHandler.test.ts` covers signed-in consent, capability selection, exact callback redirects, denial, and privilege floors.
 - `src/__tests__/ai/mcpConnectorsHandler.test.ts` covers connection listing, personal-token creation, step-up, revoke, and privilege floors.
+- `src/__tests__/server/siteEditor.test.ts` covers server-side page editing against a real relay and database: no editor connected, an open editor peer seeing the edit live, a human edit between two agent calls surviving, the update guard refusing a capability the connection lacks, persistence of derived rows, and the `site.edit` audit event.
 - `server/ai/mcp/e2e.test.ts`, `transports/http.test.ts`, and `publishTool.test.ts` cover the real MCP request flow and publish path.
 - `src/__tests__/architecture/ai-mcp-connectors-never-leak.test.ts` gates the token-free connection projection.

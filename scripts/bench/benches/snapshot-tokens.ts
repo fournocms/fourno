@@ -18,7 +18,7 @@
  *   not an estimate.
  * - Tokens are counted with Anthropic `count_tokens` (model-accurate).
  *
- * Fixtures are the real seeded pages in `.tmp/dev.db` (the `bun run dev`
+ * Fixtures are the real seeded pages in `.tmp/dev.db` (the `pnpm dev`
  * default), so the numbers reflect production payloads, not synthetic trees.
  */
 
@@ -33,7 +33,7 @@ import { fmtNum } from '../lib/stats'
 import { log } from '../lib/log'
 import { createTokenCounter, type TokenCounter } from '../lib/anthropicTokens'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 const DEV_DB_PATH = resolve(REPO_ROOT, '.tmp/dev.db')
 
 // Pacing between count_tokens calls so a big site doesn't trip provider rate limits.
@@ -442,7 +442,7 @@ export const snapshotTokensBench: BenchModule = {
         'Skipped — no ANTHROPIC_API_KEY',
         'count_tokens needs an Anthropic API key; the benchmark measures exact, model-accurate token counts.',
         [
-          'Set ANTHROPIC_API_KEY in your environment, then re-run `bun run bench --only=snapshot-tokens`.',
+          'Set ANTHROPIC_API_KEY in your environment, then re-run `pnpm bench --only=snapshot-tokens`.',
         ],
       )
     }
@@ -451,7 +451,7 @@ export const snapshotTokensBench: BenchModule = {
       return skippedResult(
         'Skipped — no seeded dev database',
         `Expected a SQLite dev DB at ${DEV_DB_PATH}.`,
-        ['Run `bun run dev` once to seed a dev database, then re-run this bench.'],
+        ['Run `pnpm dev` once to seed a dev database, then re-run this bench.'],
       )
     }
 
@@ -462,7 +462,7 @@ export const snapshotTokensBench: BenchModule = {
       return skippedResult(
         'Skipped — empty dev database',
         'The dev DB has no draft site or no pages.',
-        ['Open the editor (`bun run dev`) and create at least one page, then re-run this bench.'],
+        ['Open the editor (`pnpm dev`) and create at least one page, then re-run this bench.'],
       )
     }
 

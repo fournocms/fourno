@@ -1,13 +1,13 @@
 /**
  * Publisher tests for Layer C hole emission.
  *
- * Verifies that `publishPage` emits `<instatic-hole>` placeholders for dynamic
+ * Verifies that `publishPage` emits `<fourno-hole>` placeholders for dynamic
  * nodes instead of recursing into their subtrees, and that the
- * `/_instatic/hole-runtime.js` script tag is injected into the page `<head>` when
+ * `/_fourno/hole-runtime.js` script tag is injected into the page `<head>` when
  * at least one hole exists.
  */
 
-import { describe, it, expect } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { publishPage } from '../../core/publisher/render'
 import { makePage, makeSite, makeRegistry, makeModule } from '../publisher/helpers'
 
@@ -16,7 +16,7 @@ import { makePage, makeSite, makeRegistry, makeModule } from '../publisher/helpe
 // ---------------------------------------------------------------------------
 
 describe('publishPage — Layer C hole placeholders', () => {
-  it('emits <instatic-hole> for a node whose module has dynamic: true', () => {
+  it('emits <fourno-hole> for a node whose module has dynamic: true', () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['widget'] },
       widget: { moduleId: 'plugin.live-widget' },
@@ -32,13 +32,13 @@ describe('publishPage — Layer C hole placeholders', () => {
     const { html } = publishPage(page, site, reg, { publishVersion: 42 })
 
     // The placeholder must be present
-    expect(html).toContain('<instatic-hole')
-    expect(html).toContain('data-instatic-hole="widget"')
-    expect(html).toContain('data-instatic-version="42"')
+    expect(html).toContain('<fourno-hole')
+    expect(html).toContain('data-fourno-hole="widget"')
+    expect(html).toContain('data-fourno-version="42"')
     expect(html).toContain('id="hole-widget"')
   })
 
-  it('injects /_instatic/hole-runtime.js into <head> when the page has at least one hole', () => {
+  it('injects /_fourno/hole-runtime.js into <head> when the page has at least one hole', () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['widget'] },
       widget: { moduleId: 'plugin.live-widget' },
@@ -55,7 +55,7 @@ describe('publishPage — Layer C hole placeholders', () => {
 
     // The runtime script must be in <head>
     const headSection = html.slice(html.indexOf('<head>'), html.indexOf('</head>'))
-    expect(headSection).toContain('/_instatic/hole-runtime.js')
+    expect(headSection).toContain('/_fourno/hole-runtime.js')
     expect(headSection).toContain('type="module"')
     expect(headSection).toContain('defer')
   })
@@ -76,7 +76,7 @@ describe('publishPage — Layer C hole placeholders', () => {
     const { html } = publishPage(page, site, reg, { publishVersion: 1 })
 
     expect(html).not.toContain('hole-runtime.js')
-    expect(html).not.toContain('<instatic-hole')
+    expect(html).not.toContain('<fourno-hole')
   })
 
   it('does NOT recurse into the dynamic node subtree (children absent from output)', () => {
@@ -105,12 +105,12 @@ describe('publishPage — Layer C hole placeholders', () => {
     const { html } = publishPage(page, site, reg, { publishVersion: 1 })
 
     // The placeholder is emitted
-    expect(html).toContain('<instatic-hole')
+    expect(html).toContain('<fourno-hole')
     // The secret child's content is NOT in the output
     expect(html).not.toContain('SHOULD_NOT_APPEAR')
   })
 
-  it('stamps the publishVersion onto the data-instatic-version attribute', () => {
+  it('stamps the publishVersion onto the data-fourno-version attribute', () => {
     const page = makePage({
       root: { moduleId: 'base.body', children: ['w'] },
       w: { moduleId: 'plugin.live-widget' },
@@ -124,10 +124,10 @@ describe('publishPage — Layer C hole placeholders', () => {
     })
 
     const { html: html7 } = publishPage(page, site, reg, { publishVersion: 7 })
-    expect(html7).toContain('data-instatic-version="7"')
+    expect(html7).toContain('data-fourno-version="7"')
 
     const { html: html99 } = publishPage(page, site, reg, { publishVersion: 99 })
-    expect(html99).toContain('data-instatic-version="99"')
+    expect(html99).toContain('data-fourno-version="99"')
   })
 
   it('defaults publishVersion to 0 when not provided', () => {
@@ -144,7 +144,7 @@ describe('publishPage — Layer C hole placeholders', () => {
     })
 
     const { html } = publishPage(page, site, reg)
-    expect(html).toContain('data-instatic-version="0"')
+    expect(html).toContain('data-fourno-version="0"')
   })
 
   it('renders static siblings of a dynamic node normally', () => {
@@ -172,7 +172,7 @@ describe('publishPage — Layer C hole placeholders', () => {
     // Static sibling IS in the output
     expect(html).toContain('STATIC_TEXT')
     // Dynamic node is a placeholder
-    expect(html).toContain('<instatic-hole')
-    expect(html).toContain('data-instatic-hole="dynamic-node"')
+    expect(html).toContain('<fourno-hole')
+    expect(html).toContain('data-fourno-hole="dynamic-node"')
   })
 })

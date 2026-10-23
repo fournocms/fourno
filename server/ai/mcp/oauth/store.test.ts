@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, spyOn } from 'bun:test'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { McpOAuthAuthorizationRequest } from '@core/ai'
 import type { DbClient } from '../../../db/client'
 import { sqliteMigrations } from '../../../db/migrations-sqlite'
@@ -15,7 +15,7 @@ import {
   rotateRefreshToken,
 } from './store'
 
-const RESOURCE = 'https://cms.example.com/_instatic/mcp'
+const RESOURCE = 'https://cms.example.com/_fourno/mcp'
 const REDIRECT_URI = 'https://claude.ai/api/mcp/auth_callback'
 const VERIFIER = 'a'.repeat(64)
 
@@ -142,7 +142,7 @@ describe('MCP OAuth grant store', () => {
   })
 
   it('rotates refresh tokens and invalidates the previous refresh token', async () => {
-    const warn = spyOn(console, 'warn').mockImplementation(() => {})
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const { code } = await createOAuthAuthorizationGrant(db, {
       userId: 'u1',
       clientName: 'Claude',

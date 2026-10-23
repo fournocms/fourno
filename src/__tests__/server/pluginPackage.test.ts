@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import { zipSync, strToU8 } from 'fflate'
 import { readPluginPackage } from '../../../server/plugins/package'
 

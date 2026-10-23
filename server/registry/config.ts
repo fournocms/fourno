@@ -2,7 +2,7 @@
  * Registry endpoints the server talks to.
  *
  * `NPM_REGISTRY_URL` points every registry read (search, packuments, the
- * dependency resolver) and the runtime `bun install` at one registry, so a
+ * dependency resolver) and the runtime `npm install` at one registry, so a
  * self-hosted install behind a private registry or a corporate mirror needs a
  * single setting. It is parsed once at boot by `readServerConfig()` and handed
  * here through `configureNpmRegistryUrl()`, the same way public origins reach

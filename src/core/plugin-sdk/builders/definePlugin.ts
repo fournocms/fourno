@@ -1,7 +1,7 @@
 /**
  * `definePlugin` — type-checked plugin configuration.
  *
- *   import { definePlugin, permissions } from '@instatic/plugin-sdk'
+ *   import { definePlugin, permissions } from '@fourno/plugin-sdk'
  *   import callout from './modules/callout'
  *   import pack from './pack'
  *
@@ -18,7 +18,7 @@
  * The return value is the host's runtime `PluginManifest` plus the bundled
  * builder objects. The build CLI (`cli/build.ts`) uses those builder
  * objects to emit the final zip. Entrypoints are NOT declared here —
- * `instatic-plugin build` auto-wires them into the emitted `plugin.json`
+ * `fourno-plugin build` auto-wires them into the emitted `plugin.json`
  * from the source layout (`server/index.ts`, `editor/index.ts`, top-level
  * `frontend/*.ts`, admin app entries).
  */

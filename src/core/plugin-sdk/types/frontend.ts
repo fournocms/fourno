@@ -22,7 +22,7 @@
 //                     stylesheets, JSON-LD, preconnects.
 //   - 'body-start'  → just after <body …>, before page content. Default for
 //                     shared host runtimes that need to install
-//                     `window.__instatic.*` BEFORE plugin scripts that depend on it.
+//                     `window.__fourno.*` BEFORE plugin scripts that depend on it.
 //   - 'body-end'    → just before </body>. Default for deferred plugin
 //                     bundles (analytics trackers, widget bootstraps).
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { describe, test, expect } from 'bun:test'
+import { describe, test, expect } from 'vitest'
 import { join } from 'node:path'
 import { Value } from '@sinclair/typebox/value'
 import { assertPathWithin } from '../../../server/util/pathWithin'

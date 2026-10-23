@@ -3,7 +3,7 @@
  * while its registry row still exists, a re-created id is welcome again, and
  * resets queued for a deleted branch never poison the queue.
  */
-import { afterEach, describe, expect, it, spyOn } from 'bun:test'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createCollabRelay, type CollabRelay } from '../../../server/collab/relay'
 import { BranchGoneError } from '../../../server/collab/relayBranches'
 import { deleteBranch } from '../../../server/branches/deleteBranch'
@@ -234,7 +234,7 @@ describe('collab relay and branches', () => {
     await relay.openDoc('site:flaky')
     await relay.forgetBranch('flaky')
 
-    const errorLog = spyOn(console, 'error').mockImplementation(() => undefined)
+    const errorLog = vi.spyOn(console, 'error').mockImplementation(() => undefined)
     try {
       outage = true
       await relay.rememberBranch('flaky')

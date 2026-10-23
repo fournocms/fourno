@@ -33,7 +33,7 @@ import type { BenchModule, BenchResult, BenchRow, BenchContext } from '../lib/ty
 import { summarize, fmtMs, fmtBytes, fmtNum } from '../lib/stats'
 import { log } from '../lib/log'
 
-const REPO_ROOT = resolve(import.meta.dir, '../../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../../..')
 const BENCH_DIR = resolve(REPO_ROOT, '.tmp/benchmarks')
 const ADMIN_USER_ID = 'bench-admin'
 const NODES_PER_PAGE = 150

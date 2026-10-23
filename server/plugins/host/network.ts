@@ -21,6 +21,7 @@
 import { isIP } from 'node:net'
 import { lookup } from 'node:dns/promises'
 import ipaddr from 'ipaddr.js'
+import { Agent, fetch as undiciFetch, type Dispatcher } from 'undici'
 import {
   decodeBodyBytes,
   encodeBodyBytes,
@@ -188,42 +189,32 @@ function withoutBodyHeaders(headers: Record<string, string> | undefined): Record
   return next
 }
 
-/** Replace any host header with `host`, so the pinned request keeps the original hostname. */
-function withHostHeader(headers: Record<string, string> | undefined, host: string): Record<string, string> {
-  const next: Record<string, string> = {}
-  if (headers) {
-    for (const [k, v] of Object.entries(headers)) {
-      if (k.toLowerCase() === 'host') continue
-      next[k] = v
-    }
-  }
-  next.Host = host
-  return next
-}
-
-/** Bun's `fetch` accepts a `tls` option that standard `RequestInit` omits. */
-type PinnedFetchInit = RequestInit & { tls?: { serverName: string } }
+/** `RequestInit` plus undici's `dispatcher`, which carries the connection pin. */
+type PinnedFetchInit = RequestInit & { dispatcher?: Dispatcher }
 
 /**
- * Turn a validated target into the actual request: for a hostname, rewrite the
- * URL to the pinned IP and carry the hostname in the `Host` header and (for
- * https) the TLS `serverName`, so virtual hosting and certificate validation
- * still target the host while the socket connects to the IP we checked. For an
- * IP-literal target there is nothing to pin.
+ * An undici dispatcher whose DNS lookup always answers `pinnedIp`, so the
+ * socket connects to exactly the address `assertOutboundAllowed` checked —
+ * no second resolution a rebinding DNS server could swing to an internal IP.
+ * The URL keeps its hostname, so the `Host` header, TLS SNI, and certificate
+ * validation all still target the host. Connections are not pooled beyond
+ * the one request: the dispatcher is per hop and idles out within a second.
+ *
+ * Exported for the end-to-end pinning test.
  */
-function buildPinnedRequest(
-  parsed: URL,
-  pinnedIp: string | null,
-  headers: Record<string, string> | undefined,
-): { url: string; headers: Record<string, string> | undefined; tls?: { serverName: string } } {
-  if (pinnedIp === null) return { url: parsed.toString(), headers }
-
-  const ipHost = isIP(pinnedIp) === 6 ? `[${pinnedIp}]` : pinnedIp
-  const portPart = parsed.port ? `:${parsed.port}` : ''
-  const url = `${parsed.protocol}//${ipHost}${portPart}${parsed.pathname}${parsed.search}`
-  const nextHeaders = withHostHeader(headers, parsed.host)
-  const tls = parsed.protocol === 'https:' ? { serverName: parsed.hostname } : undefined
-  return { url, headers: nextHeaders, tls }
+export function createPinnedDispatcher(pinnedIp: string): Dispatcher {
+  const family = isIP(pinnedIp)
+  return new Agent({
+    connections: 1,
+    keepAliveTimeout: 1_000,
+    keepAliveMaxTimeout: 1_000,
+    connect: {
+      lookup: (_hostname, options, callback) => {
+        if (options.all) callback(null, [{ address: pinnedIp, family }])
+        else callback(null, pinnedIp, family)
+      },
+    },
+  })
 }
 
 /** Options for the shared SSRF-safe fetch. */
@@ -235,6 +226,11 @@ export interface GuardedFetchOptions {
    */
   allowlist?: ReadonlyArray<string>
   resolveHost?: (host: string) => Promise<string[]>
+  /**
+   * The fetch to issue each hop with. It must honour undici's `dispatcher`
+   * init option (that is where the connection pin lives); the default is
+   * undici's own `fetch`, matched to the `Agent` the pin is built from.
+   */
   fetchImpl?: typeof fetch
   signal?: AbortSignal
   maxRedirects?: number
@@ -255,7 +251,9 @@ export async function guardedFetch(
   opts: GuardedFetchOptions = {},
 ): Promise<Response> {
   const resolveHost = opts.resolveHost ?? defaultResolveHost
-  const fetchImpl = opts.fetchImpl ?? fetch
+  // undici's fetch returns a WHATWG `Response`; its class is not the global
+  // one, but every consumer here only reads status, headers, and body.
+  const fetchImpl = opts.fetchImpl ?? (undiciFetch as unknown as typeof fetch)
   const maxRedirects = opts.maxRedirects ?? MAX_REDIRECTS
   const label = opts.label ?? 'Outbound'
 
@@ -266,7 +264,7 @@ export async function guardedFetch(
 
   for (let hop = 0; ; hop++) {
     // Re-validate protocol + allowlist + resolved-IP on EVERY hop and pin the
-    // connection to the checked IP. Bun is told not to follow redirects, so an
+    // connection to the checked IP. fetch is told not to follow redirects, so an
     // allowlisted host can never bounce us to a private/internal target, and
     // the pin closes the check-then-connect DNS-rebinding gap (SSRF).
     const { url: parsed, pinnedIp } = await assertOutboundAllowed(
@@ -276,18 +274,18 @@ export async function guardedFetch(
       label,
       opts.requireHttps ?? false,
     )
-    const request = buildPinnedRequest(parsed, pinnedIp, headers)
-
     const fetchInit: PinnedFetchInit = {
       method,
-      headers: request.headers,
+      headers,
       body,
       signal: opts.signal,
       redirect: 'manual',
     }
-    if (request.tls) fetchInit.tls = request.tls
+    // An IP-literal target has nothing to pin; a hostname is pinned to the
+    // address that was just validated.
+    if (pinnedIp !== null) fetchInit.dispatcher = createPinnedDispatcher(pinnedIp)
 
-    const response = await fetchImpl(request.url, fetchInit)
+    const response = await fetchImpl(parsed.toString(), fetchInit)
 
     const location = response.headers.get('location')
     if (REDIRECT_STATUSES.has(response.status) && location) {
@@ -295,8 +293,7 @@ export async function guardedFetch(
         throw new Error(`${label} fetch exceeded ${maxRedirects} redirects.`)
       }
       await response.body?.cancel()
-      // Resolve the redirect against the ORIGINAL hostname URL, not the pinned
-      // IP URL, so a relative Location keeps the right host.
+      // Resolve a relative Location against the current hop's URL.
       const next = new URL(location, currentUrl)
       // Per the Fetch spec: 303 always becomes GET; 301/302 downgrade a
       // non-GET/HEAD request to GET and drop the body.

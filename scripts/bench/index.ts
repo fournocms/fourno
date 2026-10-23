@@ -1,15 +1,15 @@
-#!/usr/bin/env bun
+#!/usr/bin/env tsx
 /**
- * Instatic benchmark suite — CLI orchestrator.
+ * Fourno benchmark suite — CLI orchestrator.
  *
  * Usage:
- *   bun run bench                    # full suite, write .tmp/benchmarks/REPORT.md
- *   bun run bench --only=publisher   # comma-separated subset
- *   bun run bench --skip=plugin      # comma-separated exclusions
- *   bun run bench --quick            # smaller iteration counts (~10x faster)
- *   bun run bench --output=path.md   # override report destination
- *   bun run bench --base-url=URL     # use a running server instead of spawning one
- *   bun run bench --help
+ *   pnpm bench                    # full suite, write .tmp/benchmarks/REPORT.md
+ *   pnpm bench --only=publisher   # comma-separated subset
+ *   pnpm bench --skip=plugin      # comma-separated exclusions
+ *   pnpm bench --quick            # smaller iteration counts (~10x faster)
+ *   pnpm bench --output=path.md   # override report destination
+ *   pnpm bench --base-url=URL     # use a running server instead of spawning one
+ *   pnpm bench --help
  *
  * Each bench lives in `scripts/bench/benches/<name>.ts` and exports a
  * `BenchModule`. Adding a new bench is a one-line registration in
@@ -20,6 +20,9 @@
  *   - Per-bench logs at `.tmp/benchmarks/<name>.log` for deeper digging
  *   - Stdout: a streaming progress log + a one-line summary per bench
  */
+// Must stay first: the publisher/publish/editor-store benches import the module registry,
+// whose editor components pull in `*.module.css` that Node cannot load without this stub.
+import '../../server/runtime/cssModuleStub'
 import { resolve, dirname } from 'node:path'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
@@ -39,13 +42,13 @@ import { healthBench } from './benches/health'
 import { browserBench } from './benches/browser'
 import { snapshotTokensBench } from './benches/snapshot-tokens'
 
-const REPO_ROOT = resolve(import.meta.dir, '../..')
+const REPO_ROOT = resolve(import.meta.dirname, '../..')
 
 // `browser` and `snapshot-tokens` are NOT in the default run. `browser` needs
-// Chromium and optional INSTATIC_BENCH_ADMIN_EMAIL / INSTATIC_BENCH_ADMIN_PASSWORD
+// Chromium and optional FOURNO_BENCH_ADMIN_EMAIL / FOURNO_BENCH_ADMIN_PASSWORD
 // credentials for authenticated scenarios; `snapshot-tokens` needs ANTHROPIC_API_KEY
 // + a seeded .tmp/dev.db and makes network calls to count_tokens. Run them
-// explicitly, e.g. `bun run bench --only=snapshot-tokens`.
+// explicitly, e.g. `pnpm bench --only=snapshot-tokens`.
 const DEFAULT_BENCHES: readonly BenchModule[] = [
   bundleBench,
   publisherBench,
@@ -104,10 +107,10 @@ function parseArgs(argv: readonly string[]): CliFlags {
 
 function printHelp(): void {
   console.log(`
-Instatic benchmark suite.
+Fourno benchmark suite.
 
 Usage:
-  bun run bench [flags]
+  pnpm bench [flags]
 
 Flags:
   --only=NAME[,NAME]   Run only the listed benches. (Use this to opt into the
@@ -120,7 +123,7 @@ Flags:
   --trace=NAME[,NAME]  For the browser bench: wrap the named scenarios in a Playwright
                        trace and write to .tmp/benchmarks/browser-traces/<name>.trace.zip.
                        Pass --trace=ALL for every scenario. Open with
-                       \`bunx playwright show-trace <file>\`.
+                       \`pnpm exec playwright show-trace <file>\`.
   --list               Print available bench names and exit.
   --help               Show this help.
 
@@ -177,7 +180,7 @@ async function main(): Promise<void> {
     baseUrl: flags.baseUrl,
   }
 
-  log.section('Instatic benchmark suite')
+  log.section('Fourno benchmark suite')
   log.detail(`Running ${benches.length} bench${benches.length === 1 ? '' : 'es'}: ${benches.map((b) => b.name).join(', ')}`)
   if (flags.quick) log.detail('Quick mode — reduced iteration counts.')
   if (flags.baseUrl) log.detail(`Targeting external server: ${flags.baseUrl}`)
@@ -221,7 +224,7 @@ async function main(): Promise<void> {
     runAt: new Date(),
     durationMs: suiteWallMs,
     host: `${os.platform()} ${os.arch()} ${os.cpus()[0]?.model ?? ''}`.trim(),
-    bun: Bun.version,
+    runtime: `Node ${process.versions.node}`,
   })
 
   mkdirSync(dirname(flags.output), { recursive: true })

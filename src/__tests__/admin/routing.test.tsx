@@ -10,7 +10,7 @@
  * — are never claimed by the admin SPA.
  */
 
-import { afterEach, describe, expect, it } from 'bun:test'
+import { afterEach, describe, expect, it } from 'vitest'
 import React from 'react'
 import { cleanup, render, screen } from '@testing-library/react'
 import { matchPath, MemoryRouter, Navigate, Route, Routes, useLocation } from '@admin/lib/routing'

@@ -6,7 +6,7 @@
  *
  * Plugin bundles externalize `react` and resolve it through the host's
  * import map (see index.html) to this URL. At load time, the host's main
- * bundle has already populated `globalThis.__instatic.React` with the
+ * bundle has already populated `globalThis.__fourno.React` with the
  * editor's live React instance — we re-export the named API plus the
  * default so plugin authors can write either `import * as React from 'react'`
  * or `import { useState } from 'react'`.
@@ -17,10 +17,10 @@
  * plugins import lazily), we throw a clear diagnostic instead of
  * silently re-instantiating React.
  */
-const G = globalThis.__instatic?.React
+const G = globalThis.__fourno?.React
 if (!G) {
   throw new Error(
-    "[@instatic/runtime] Host React not initialized. Did the host bundle finish loading before the plugin import?",
+    "[@fourno/runtime] Host React not initialized. Did the host bundle finish loading before the plugin import?",
   )
 }
 

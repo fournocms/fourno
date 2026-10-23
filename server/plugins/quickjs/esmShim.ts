@@ -13,14 +13,14 @@
  *     wants only the default export value (an array of module definitions, or
  *     a factory function returning one) assigned directly.
  *
- * Export forms handled — the union of every shape Bun's bundler and plugin
+ * Export forms handled — the union of every shape the bundler (esbuild) and plugin
  * authors emit (previously split across two diverging private copies):
  *
  *   - `export default <expr>`               — direct default export
  *   - `export default function/class …`     — default declaration
  *   - `export function/const/let <name> …`  — named declarations
  *   - `export { a as default, b, c }`       — re-export / mixed default+named
- *     blocks (Bun emits this for default re-export facades)
+ *     blocks (esbuild emits this for default re-export facades)
  *
  * `unwrapDefault` selects the global's SHAPE — the single legitimate
  * difference between the two bootstraps. Everything else (which forms are

@@ -1,6 +1,6 @@
-# Contributing To Instatic
+# Contributing To Fourno
 
-Thanks for helping improve Instatic. The project is pre-1.0, self-hosted, and intentionally moving quickly, so contributions should favor clean architecture over compatibility shims.
+Thanks for helping improve Fourno. The project is pre-1.0, self-hosted, and intentionally moving quickly, so contributions should favor clean architecture over compatibility shims.
 
 ## Start Here
 
@@ -11,34 +11,35 @@ Thanks for helping improve Instatic. The project is pre-1.0, self-hosted, and in
 
 ## Local Development
 
-Use Bun for all project commands:
+Use pnpm for all project commands (Node.js 24.11 or newer; `corepack enable` gives you the pinned pnpm):
 
 ```sh
-bun install
-bun run dev
+pnpm install
+pnpm dev
 ```
 
 The default local database is SQLite at `.tmp/dev.db`. Postgres mode is selected by setting `DATABASE_URL`.
 
-`bun run dev` runs `bun install --frozen-lockfile` before starting the servers, so after a `git pull` it is the only command you need.
+`pnpm dev` re-installs first whenever `node_modules` is out of date with the lockfile, so after a `git pull` it is the only command you need.
 
 Useful checks:
 
 ```sh
-bun run build
-bun test
-bun run lint
+pnpm build
+pnpm test
+pnpm lint
 ```
 
 For Docker changes:
 
 ```sh
-docker build -t instatic:local .
+docker build -t fourno:local .
 docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.build.yml config
 ```
 
 ## Pull Requests
 
+- Sign off every commit (`git commit -s`) to certify the [Developer Certificate of Origin](https://developercertificate.org/). Commit messages and PR titles are English and follow Conventional Commits.
 - Keep PRs focused on one problem.
 - Include tests for behavior changes.
 - Update docs in the same PR when behavior, configuration, public APIs, or deployment instructions change.
@@ -48,7 +49,7 @@ docker compose -f compose.prod.yml -f compose.sqlite.yml -f compose.build.yml co
 
 ## Project Conventions
 
-Instatic is pre-release. Do not add deprecation shims or backwards-compatibility wrappers for old internal APIs. If a shape is wrong, update the source of truth and all callers in the same change.
+Fourno is pre-release. Do not add deprecation shims or backwards-compatibility wrappers for old internal APIs. If a shape is wrong, update the source of truth and all callers in the same change.
 
 Important rules live in:
 

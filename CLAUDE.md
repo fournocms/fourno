@@ -81,15 +81,15 @@ Source of truth for layout details: [`docs/architecture.md`](docs/architecture.m
 
 ## Development status — READ THIS FIRST
 
-**This project has live, self-hosted installations with real user data.** That has direct consequences for how Claude must approach changes in this repo.
+**Fourno has not had its first release and runs nowhere in production.** There are no installations with real user data (Instatic had them; this fork does not inherit them). That has direct consequences for how Claude must approach changes in this repo.
 
 **For code** (TypeScript APIs, function signatures, types, modules, plugin SDK): there are no backward-compatibility obligations. Refactor freely, rename boldly, delete dead code, fix bad abstractions — the aggressive stance throughout this section applies in full.
 
-**Database schema is the exception.** Live installations run the migration runner on every pull. A destructive schema change breaks those installations permanently. Every schema change ships as an additive, non-destructive migration. See "Database, schema, and stored data" below.
+**Database schema: free until the first release, additive-only afterwards.** Until the first tagged Fourno release, the migration history may be edited, squashed or rebuilt, and a dev database may be dropped and recreated. From the first release on, live installations run the migration runner on every pull, and every schema change ships as an additive, non-destructive migration. See "Database, schema, and stored data" below. The release maintainer flips this rule in the same PR that cuts the first release.
 
 ### No backward compatibility. Ever.
 
-There is nothing to be backward compatible with — **for code.** TypeScript APIs, function signatures, types, and module shapes can change freely. **Database schema is the explicit exception: see "Database, schema, and stored data" below.**
+There is nothing to be backward compatible with — **for code.** TypeScript APIs, function signatures, types, and module shapes can change freely. **Database schema has its own rule: see "Database, schema, and stored data" below.**
 
 - **Do not preserve old function signatures, schemas, types, or APIs out of compatibility concern.** If a cleaner shape exists, change it everywhere and delete the old one.
 - **Do not add deprecation shims.** Don't keep a `legacyFoo()` that forwards to `foo()`. Just rename it and update callers.
@@ -119,7 +119,9 @@ What you must not do:
 
 ### Database, schema, and stored data
 
-**The database is NOT disposable.** Live, self-hosted installations exist with real user data. The migration runner executes every unrun migration on startup — a destructive schema change breaks those installations on the next pull.
+**Before the first Fourno release the database is disposable.** No installation holds real data, so migrations may be edited, reordered, squashed into a clean baseline, or rebuilt when that gives a cleaner schema (e.g. for multilingual content). Keep the PG and SQLite files in parity with identical IDs (gated by `migration-parity.test.ts`) and update the tests that pin migration IDs in the same change.
+
+**From the first release on the database is NOT disposable.** Live, self-hosted installations will hold real user data, and the migration runner executes every unrun migration on startup — a destructive schema change breaks those installations on the next pull. The rules below then apply in full (they are the standing rules; today they are the target state to preserve once a release exists):
 
 - **Every schema change ships as a new additive migration.** Add it to BOTH `migrations-pg.ts` AND `migrations-sqlite.ts` with the next sequential ID and the same semantic effect. See "Database dialect rules" for the mechanics.
 - **Never edit or rewrite a migration that has already been committed.** If a past migration has the wrong shape, ship a new forward migration that corrects it.
@@ -239,7 +241,7 @@ Detailed: [`docs/reference/database-dialects.md`](docs/reference/database-dialec
 2. **JSON columns end in `_json`.** The SQLite adapter auto-parses `*_json` strings on read and auto-stringifies plain objects on write. Gated by `db-json-column-naming.test.ts`.
 3. **Migrations are split per dialect with identical IDs.** `server/db/migrations-pg.ts` (PG dialect) and `server/db/migrations-sqlite.ts` (SQLite dialect). Parity gated by `migration-parity.test.ts`.
 
-**Adding a new migration:** add it to BOTH `migrations-pg.ts` and `migrations-sqlite.ts` with the next sequential ID and the same semantic effect. Migrations must be **additive and non-destructive** — live installations run the migration runner on every pull. Never rewrite or delete a committed migration; if a past migration is wrong, ship a new forward migration that corrects it. Never write a migration that requires dropping or recreating the database.
+**Adding a new migration:** add it to BOTH `migrations-pg.ts` and `migrations-sqlite.ts` with the next sequential ID and the same semantic effect. After the first release, migrations must be **additive and non-destructive** — live installations run the migration runner on every pull (before it, see "Database, schema, and stored data": the history may still be reworked). Never rewrite or delete a released migration; if a past migration is wrong, ship a new forward migration that corrects it. Never write a migration that requires dropping or recreating the database.
 
 **Adding a JSON column:** name it `*_json`.
 
@@ -340,7 +342,7 @@ The bar is: **your work is clean.**
 
 ## TL;DR
 
-1. Live installations exist with real user data. Refactor **code** freely — no compat shims needed. **DB schema is the exception: every change ships as an additive, non-destructive migration; never rewrite a committed migration or require a DB drop.**
+1. No production installations exist yet. Refactor **code** freely — no compat shims needed. **DB schema: the migration history may be reworked until the first release; after it, every change ships as an additive, non-destructive migration and a released migration is never rewritten.**
 2. Never preserve backward compatibility in code, never leave band-aids, never duplicate "old vs new" code paths.
 3. If the architecture would be cleaner with a multi-file refactor — do the refactor, in this change.
 4. Every untyped boundary goes through TypeBox. `as Foo` at a JSON boundary is a bug. `zod` is banned repo-wide — AI drivers pass TypeBox schemas straight to providers as JSON Schema.
